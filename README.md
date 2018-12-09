@@ -10,6 +10,8 @@ PHP 7.2 Event Store HTTP Client Implementation.
 
 Prooph Event Store HTTP Client supports communication via HTTP to [EventStore](https://eventstore.org/).
 
+For usage in async event loop, use the [TCP Connection](https://github.com/prooph/event-store-client) instead.
+
 ## Installation
 
 ### Client
