@@ -30,4 +30,13 @@ class AccessDeniedException extends RuntimeException
             $stream
         ));
     }
+
+    public static function toSubscription(string $subscription, string $group): AccessDeniedException
+    {
+        return new self(\sprintf(
+            'Access to subscription \'%s\', group \'%s\' is denied',
+            $subscription,
+            $group
+        ));
+    }
 }

@@ -16,12 +16,12 @@ namespace Prooph\EventStoreHttpClient\ClientOperations;
 use Http\Client\HttpClient;
 use Http\Message\RequestFactory;
 use Http\Message\UriFactory;
-use Prooph\EventStore\Internal\Data\PersistentSubscriptionDeleteResult;
-
-Prooph\EventStoreHttpClient\Exception\AccessDeniedException;
-use Prooph\EventStore\Internal\Data\PersistentSubscriptionDeleteStatus;
+use Prooph\EventStoreHttpClient\Exception\AccessDeniedException;
 use Prooph\EventStoreHttpClient\Http\Method;
+use Prooph\EventStoreHttpClient\Internal\PersistentSubscriptionDeleteResult;
+use Prooph\EventStoreHttpClient\Internal\PersistentSubscriptionDeleteStatus;
 use Prooph\EventStoreHttpClient\UserCredentials;
+use Prooph\EventStoreHttpClient\Util\Json;
 
 /** @internal  */
 class DeletePersistentSubscriptionOperation extends Operation
@@ -33,16 +33,25 @@ class DeletePersistentSubscriptionOperation extends Operation
         string $baseUri,
         string $stream,
         string $groupName,
-        ?UserCredentials $userCredentials
+        ?UserCredentials $userCredentials,
+        bool $requireMaster
     ): PersistentSubscriptionDeleteResult {
+        $headers = [];
+
+        if ($requireMaster) {
+            $headers['ES-RequiresMaster'] = 'true';
+        }
+
         $request = $requestFactory->createRequest(
             Method::Delete,
-            $uriFactory->createUri($baseUri . '/subscriptions/' . \urlencode($stream) . '/' . \urlencode($groupName))
+            $uriFactory->createUri($baseUri . '/subscriptions/' . \urlencode($stream) . '/' . \urlencode($groupName)),
+            $headers
         );
 
         $response = $this->sendRequest($httpClient, $userCredentials, $request);
 
-        $json = \json_decode($response->getBody()->getContents(), true);
+        $json = Json::decode($response->getBody()->getContents());
+
         switch ($response->getStatusCode()) {
             case 401:
                 throw AccessDeniedException::toSubscription($stream, $groupName);

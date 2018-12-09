@@ -16,13 +16,13 @@ namespace Prooph\EventStoreHttpClient\ClientOperations;
 use Http\Client\HttpClient;
 use Http\Message\RequestFactory;
 use Http\Message\UriFactory;
-use Prooph\EventStore\Data\PersistentSubscriptionSettings;
-use Prooph\EventStore\Internal\Data\PersistentSubscriptionCreateResult;
-
-Prooph\EventStoreHttpClient\Exception\AccessDeniedException;
-use Prooph\EventStore\Internal\Data\PersistentSubscriptionCreateStatus;
+use Prooph\EventStoreHttpClient\Exception\AccessDeniedException;
 use Prooph\EventStoreHttpClient\Http\Method;
+use Prooph\EventStoreHttpClient\Internal\PersistentSubscriptionCreateResult;
+use Prooph\EventStoreHttpClient\Internal\PersistentSubscriptionCreateStatus;
+use Prooph\EventStoreHttpClient\PersistentSubscriptionSettings;
 use Prooph\EventStoreHttpClient\UserCredentials;
+use Prooph\EventStoreHttpClient\Util\Json;
 
 /** @internal  */
 class CreatePersistentSubscriptionOperation extends Operation
@@ -35,23 +35,31 @@ class CreatePersistentSubscriptionOperation extends Operation
         string $stream,
         string $groupName,
         PersistentSubscriptionSettings $settings,
-        ?UserCredentials $userCredentials
+        ?UserCredentials $userCredentials,
+        bool $requireMaster
     ): PersistentSubscriptionCreateResult {
-        $string = \json_encode($settings->toArray());
+        $body = Json::encode($settings);
+
+        $headers = [
+            'Content-Type' => 'application/json',
+            'Content-Length' => \strlen($body),
+        ];
+
+        if ($requireMaster) {
+            $headers['ES-RequiresMaster'] = 'true';
+        }
 
         $request = $requestFactory->createRequest(
             Method::Put,
             $uriFactory->createUri($baseUri . '/subscriptions/' . \urlencode($stream) . '/' . \urlencode($groupName)),
-            [
-                'Content-Type' => 'application/json',
-                'Content-Length' => \strlen($string),
-            ],
-            $string
+            $headers,
+            $body
         );
 
         $response = $this->sendRequest($httpClient, $userCredentials, $request);
 
-        $json = \json_decode($response->getBody()->getContents(), true);
+        $json = Json::decode($response->getBody()->getContents());
+
         switch ($response->getStatusCode()) {
             case 401:
                 throw AccessDeniedException::toSubscription($stream, $groupName);

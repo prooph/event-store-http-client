@@ -13,6 +13,10 @@ declare(strict_types=1);
 
 namespace Prooph\EventStoreHttpClient;
 
+use Prooph\EventStoreHttpClient\Internal\PersistentSubscriptionCreateResult;
+use Prooph\EventStoreHttpClient\Internal\PersistentSubscriptionDeleteResult;
+use Prooph\EventStoreHttpClient\Internal\PersistentSubscriptionUpdateResult;
+
 interface EventStoreConnection
 {
     public function connectionSettings(): ConnectionSettings;
@@ -118,13 +122,13 @@ interface EventStoreConnection
         string $groupName,
         PersistentSubscriptionSettings $settings,
         ?UserCredentials $userCredentials = null
-    ): UpdatePersistentSubscription;
+    ): PersistentSubscriptionUpdateResult;
 
     public function deletePersistentSubscription(
         string $stream,
         string $groupName,
         ?UserCredentials $userCredentials = null
-    ): DeletePersistentSubscription;
+    ): PersistentSubscriptionDeleteResult;
 
     public function connectToPersistentSubscription(
         string $stream,

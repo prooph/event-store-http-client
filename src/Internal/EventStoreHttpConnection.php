@@ -21,7 +21,6 @@ use Prooph\EventStoreHttpClient\ClientOperations;
 use Prooph\EventStoreHttpClient\Common\SystemEventTypes;
 use Prooph\EventStoreHttpClient\Common\SystemStreams;
 use Prooph\EventStoreHttpClient\ConnectionSettings;
-use Prooph\EventStoreHttpClient\DeletePersistentSubscription;
 use Prooph\EventStoreHttpClient\EventAppearedOnPersistentSubscription;
 use Prooph\EventStoreHttpClient\EventData;
 use Prooph\EventStoreHttpClient\EventReadResult;
@@ -32,7 +31,6 @@ use Prooph\EventStoreHttpClient\Exception\InvalidArgumentException;
 use Prooph\EventStoreHttpClient\Exception\OutOfRangeException;
 use Prooph\EventStoreHttpClient\Exception\UnexpectedValueException;
 use Prooph\EventStoreHttpClient\ExpectedVersion;
-use Prooph\EventStoreHttpClient\PersistentSubscriptionCreateResult;
 use Prooph\EventStoreHttpClient\PersistentSubscriptionDropped;
 use Prooph\EventStoreHttpClient\PersistentSubscriptionSettings;
 use Prooph\EventStoreHttpClient\Position;
@@ -41,7 +39,6 @@ use Prooph\EventStoreHttpClient\StreamEventsSlice;
 use Prooph\EventStoreHttpClient\StreamMetadata;
 use Prooph\EventStoreHttpClient\StreamMetadataResult;
 use Prooph\EventStoreHttpClient\SystemSettings;
-use Prooph\EventStoreHttpClient\UpdatePersistentSubscription;
 use Prooph\EventStoreHttpClient\UserCredentials;
 use Prooph\EventStoreHttpClient\Util\Json;
 
@@ -410,7 +407,25 @@ class EventStoreHttpConnection implements EventStoreConnection
         PersistentSubscriptionSettings $settings,
         ?UserCredentials $userCredentials = null
     ): PersistentSubscriptionCreateResult {
-        // TODO: Implement createPersistentSubscription() method.
+        if (empty($stream)) {
+            throw new InvalidArgumentException('Stream cannot be empty');
+        }
+
+        if (empty($groupName)) {
+            throw new InvalidArgumentException('Group name cannot be empty');
+        }
+
+        return (new ClientOperations\CreatePersistentSubscriptionOperation())(
+            $this->httpClient,
+            $this->requestFactory,
+            $this->uriFactory,
+            $this->baseUri,
+            $stream,
+            $groupName,
+            $settings,
+            $userCredentials ?? $this->settings->defaultUserCredentials(),
+            $this->settings->requireMaster()
+        );
     }
 
     public function updatePersistentSubscription(
@@ -418,16 +433,51 @@ class EventStoreHttpConnection implements EventStoreConnection
         string $groupName,
         PersistentSubscriptionSettings $settings,
         ?UserCredentials $userCredentials = null
-    ): UpdatePersistentSubscription {
-        // TODO: Implement updatePersistentSubscription() method.
+    ): PersistentSubscriptionUpdateResult {
+        if (empty($stream)) {
+            throw new InvalidArgumentException('Stream cannot be empty');
+        }
+
+        if (empty($groupName)) {
+            throw new InvalidArgumentException('Group name cannot be empty');
+        }
+
+        return (new ClientOperations\UpdatePersistentSubscriptionOperation())(
+            $this->httpClient,
+            $this->requestFactory,
+            $this->uriFactory,
+            $this->baseUri,
+            $stream,
+            $groupName,
+            $settings,
+            $userCredentials ?? $this->settings->defaultUserCredentials(),
+            $this->settings->requireMaster()
+        );
     }
 
     public function deletePersistentSubscription(
         string $stream,
         string $groupName,
         ?UserCredentials $userCredentials = null
-    ): DeletePersistentSubscription {
-        // TODO: Implement deletePersistentSubscription() method.
+    ): PersistentSubscriptionDeleteResult {
+        if (empty($stream)) {
+            throw new InvalidArgumentException('Stream cannot be empty');
+        }
+
+        if (empty($groupName)) {
+            throw new InvalidArgumentException('Group name cannot be empty');
+        }
+
+        return (new ClientOperations\DeletePersistentSubscriptionOperation())(
+            $this->httpClient,
+            $this->requestFactory,
+            $this->uriFactory,
+            $this->baseUri,
+            $stream,
+            $groupName,
+            $userCredentials ?? $this->settings->defaultUserCredentials(),
+            $this->settings->requireMaster()
+        );
     }
 
     public function connectToPersistentSubscription(

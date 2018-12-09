@@ -135,7 +135,7 @@ class ReadStreamEventsForwardOperation extends Operation
                         $json['streamId'],
                         $json['eventNumber'],
                         EventId::fromString($json['eventId']),
-                        SystemEventTypes::LinkTo,
+                        SystemEventTypes::LINK_TO,
                         false,
                         $json['title'],
                         '',
