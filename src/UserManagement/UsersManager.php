@@ -29,18 +29,18 @@ class UsersManager
     /** @var string */
     private $schema;
     /** @var UserCredentials|null */
-    private $defaultCredentials;
+    private $defaultUserCredentials;
 
     public function __construct(
         HttpClient $client,
         EndPoint $endPoint,
         string $schema = EndpointExtensions::HTTP_SCHEMA,
-        ?UserCredentials $userCredentials = null
+        ?UserCredentials $defaultUserCredentials = null
     ) {
         $this->client = new UsersClient($client);
         $this->endPoint = $endPoint;
         $this->schema = $schema;
-        $this->defaultCredentials = $userCredentials;
+        $this->defaultUserCredentials = $defaultUserCredentials;
     }
 
     public function enable(string $login, ?UserCredentials $userCredentials = null): void
@@ -49,7 +49,7 @@ class UsersManager
             throw new InvalidArgumentException('Login cannot be empty');
         }
 
-        $userCredentials = $userCredentials ?? $this->defaultCredentials;
+        $userCredentials = $userCredentials ?? $this->defaultUserCredentials;
 
         $this->client->enable($this->endPoint, $login, $userCredentials, $this->schema);
     }
@@ -60,7 +60,7 @@ class UsersManager
             throw new InvalidArgumentException('Login cannot be empty');
         }
 
-        $userCredentials = $userCredentials ?? $this->defaultCredentials;
+        $userCredentials = $userCredentials ?? $this->defaultUserCredentials;
 
         $this->client->disable($this->endPoint, $login, $userCredentials, $this->schema);
     }
@@ -72,7 +72,7 @@ class UsersManager
             throw new InvalidArgumentException('Login cannot be empty');
         }
 
-        $userCredentials = $userCredentials ?? $this->defaultCredentials;
+        $userCredentials = $userCredentials ?? $this->defaultUserCredentials;
 
         $this->client->delete($this->endPoint, $login, $userCredentials, $this->schema);
     }
@@ -80,14 +80,14 @@ class UsersManager
     /** @return UserDetails[] */
     public function listAll(?UserCredentials $userCredentials = null): array
     {
-        $userCredentials = $userCredentials ?? $this->defaultCredentials;
+        $userCredentials = $userCredentials ?? $this->defaultUserCredentials;
 
         return $this->client->listAll($this->endPoint, $userCredentials, $this->schema);
     }
 
     public function getCurrentUser(?UserCredentials $userCredentials = null): UserDetails
     {
-        $userCredentials = $userCredentials ?? $this->defaultCredentials;
+        $userCredentials = $userCredentials ?? $this->defaultUserCredentials;
 
         return $this->client->getCurrentUser($this->endPoint, $userCredentials, $this->schema);
     }
@@ -98,7 +98,7 @@ class UsersManager
             throw new InvalidArgumentException('Login cannot be empty');
         }
 
-        $userCredentials = $userCredentials ?? $this->defaultCredentials;
+        $userCredentials = $userCredentials ?? $this->defaultUserCredentials;
 
         return $this->client->getUser($this->endPoint, $login, $userCredentials, $this->schema);
     }
@@ -136,7 +136,7 @@ class UsersManager
             }
         }
 
-        $userCredentials = $userCredentials ?? $this->defaultCredentials;
+        $userCredentials = $userCredentials ?? $this->defaultUserCredentials;
 
         $this->client->createUser(
             $this->endPoint,
@@ -178,7 +178,7 @@ class UsersManager
             }
         }
 
-        $userCredentials = $userCredentials ?? $this->defaultCredentials;
+        $userCredentials = $userCredentials ?? $this->defaultUserCredentials;
 
         $this->client->updateUser(
             $this->endPoint,
@@ -207,7 +207,7 @@ class UsersManager
             throw new InvalidArgumentException('New password cannot be empty');
         }
 
-        $userCredentials = $userCredentials ?? $this->defaultCredentials;
+        $userCredentials = $userCredentials ?? $this->defaultUserCredentials;
 
         $this->client->changePassword(
             $this->endPoint,
@@ -231,7 +231,7 @@ class UsersManager
             throw new InvalidArgumentException('New password cannot be empty');
         }
 
-        $userCredentials = $userCredentials ?? $this->defaultCredentials;
+        $userCredentials = $userCredentials ?? $this->defaultUserCredentials;
 
         $this->client->resetPassword(
             $this->endPoint,

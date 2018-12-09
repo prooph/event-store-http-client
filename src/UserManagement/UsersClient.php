@@ -30,8 +30,6 @@ class UsersClient
 {
     /** @var HttpClient */
     private $client;
-    /** @var int */
-    private $operationTimeout;
 
     public function __construct(HttpClient $client)
     {
