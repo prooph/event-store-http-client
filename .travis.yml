@@ -1,0 +1,62 @@
+sudo: required
+
+language: php
+
+matrix:
+  fast_finish: true
+  include:
+    - php: 7.2
+      env:
+        - DEPENDENCIES=""
+        - EXECUTE_CS_CHECK=true
+        - TEST_COVERAGE=true
+    - php: 7.2
+      env:
+        - DEPENDENCIES="--prefer-lowest --prefer-stable"
+    - php: 7.3
+      env:
+      - DEPENDENCIES=""
+      - TEST_COVERAGE=true
+    - php: 7.3
+      env:
+      - DEPENDENCIES="--prefer-lowest --prefer-stable"
+
+cache:
+  directories:
+    - $HOME/.composer/cache
+    - $HOME/.php-cs-fixer
+    - $HOME/.local
+
+before_script:
+  - echo downloading event-store 4.1.1-hotfix1
+  - wget https://eventstore.org/downloads/EventStore-OSS-Ubuntu-14.04-v4.1.1-hotfix1.tar.gz
+  - echo extracting event-store
+  - tar xf EventStore-OSS-Ubuntu-14.04-v4.1.1-hotfix1.tar.gz
+  - cd EventStore-OSS-Ubuntu-14.04-v4.1.1-hotfix1
+  - echo starting event-store
+  - ./run-node.sh --run-projections=all --mem-db --ext-tcp-heartbeat-interval 5000 --ext-tcp-heartbeat-timeout 1500 > /dev/null &
+  - cd ..
+  - mkdir -p "$HOME/.php-cs-fixer"
+  - if php --ri xdebug >/dev/null; then phpenv config-rm xdebug.ini; fi
+  - composer self-update
+  - composer update --prefer-dist $DEPENDENCIES
+  - if [[ $EXECUTE_CS_CHECK == 'true' ]]; then composer require prooph/php-cs-fixer-config ^0.3; fi
+
+script:
+  - if [[ $TEST_COVERAGE == 'true' ]]; then php -dzend_extension=xdebug.so ./vendor/bin/phpunit --exclude-group=ignore --coverage-text --coverage-clover ./build/logs/clover.xml; else ./vendor/bin/phpunit --exclude-group=ignore; fi
+  - if [[ $EXECUTE_CS_CHECK == 'true' ]]; then ./vendor/bin/php-cs-fixer fix -v --diff --dry-run; fi
+
+after_script:
+  - echo stopping event-store
+  - wget --http-user="admin" --http-password="changeit" --post-data='' http://localhost:2113/admin/shutdown
+
+after_success:
+  - if [[ $TEST_COVERAGE == 'true' ]]; then php vendor/bin/coveralls -v; fi
+
+notifications:
+  webhooks:
+    urls:
+      - https://webhooks.gitter.im/e/61c75218816eebde4486
+    on_success: change  # options: [always|never|change] default: always
+    on_failure: always  # options: [always|never|change] default: always
+    on_start: never     # options: [always|never|change] default: always
