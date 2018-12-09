@@ -13,14 +13,13 @@ declare(strict_types=1);
 
 namespace Prooph\EventStoreHttpClient\ClientOperations;
 
-use Http\Client\HttpClient;
 use Http\Message\RequestFactory;
 use Http\Message\UriFactory;
 use Prooph\EventStore\Internal\Data\ReplayParkedResult;
 
 Prooph\EventStoreHttpClient\Exception\AccessDeniedException;
 use Prooph\EventStore\Internal\Data\ReplayParkedStatus;
-use Prooph\EventStoreHttpClient\Http\Method;
+use Prooph\EventStoreHttpClient\Http\HttpMethod;
 use Prooph\EventStoreHttpClient\UserCredentials;
 
 /** @internal */
@@ -36,7 +35,7 @@ class ReplayParkedOperation extends Operation
         ?UserCredentials $userCredentials
     ): ReplayParkedResult {
         $request = $requestFactory->createRequest(
-            Method::Post,
+            HttpMethod::POST,
             $uriFactory->createUri(\sprintf(
                 '%s/subscriptions/%s/%s/replayParked',
                 $baseUri,

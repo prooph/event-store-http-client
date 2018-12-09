@@ -13,7 +13,6 @@ declare(strict_types=1);
 
 namespace Prooph\EventStoreHttpClient\ClientOperations;
 
-use Http\Client\HttpClient;
 use Http\Message\RequestFactory;
 use Http\Message\UriFactory;
 use Prooph\EventStore\Data\DetailedSubscriptionInformation;
@@ -21,14 +20,15 @@ use Prooph\EventStore\Data\PersistentSubscriptionSettings;
 use Prooph\EventStore\NamedConsumerStrategy;
 
 Prooph\EventStoreHttpClient\Exception\AccessDeniedException;
-use Prooph\EventStoreHttpClient\Http\Method;
+use Prooph\EventStoreHttpClient\Http\HttpMethod;
 use Prooph\EventStoreHttpClient\UserCredentials;
+use Psr\Http\Client\ClientInterface;
 
 /** @internal */
 class GetInformationForSubscriptionOperation extends Operation
 {
     public function __invoke(
-        HttpClient $httpClient,
+        ClientInterface $httpClient,
         RequestFactory $requestFactory,
         UriFactory $uriFactory,
         string $baseUri,
@@ -37,7 +37,7 @@ class GetInformationForSubscriptionOperation extends Operation
         ?UserCredentials $userCredentials
     ): DetailedSubscriptionInformation {
         $request = $requestFactory->createRequest(
-            Method::Get,
+            HttpMethod::GET,
             $uriFactory->createUri($baseUri . '/subscriptions/' . \urlencode($stream) . '/' . \urlencode($groupName) . '/info')
         );
 

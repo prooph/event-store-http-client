@@ -14,10 +14,10 @@ declare(strict_types=1);
 namespace Prooph\EventStoreHttpClient\ClientOperations;
 
 use Http\Client\Exception as HttpClientException;
-use Http\Client\HttpClient;
 use Http\Message\Authentication\BasicAuth;
 use Prooph\EventStoreHttpClient\Exception\EventStoreConnectionException;
 use Prooph\EventStoreHttpClient\UserCredentials;
+use Psr\Http\Client\ClientInterface;
 use Psr\Http\Message\RequestInterface;
 use Psr\Http\Message\ResponseInterface;
 use Throwable;
@@ -26,7 +26,7 @@ use Throwable;
 abstract class Operation
 {
     protected function sendRequest(
-        HttpClient $httpClient,
+        ClientInterface $httpClient,
         ?UserCredentials $userCredentials,
         RequestInterface $request
     ): ResponseInterface {

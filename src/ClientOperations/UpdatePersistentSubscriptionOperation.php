@@ -13,22 +13,22 @@ declare(strict_types=1);
 
 namespace Prooph\EventStoreHttpClient\ClientOperations;
 
-use Http\Client\HttpClient;
 use Http\Message\RequestFactory;
 use Http\Message\UriFactory;
 use Prooph\EventStoreHttpClient\Exception\AccessDeniedException;
-use Prooph\EventStoreHttpClient\Http\Method;
+use Prooph\EventStoreHttpClient\Http\HttpMethod;
 use Prooph\EventStoreHttpClient\Internal\PersistentSubscriptionUpdateResult;
 use Prooph\EventStoreHttpClient\Internal\PersistentSubscriptionUpdateStatus;
 use Prooph\EventStoreHttpClient\PersistentSubscriptionSettings;
 use Prooph\EventStoreHttpClient\UserCredentials;
 use Prooph\EventStoreHttpClient\Util\Json;
+use Psr\Http\Client\ClientInterface;
 
 /** @internal  */
 class UpdatePersistentSubscriptionOperation extends Operation
 {
     public function __invoke(
-        HttpClient $httpClient,
+        ClientInterface $httpClient,
         RequestFactory $requestFactory,
         UriFactory $uriFactory,
         string $baseUri,
@@ -50,7 +50,7 @@ class UpdatePersistentSubscriptionOperation extends Operation
         }
 
         $request = $requestFactory->createRequest(
-            Method::Post,
+            HttpMethod::POST,
             $uriFactory->createUri($baseUri . '/subscriptions/' . \urlencode($stream) . '/' . \urlencode($groupName)),
             $headers,
             $body

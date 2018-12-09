@@ -13,7 +13,6 @@ declare(strict_types=1);
 
 namespace Prooph\EventStoreHttpClient\ClientOperations;
 
-use Http\Client\HttpClient;
 use Http\Message\RequestFactory;
 use Http\Message\UriFactory;
 use Prooph\EventStore\Data\EventId;
@@ -22,13 +21,14 @@ use Prooph\EventStore\Data\PersistentSubscriptionNakEventAction;
 use Prooph\EventStore\Internal\PersistentSubscriptionOperations as BasePersistentSubscriptionOperations;
 
 Prooph\EventStoreHttpClient\Exception\AccessDeniedException;
-use Prooph\EventStoreHttpClient\Http\Method;
+use Prooph\EventStoreHttpClient\Http\HttpMethod;
 use Prooph\EventStoreHttpClient\UserCredentials;
+use Psr\Http\Client\ClientInterface;
 
 /** @internal */
 final class PersistentSubscriptionOperations extends Operation implements BasePersistentSubscriptionOperations
 {
-    /** @var HttpClient */
+    /** @var ClientInterface */
     private $httpClient;
     /** @var RequestFactory */
     private $requestFactory;
@@ -44,7 +44,7 @@ final class PersistentSubscriptionOperations extends Operation implements BasePe
     private $userCredentials;
 
     public function __construct(
-        HttpClient $httpClient,
+        ClientInterface $httpClient,
         RequestFactory $requestFactory,
         UriFactory $uriFactory,
         string $baseUri,
@@ -86,7 +86,7 @@ final class PersistentSubscriptionOperations extends Operation implements BasePe
         }, $eventIds);
 
         $request = $this->requestFactory->createRequest(
-            Method::Post,
+            HttpMethod::POST,
             $this->uriFactory->createUri(\sprintf(
                 '%s/subscriptions/%s/%s/ack?ids=%s',
                 $this->baseUri,
@@ -119,7 +119,7 @@ final class PersistentSubscriptionOperations extends Operation implements BasePe
         }, $eventIds);
 
         $request = $this->requestFactory->createRequest(
-            Method::Post,
+            HttpMethod::POST,
             $this->uriFactory->createUri(\sprintf(
                 '%s/subscriptions/%s/%s/nack?ids=%s&action=%s',
                 $this->baseUri,

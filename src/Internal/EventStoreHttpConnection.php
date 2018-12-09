@@ -13,7 +13,6 @@ declare(strict_types=1);
 
 namespace Prooph\EventStoreHttpClient\Internal;
 
-use Http\Client\HttpClient;
 use Http\Message\RequestFactory;
 use Http\Message\UriFactory;
 use Prooph\EventStoreHttpClient\AllEventsSlice;
@@ -31,6 +30,7 @@ use Prooph\EventStoreHttpClient\Exception\InvalidArgumentException;
 use Prooph\EventStoreHttpClient\Exception\OutOfRangeException;
 use Prooph\EventStoreHttpClient\Exception\UnexpectedValueException;
 use Prooph\EventStoreHttpClient\ExpectedVersion;
+use Prooph\EventStoreHttpClient\Http\HttpClient;
 use Prooph\EventStoreHttpClient\PersistentSubscriptionDropped;
 use Prooph\EventStoreHttpClient\PersistentSubscriptionSettings;
 use Prooph\EventStoreHttpClient\Position;
@@ -56,6 +56,7 @@ class EventStoreHttpConnection implements EventStoreConnection
     /** @var string */
     private $baseUri;
 
+    /** @internal */
     public function __construct(
         HttpClient $httpClient,
         RequestFactory $requestFactory,

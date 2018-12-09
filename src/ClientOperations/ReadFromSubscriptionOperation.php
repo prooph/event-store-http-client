@@ -13,7 +13,6 @@ declare(strict_types=1);
 
 namespace Prooph\EventStoreHttpClient\ClientOperations;
 
-use Http\Client\HttpClient;
 use Http\Message\RequestFactory;
 use Http\Message\UriFactory;
 use Prooph\EventStore\Data\EventId;
@@ -21,8 +20,9 @@ use Prooph\EventStore\Data\EventRecord;
 use Prooph\EventStore\Internal\DateTimeUtil;
 
 Prooph\EventStoreHttpClient\Exception\AccessDeniedException;
-use Prooph\EventStoreHttpClient\Http\Method;
+use Prooph\EventStoreHttpClient\Http\HttpMethod;
 use Prooph\EventStoreHttpClient\UserCredentials;
+use Psr\Http\Client\ClientInterface;
 
 /** @internal */
 class ReadFromSubscriptionOperation extends Operation
@@ -31,7 +31,7 @@ class ReadFromSubscriptionOperation extends Operation
      * @return EventRecord[]
      */
     public function __invoke(
-        HttpClient $httpClient,
+        ClientInterface $httpClient,
         RequestFactory $requestFactory,
         UriFactory $uriFactory,
         string $baseUri,
@@ -41,7 +41,7 @@ class ReadFromSubscriptionOperation extends Operation
         ?UserCredentials $userCredentials
     ): array {
         $request = $requestFactory->createRequest(
-            Method::Get,
+            HttpMethod::GET,
             $uriFactory->createUri(\sprintf(
                 '%s/subscriptions/%s/%s/%d?embed=tryharder',
                 $baseUri,

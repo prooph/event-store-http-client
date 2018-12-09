@@ -13,20 +13,20 @@ declare(strict_types=1);
 
 namespace Prooph\EventStoreHttpClient\ClientOperations;
 
-use Http\Client\HttpClient;
 use Http\Message\RequestFactory;
 use Http\Message\UriFactory;
 use Prooph\EventStoreHttpClient\Exception\AccessDeniedException;
-use Prooph\EventStoreHttpClient\Http\Method;
+use Prooph\EventStoreHttpClient\Http\HttpMethod;
 
 Prooph\EventStoreHttpClient\Exception\AccessDeniedException;
 use Prooph\EventStoreHttpClient\UserCredentials;
+use Psr\Http\Client\ClientInterface;
 
 /** @internal */
 class DeleteStreamOperation extends Operation
 {
     public function __invoke(
-        HttpClient $httpClient,
+        ClientInterface $httpClient,
         RequestFactory $requestFactory,
         UriFactory $uriFactory,
         string $baseUri,
@@ -49,7 +49,7 @@ class DeleteStreamOperation extends Operation
         }
 
         $request = $requestFactory->createRequest(
-            Method::Delete,
+            HttpMethod::DELETE,
             $uriFactory->createUri($baseUri . '/streams/' . \urlencode($stream)),
             $headers
         );
