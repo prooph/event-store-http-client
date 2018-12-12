@@ -244,7 +244,28 @@ class EventStoreHttpConnection implements EventStoreConnection
         bool $resolveLinkTos = true,
         ?UserCredentials $userCredentials = null
     ): AllEventsSlice {
-        // TODO: Implement readAllEventsForward() method.
+        if ($count < 1) {
+            throw new InvalidArgumentException('Count must be positive');
+        }
+
+        if ($count > Consts::MAX_READ_SIZE) {
+            throw new InvalidArgumentException(\sprintf(
+                'Count should be less than %s. For larger reads you should page.',
+                Consts::MAX_READ_SIZE
+            ));
+        }
+
+        return (new ClientOperations\ReadAllEventsForwardOperation())(
+            $this->httpClient,
+            $this->requestFactory,
+            $this->uriFactory,
+            $this->baseUri,
+            $position,
+            $count,
+            $resolveLinkTos,
+            $userCredentials ?? $this->settings->defaultUserCredentials(),
+            $this->settings->requireMaster()
+        );
     }
 
     public function readAllEventsBackward(
@@ -253,7 +274,28 @@ class EventStoreHttpConnection implements EventStoreConnection
         bool $resolveLinkTos = true,
         ?UserCredentials $userCredentials = null
     ): AllEventsSlice {
-        // TODO: Implement readAllEventsBackward() method.
+        if ($count < 1) {
+            throw new InvalidArgumentException('Count must be positive');
+        }
+
+        if ($count > Consts::MAX_READ_SIZE) {
+            throw new InvalidArgumentException(\sprintf(
+                'Count should be less than %s. For larger reads you should page.',
+                Consts::MAX_READ_SIZE
+            ));
+        }
+
+        return (new ClientOperations\ReadAllEventsBackwardOperation())(
+            $this->httpClient,
+            $this->requestFactory,
+            $this->uriFactory,
+            $this->baseUri,
+            $position,
+            $count,
+            $resolveLinkTos,
+            $userCredentials ?? $this->settings->defaultUserCredentials(),
+            $this->settings->requireMaster()
+        );
     }
 
     public function setStreamMetadata(
@@ -476,17 +518,5 @@ class EventStoreHttpConnection implements EventStoreConnection
             $userCredentials ?? $this->settings->defaultUserCredentials(),
             $this->settings->requireMaster()
         );
-    }
-
-    public function connectToPersistentSubscription(
-        string $stream,
-        string $groupName,
-        EventAppearedOnPersistentSubscription $eventAppeared,
-        ?PersistentSubscriptionDropped $subscriptionDropped = null,
-        int $bufferSize = 10,
-        bool $autoAck = true,
-        ?UserCredentials $userCredentials = null
-    ): EventStorePersistentSubscription {
-        // TODO: Implement connectToPersistentSubscription() method.
     }
 }

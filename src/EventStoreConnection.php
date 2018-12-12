@@ -129,14 +129,4 @@ interface EventStoreConnection
         string $groupName,
         ?UserCredentials $userCredentials = null
     ): PersistentSubscriptionDeleteResult;
-
-    public function connectToPersistentSubscription(
-        string $stream,
-        string $groupName,
-        EventAppearedOnPersistentSubscription $eventAppeared,
-        ?PersistentSubscriptionDropped $subscriptionDropped = null,
-        int $bufferSize = 10,
-        bool $autoAck = true,
-        ?UserCredentials $userCredentials = null
-    ): EventStorePersistentSubscription;
 }
