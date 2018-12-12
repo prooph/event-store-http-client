@@ -30,6 +30,7 @@ class PersistentSubscriptionsManager
     /** @var UserCredentials|null */
     private $defaultUserCredentials;
 
+    /** @internal */
     public function __construct(
         HttpClient $client,
         EndPoint $endPoint,

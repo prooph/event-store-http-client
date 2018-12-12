@@ -30,6 +30,7 @@ class ProjectionsManager
     /** @var UserCredentials|null */
     private $defaultUserCredentials;
 
+    /** @internal */
     public function __construct(
         HttpClient $client,
         EndPoint $endPoint,
@@ -43,7 +44,7 @@ class ProjectionsManager
     }
 
     /**
-     * Asynchronously enables a projection
+     * Enables a projection
      */
     public function enable(string $name, ?UserCredentials $userCredentials = null): void
     {

@@ -29,6 +29,7 @@ class QueryManager
     /** @var ProjectionsManager */
     private $projectionsManager;
 
+    /** @internal  */
     public function __construct(
         HttpClient $client,
         EndPoint $endPoint,
