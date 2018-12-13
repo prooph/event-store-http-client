@@ -17,8 +17,6 @@ use Http\Message\RequestFactory;
 use Http\Message\UriFactory;
 use Prooph\EventStoreHttpClient\Exception\AccessDeniedException;
 use Prooph\EventStoreHttpClient\Http\HttpMethod;
-
-Prooph\EventStoreHttpClient\Exception\AccessDeniedException;
 use Prooph\EventStoreHttpClient\UserCredentials;
 use Psr\Http\Client\ClientInterface;
 

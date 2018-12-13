@@ -18,8 +18,7 @@ use Http\Message\UriFactory;
 use Prooph\EventStore\Data\DetailedSubscriptionInformation;
 use Prooph\EventStore\Data\PersistentSubscriptionSettings;
 use Prooph\EventStore\NamedConsumerStrategy;
-
-Prooph\EventStoreHttpClient\Exception\AccessDeniedException;
+use Prooph\EventStoreHttpClient\Exception\AccessDeniedException;
 use Prooph\EventStoreHttpClient\Http\HttpMethod;
 use Prooph\EventStoreHttpClient\UserCredentials;
 use Psr\Http\Client\ClientInterface;
@@ -77,7 +76,7 @@ class GetInformationForSubscriptionOperation extends Operation
                     $json['totalInFlightMessages']
                 );
             case 401:
-                throw new AccessDenied();
+                throw new AccessDeniedException();
             case 404:
                 throw new \RuntimeException(\sprintf(
                     'Subscription with stream \'%s\' and group name \'%s\' not found',

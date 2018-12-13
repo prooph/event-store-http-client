@@ -16,6 +16,7 @@ namespace Prooph\EventStoreHttpClient\ClientOperations;
 use Http\Message\RequestFactory;
 use Http\Message\UriFactory;
 use Prooph\EventStore\SubscriptionInformation;
+use Prooph\EventStoreHttpClient\Exception\AccessDeniedException;
 use Prooph\EventStoreHttpClient\Http\HttpMethod;
 use Prooph\EventStoreHttpClient\UserCredentials;
 use Psr\Http\Client\ClientInterface;
@@ -43,7 +44,7 @@ class GetInformationForSubscriptionsWithStreamOperation extends Operation
 
         switch ($response->getStatusCode()) {
             case 401:
-                throw new AccessDenied();
+                throw new AccessDeniedException();
             case 200:
                 $json = \json_decode($response->getBody()->getContents(), true);
 

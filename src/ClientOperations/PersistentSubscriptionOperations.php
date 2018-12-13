@@ -19,8 +19,7 @@ use Prooph\EventStore\Data\EventId;
 use Prooph\EventStore\Data\EventRecord;
 use Prooph\EventStore\Data\PersistentSubscriptionNakEventAction;
 use Prooph\EventStore\Internal\PersistentSubscriptionOperations as BasePersistentSubscriptionOperations;
-
-Prooph\EventStoreHttpClient\Exception\AccessDeniedException;
+use Prooph\EventStoreHttpClient\Exception\AccessDeniedException;
 use Prooph\EventStoreHttpClient\Http\HttpMethod;
 use Prooph\EventStoreHttpClient\UserCredentials;
 use Psr\Http\Client\ClientInterface;

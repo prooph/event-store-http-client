@@ -16,9 +16,8 @@ namespace Prooph\EventStoreHttpClient\ClientOperations;
 use Http\Message\RequestFactory;
 use Http\Message\UriFactory;
 use Prooph\EventStore\Internal\Data\ReplayParkedResult;
-
-Prooph\EventStoreHttpClient\Exception\AccessDeniedException;
 use Prooph\EventStore\Internal\Data\ReplayParkedStatus;
+use Prooph\EventStoreHttpClient\Exception\AccessDeniedException;
 use Prooph\EventStoreHttpClient\Http\HttpMethod;
 use Prooph\EventStoreHttpClient\UserCredentials;
 
