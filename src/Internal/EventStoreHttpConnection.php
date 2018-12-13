@@ -28,6 +28,7 @@ use Prooph\EventStoreHttpClient\Exception\InvalidArgumentException;
 use Prooph\EventStoreHttpClient\Exception\OutOfRangeException;
 use Prooph\EventStoreHttpClient\Exception\UnexpectedValueException;
 use Prooph\EventStoreHttpClient\ExpectedVersion;
+use Prooph\EventStoreHttpClient\Http\EndpointExtensions;
 use Prooph\EventStoreHttpClient\Http\HttpClient;
 use Prooph\EventStoreHttpClient\PersistentSubscriptionSettings;
 use Prooph\EventStoreHttpClient\Position;
@@ -66,7 +67,7 @@ class EventStoreHttpConnection implements EventStoreConnection
         $this->settings = $settings ?? ConnectionSettings::default();
         $this->baseUri = \sprintf(
             '%s://%s:%s',
-            $this->settings->useSslConnection() ? 'https' : 'http',
+            $this->settings->schema(),
             $this->settings->endPoint()->host(),
             $this->settings->endPoint()->port()
         );
