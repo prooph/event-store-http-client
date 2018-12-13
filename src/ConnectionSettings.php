@@ -13,12 +13,14 @@ declare(strict_types=1);
 
 namespace Prooph\EventStoreHttpClient;
 
+use Prooph\EventStoreHttpClient\Http\EndpointExtensions;
+
 class ConnectionSettings
 {
     /** @var EndPoint */
     private $endPoint;
-    /** @var bool */
-    private $useSslConnection;
+    /** @var string */
+    private $schema;
     /** @var UserCredentials|null */
     private $defaultUserCredentials;
     /** @var bool */
@@ -28,7 +30,7 @@ class ConnectionSettings
     {
         return new self(
             new EndPoint('localhost', 2113),
-            false,
+            EndpointExtensions::HTTP_SCHEMA,
             null,
             true
         );
@@ -36,12 +38,12 @@ class ConnectionSettings
 
     public function __construct(
         EndPoint $endpoint,
-        bool $useSslConnection,
+        string $schema = EndpointExtensions::HTTP_SCHEMA,
         ?UserCredentials $defaultUserCredentials = null,
         bool $requireMaster = true
     ) {
         $this->endPoint = $endpoint;
-        $this->useSslConnection = $useSslConnection;
+        $this->schema = $schema;
         $this->defaultUserCredentials = $defaultUserCredentials;
         $this->requireMaster = $requireMaster;
     }
@@ -51,9 +53,9 @@ class ConnectionSettings
         return $this->defaultUserCredentials;
     }
 
-    public function useSslConnection(): bool
+    public function schema(): string
     {
-        return $this->useSslConnection;
+        return $this->schema;
     }
 
     public function endPoint(): EndPoint

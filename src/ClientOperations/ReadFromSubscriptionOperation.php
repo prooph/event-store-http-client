@@ -18,8 +18,7 @@ use Http\Message\UriFactory;
 use Prooph\EventStore\Data\EventId;
 use Prooph\EventStore\Data\EventRecord;
 use Prooph\EventStore\Internal\DateTimeUtil;
-
-Prooph\EventStoreHttpClient\Exception\AccessDeniedException;
+use Prooph\EventStoreHttpClient\Exception\AccessDeniedException;
 use Prooph\EventStoreHttpClient\Http\HttpMethod;
 use Prooph\EventStoreHttpClient\UserCredentials;
 use Psr\Http\Client\ClientInterface;
