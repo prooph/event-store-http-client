@@ -28,7 +28,6 @@ use Prooph\EventStoreHttpClient\Exception\InvalidArgumentException;
 use Prooph\EventStoreHttpClient\Exception\OutOfRangeException;
 use Prooph\EventStoreHttpClient\Exception\UnexpectedValueException;
 use Prooph\EventStoreHttpClient\ExpectedVersion;
-use Prooph\EventStoreHttpClient\Http\EndpointExtensions;
 use Prooph\EventStoreHttpClient\Http\HttpClient;
 use Prooph\EventStoreHttpClient\PersistentSubscriptionSettings;
 use Prooph\EventStoreHttpClient\Position;
