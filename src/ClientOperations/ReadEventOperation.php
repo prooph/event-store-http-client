@@ -20,19 +20,19 @@ use Prooph\EventStoreHttpClient\EventId;
 use Prooph\EventStoreHttpClient\EventReadResult;
 use Prooph\EventStoreHttpClient\EventReadStatus;
 use Prooph\EventStoreHttpClient\Exception\AccessDeniedException;
+use Prooph\EventStoreHttpClient\Http\HttpClient;
 use Prooph\EventStoreHttpClient\Http\HttpMethod;
 use Prooph\EventStoreHttpClient\RecordedEvent;
 use Prooph\EventStoreHttpClient\ResolvedEvent;
 use Prooph\EventStoreHttpClient\UserCredentials;
 use Prooph\EventStoreHttpClient\Util\DateTime;
 use Prooph\EventStoreHttpClient\Util\Json;
-use Psr\Http\Client\ClientInterface;
 
 /** @internal */
 class ReadEventOperation extends Operation
 {
     public function __invoke(
-        ClientInterface $httpClient,
+        HttpClient $httpClient,
         RequestFactory $requestFactory,
         UriFactory $uriFactory,
         string $baseUri,

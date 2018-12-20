@@ -18,6 +18,7 @@ use Http\Message\UriFactory;
 use Prooph\EventStoreHttpClient\Common\SystemEventTypes;
 use Prooph\EventStoreHttpClient\EventId;
 use Prooph\EventStoreHttpClient\Exception\AccessDeniedException;
+use Prooph\EventStoreHttpClient\Http\HttpClient;
 use Prooph\EventStoreHttpClient\Http\HttpMethod;
 use Prooph\EventStoreHttpClient\ReadDirection;
 use Prooph\EventStoreHttpClient\RecordedEvent;
@@ -27,13 +28,12 @@ use Prooph\EventStoreHttpClient\StreamEventsSlice;
 use Prooph\EventStoreHttpClient\UserCredentials;
 use Prooph\EventStoreHttpClient\Util\DateTime;
 use Prooph\EventStoreHttpClient\Util\Json;
-use Psr\Http\Client\ClientInterface;
 
 /** @internal */
 class ReadStreamEventsBackwardOperation extends Operation
 {
     public function __invoke(
-        ClientInterface $httpClient,
+        HttpClient $httpClient,
         RequestFactory $requestFactory,
         UriFactory $uriFactory,
         string $baseUri,

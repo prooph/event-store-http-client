@@ -18,6 +18,7 @@ use Http\Message\UriFactory;
 use Prooph\EventStoreHttpClient\AllEventsSlice;
 use Prooph\EventStoreHttpClient\EventId;
 use Prooph\EventStoreHttpClient\Exception\AccessDeniedException;
+use Prooph\EventStoreHttpClient\Http\HttpClient;
 use Prooph\EventStoreHttpClient\Http\HttpMethod;
 use Prooph\EventStoreHttpClient\Position;
 use Prooph\EventStoreHttpClient\ReadDirection;
@@ -26,13 +27,12 @@ use Prooph\EventStoreHttpClient\ResolvedEvent;
 use Prooph\EventStoreHttpClient\UserCredentials;
 use Prooph\EventStoreHttpClient\Util\DateTime;
 use Prooph\EventStoreHttpClient\Util\Json;
-use Psr\Http\Client\ClientInterface;
 
 /** @internal */
 class ReadAllEventsForwardOperation extends Operation
 {
     public function __invoke(
-        ClientInterface $httpClient,
+        HttpClient $httpClient,
         RequestFactory $requestFactory,
         UriFactory $uriFactory,
         string $baseUri,

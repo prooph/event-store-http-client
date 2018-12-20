@@ -20,16 +20,16 @@ use Prooph\EventStoreHttpClient\Exception\AccessDeniedException;
 use Prooph\EventStoreHttpClient\Exception\RuntimeException;
 use Prooph\EventStoreHttpClient\Exception\StreamDeletedException;
 use Prooph\EventStoreHttpClient\Exception\WrongExpectedVersionException;
+use Prooph\EventStoreHttpClient\Http\HttpClient;
 use Prooph\EventStoreHttpClient\Http\HttpMethod;
 use Prooph\EventStoreHttpClient\UserCredentials;
 use Prooph\EventStoreHttpClient\Util\Json;
-use Psr\Http\Client\ClientInterface;
 
 /** @internal */
 class AppendToStreamOperation extends Operation
 {
     public function __invoke(
-        ClientInterface $httpClient,
+        HttpClient $httpClient,
         RequestFactory $requestFactory,
         UriFactory $uriFactory,
         string $baseUri,

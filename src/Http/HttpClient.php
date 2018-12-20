@@ -16,6 +16,7 @@ namespace Prooph\EventStoreHttpClient\Http;
 use Http\Message\RequestFactory;
 use Http\Message\ResponseFactory;
 use Prooph\EventStoreHttpClient\UserCredentials;
+use Psr\Http\Client\ClientExceptionInterface;
 use Psr\Http\Client\ClientInterface;
 use Psr\Http\Message\RequestInterface;
 use Psr\Http\Message\ResponseInterface;
@@ -39,6 +40,14 @@ class HttpClient
         $this->client = $client;
         $this->requestFactory = $requestFactory;
         $this->responseFactory = $responseFactory;
+    }
+
+    /**
+     * @throws ClientExceptionInterface
+     */
+    public function sendRequest(RequestInterface $request): ResponseInterface
+    {
+        return $this->client->sendRequest($request);
     }
 
     public function get(

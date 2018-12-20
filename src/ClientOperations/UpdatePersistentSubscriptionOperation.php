@@ -16,19 +16,19 @@ namespace Prooph\EventStoreHttpClient\ClientOperations;
 use Http\Message\RequestFactory;
 use Http\Message\UriFactory;
 use Prooph\EventStoreHttpClient\Exception\AccessDeniedException;
+use Prooph\EventStoreHttpClient\Http\HttpClient;
 use Prooph\EventStoreHttpClient\Http\HttpMethod;
 use Prooph\EventStoreHttpClient\Internal\PersistentSubscriptionUpdateResult;
 use Prooph\EventStoreHttpClient\Internal\PersistentSubscriptionUpdateStatus;
 use Prooph\EventStoreHttpClient\PersistentSubscriptionSettings;
 use Prooph\EventStoreHttpClient\UserCredentials;
 use Prooph\EventStoreHttpClient\Util\Json;
-use Psr\Http\Client\ClientInterface;
 
 /** @internal  */
 class UpdatePersistentSubscriptionOperation extends Operation
 {
     public function __invoke(
-        ClientInterface $httpClient,
+        HttpClient $httpClient,
         RequestFactory $requestFactory,
         UriFactory $uriFactory,
         string $baseUri,

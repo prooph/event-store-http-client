@@ -16,18 +16,18 @@ namespace Prooph\EventStoreHttpClient\ClientOperations;
 use Http\Message\RequestFactory;
 use Http\Message\UriFactory;
 use Prooph\EventStoreHttpClient\Exception\AccessDeniedException;
+use Prooph\EventStoreHttpClient\Http\HttpClient;
 use Prooph\EventStoreHttpClient\Http\HttpMethod;
 use Prooph\EventStoreHttpClient\Internal\PersistentSubscriptionDeleteResult;
 use Prooph\EventStoreHttpClient\Internal\PersistentSubscriptionDeleteStatus;
 use Prooph\EventStoreHttpClient\UserCredentials;
 use Prooph\EventStoreHttpClient\Util\Json;
-use Psr\Http\Client\ClientInterface;
 
 /** @internal  */
 class DeletePersistentSubscriptionOperation extends Operation
 {
     public function __invoke(
-        ClientInterface $httpClient,
+        HttpClient $httpClient,
         RequestFactory $requestFactory,
         UriFactory $uriFactory,
         string $baseUri,

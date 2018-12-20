@@ -15,22 +15,22 @@ namespace Prooph\EventStoreHttpClient\ClientOperations;
 
 use Http\Message\RequestFactory;
 use Http\Message\UriFactory;
-use Prooph\EventStore\Data\EventId;
-use Prooph\EventStore\Data\EventRecord;
-use Prooph\EventStore\Internal\DateTimeUtil;
+use Prooph\EventStoreHttpClient\EventId;
 use Prooph\EventStoreHttpClient\Exception\AccessDeniedException;
+use Prooph\EventStoreHttpClient\Http\HttpClient;
 use Prooph\EventStoreHttpClient\Http\HttpMethod;
+use Prooph\EventStoreHttpClient\RecordedEvent;
 use Prooph\EventStoreHttpClient\UserCredentials;
-use Psr\Http\Client\ClientInterface;
+use Prooph\EventStoreHttpClient\Util\DateTime;
 
 /** @internal */
 class ReadFromSubscriptionOperation extends Operation
 {
     /**
-     * @return EventRecord[]
+     * @return RecordedEvent[]
      */
     public function __invoke(
-        ClientInterface $httpClient,
+        HttpClient $httpClient,
         RequestFactory $requestFactory,
         UriFactory $uriFactory,
         string $baseUri,
@@ -87,7 +87,7 @@ class ReadFromSubscriptionOperation extends Operation
                         $metadata = \json_encode($metadata);
                     }
 
-                    $events[] = new EventRecord(
+                    $events[] = new RecordedEvent(
                         $entry['positionStreamId'],
                         $entry['positionEventNumber'],
                         EventId::fromString($entry['eventId']),
@@ -95,7 +95,7 @@ class ReadFromSubscriptionOperation extends Operation
                         $entry['isJson'],
                         $data,
                         $metadata,
-                        DateTimeUtil::create($entry['updated'])
+                        DateTime::create($entry['updated'])
                     );
                 }
 

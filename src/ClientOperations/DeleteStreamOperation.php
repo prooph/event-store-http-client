@@ -16,15 +16,15 @@ namespace Prooph\EventStoreHttpClient\ClientOperations;
 use Http\Message\RequestFactory;
 use Http\Message\UriFactory;
 use Prooph\EventStoreHttpClient\Exception\AccessDeniedException;
+use Prooph\EventStoreHttpClient\Http\HttpClient;
 use Prooph\EventStoreHttpClient\Http\HttpMethod;
 use Prooph\EventStoreHttpClient\UserCredentials;
-use Psr\Http\Client\ClientInterface;
 
 /** @internal */
 class DeleteStreamOperation extends Operation
 {
     public function __invoke(
-        ClientInterface $httpClient,
+        HttpClient $httpClient,
         RequestFactory $requestFactory,
         UriFactory $uriFactory,
         string $baseUri,

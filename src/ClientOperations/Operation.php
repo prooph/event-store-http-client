@@ -13,11 +13,11 @@ declare(strict_types=1);
 
 namespace Prooph\EventStoreHttpClient\ClientOperations;
 
-use Http\Client\Exception as HttpClientException;
 use Http\Message\Authentication\BasicAuth;
 use Prooph\EventStoreHttpClient\Exception\EventStoreConnectionException;
+use Prooph\EventStoreHttpClient\Http\HttpClient;
 use Prooph\EventStoreHttpClient\UserCredentials;
-use Psr\Http\Client\ClientInterface;
+use Psr\Http\Client\ClientExceptionInterface;
 use Psr\Http\Message\RequestInterface;
 use Psr\Http\Message\ResponseInterface;
 use Throwable;
@@ -26,7 +26,7 @@ use Throwable;
 abstract class Operation
 {
     protected function sendRequest(
-        ClientInterface $httpClient,
+        HttpClient $httpClient,
         ?UserCredentials $userCredentials,
         RequestInterface $request
     ): ResponseInterface {
@@ -37,7 +37,7 @@ abstract class Operation
 
         try {
             return $httpClient->sendRequest($request);
-        } catch (HttpClientException $e) {
+        } catch (ClientExceptionInterface $e) {
             throw new EventStoreConnectionException($e->getMessage());
         } catch (Throwable $e) {
             throw new EventStoreConnectionException($e->getMessage());
