@@ -13,13 +13,15 @@ declare(strict_types=1);
 
 namespace Prooph\EventStoreHttpClient\Projections;
 
-use Prooph\EventStoreHttpClient\EndPoint;
-use Prooph\EventStoreHttpClient\Exception\InvalidArgumentException;
-use Prooph\EventStoreHttpClient\Http\EndpointExtensions;
+use Prooph\EventStore\EndPoint;
+use Prooph\EventStore\Exception\InvalidArgumentException;
+use Prooph\EventStore\Projections\ProjectionDetails;
+use Prooph\EventStore\Projections\ProjectionsManager as SyncProjectionsManager;
+use Prooph\EventStore\Transport\Http\EndpointExtensions;
+use Prooph\EventStore\UserCredentials;
 use Prooph\EventStoreHttpClient\Http\HttpClient;
-use Prooph\EventStoreHttpClient\UserCredentials;
 
-class ProjectionsManager
+class ProjectionsManager implements SyncProjectionsManager
 {
     /** @var ProjectionsClient */
     private $client;

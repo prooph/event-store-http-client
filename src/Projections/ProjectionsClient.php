@@ -13,15 +13,16 @@ declare(strict_types=1);
 
 namespace Prooph\EventStoreHttpClient\Projections;
 
-use Prooph\EventStoreHttpClient\EndPoint;
-use Prooph\EventStoreHttpClient\Exception\EventStoreConnectionException;
-use Prooph\EventStoreHttpClient\Exception\ProjectionCommandConflictException;
+use Prooph\EventStore\EndPoint;
+use Prooph\EventStore\Exception\EventStoreConnectionException;
+use Prooph\EventStore\Exception\ProjectionCommandConflictException;
+use Prooph\EventStore\Projections\ProjectionDetails;
+use Prooph\EventStore\Transport\Http\EndpointExtensions;
+use Prooph\EventStore\Transport\Http\HttpStatusCode;
+use Prooph\EventStore\UserCredentials;
+use Prooph\EventStore\Util\Json;
 use Prooph\EventStoreHttpClient\Exception\ProjectionCommandFailedException;
-use Prooph\EventStoreHttpClient\Http\EndpointExtensions;
 use Prooph\EventStoreHttpClient\Http\HttpClient;
-use Prooph\EventStoreHttpClient\Http\HttpStatusCode;
-use Prooph\EventStoreHttpClient\UserCredentials;
-use Prooph\EventStoreHttpClient\Util\Json;
 use Psr\Http\Message\ResponseInterface;
 use Throwable;
 

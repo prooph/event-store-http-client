@@ -15,29 +15,51 @@ namespace Prooph\EventStoreHttpClient\Internal;
 
 use Http\Message\RequestFactory;
 use Http\Message\UriFactory;
-use Prooph\EventStoreHttpClient\AllEventsSlice;
+use Prooph\EventStore\AllEventsSlice;
+use Prooph\EventStore\CatchUpSubscriptionDropped;
+use Prooph\EventStore\CatchUpSubscriptionSettings;
+use Prooph\EventStore\Common\SystemEventTypes;
+use Prooph\EventStore\Common\SystemStreams;
+use Prooph\EventStore\ConditionalWriteResult;
+use Prooph\EventStore\ConnectionSettings as BaseConnectionSettings;
+use Prooph\EventStore\DeleteResult;
+use Prooph\EventStore\EventAppearedOnCatchupSubscription;
+use Prooph\EventStore\EventAppearedOnPersistentSubscription;
+use Prooph\EventStore\EventAppearedOnSubscription;
+use Prooph\EventStore\EventData;
+use Prooph\EventStore\EventReadResult;
+use Prooph\EventStore\EventReadStatus;
+use Prooph\EventStore\EventStoreAllCatchUpSubscription;
+use Prooph\EventStore\EventStoreConnection;
+use Prooph\EventStore\EventStorePersistentSubscription;
+use Prooph\EventStore\EventStoreStreamCatchUpSubscription;
+use Prooph\EventStore\EventStoreSubscription;
+use Prooph\EventStore\EventStoreTransaction;
+use Prooph\EventStore\Exception\InvalidArgumentException;
+use Prooph\EventStore\Exception\InvalidOperationException;
+use Prooph\EventStore\Exception\OutOfRangeException;
+use Prooph\EventStore\Exception\UnexpectedValueException;
+use Prooph\EventStore\ExpectedVersion;
+use Prooph\EventStore\Internal\Consts;
+use Prooph\EventStore\Internal\PersistentSubscriptionCreateResult;
+use Prooph\EventStore\Internal\PersistentSubscriptionDeleteResult;
+use Prooph\EventStore\Internal\PersistentSubscriptionUpdateResult;
+use Prooph\EventStore\LiveProcessingStartedOnCatchUpSubscription;
+use Prooph\EventStore\PersistentSubscriptionDropped;
+use Prooph\EventStore\PersistentSubscriptionSettings;
+use Prooph\EventStore\Position;
+use Prooph\EventStore\RawStreamMetadataResult;
+use Prooph\EventStore\StreamEventsSlice;
+use Prooph\EventStore\StreamMetadata;
+use Prooph\EventStore\StreamMetadataResult;
+use Prooph\EventStore\SubscriptionDropped;
+use Prooph\EventStore\SystemSettings;
+use Prooph\EventStore\UserCredentials;
+use Prooph\EventStore\Util\Json;
+use Prooph\EventStore\WriteResult;
 use Prooph\EventStoreHttpClient\ClientOperations;
-use Prooph\EventStoreHttpClient\Common\SystemEventTypes;
-use Prooph\EventStoreHttpClient\Common\SystemStreams;
 use Prooph\EventStoreHttpClient\ConnectionSettings;
-use Prooph\EventStoreHttpClient\EventData;
-use Prooph\EventStoreHttpClient\EventReadResult;
-use Prooph\EventStoreHttpClient\EventReadStatus;
-use Prooph\EventStoreHttpClient\EventStoreConnection;
-use Prooph\EventStoreHttpClient\Exception\InvalidArgumentException;
-use Prooph\EventStoreHttpClient\Exception\OutOfRangeException;
-use Prooph\EventStoreHttpClient\Exception\UnexpectedValueException;
-use Prooph\EventStoreHttpClient\ExpectedVersion;
 use Prooph\EventStoreHttpClient\Http\HttpClient;
-use Prooph\EventStoreHttpClient\PersistentSubscriptionSettings;
-use Prooph\EventStoreHttpClient\Position;
-use Prooph\EventStoreHttpClient\RawStreamMetadataResult;
-use Prooph\EventStoreHttpClient\StreamEventsSlice;
-use Prooph\EventStoreHttpClient\StreamMetadata;
-use Prooph\EventStoreHttpClient\StreamMetadataResult;
-use Prooph\EventStoreHttpClient\SystemSettings;
-use Prooph\EventStoreHttpClient\UserCredentials;
-use Prooph\EventStoreHttpClient\Util\Json;
 
 /** @internal */
 class EventStoreHttpConnection implements EventStoreConnection
@@ -72,51 +94,65 @@ class EventStoreHttpConnection implements EventStoreConnection
         );
     }
 
-    public function connectionSettings(): ConnectionSettings
+    public function connectionSettings(): BaseConnectionSettings
     {
         return $this->settings;
     }
 
+    /**
+     * Note: The `DeleteResult` will always contain an invalid `Position`.
+     *
+     * @param string $stream
+     * @param int $expectedVersion
+     * @param bool $hardDelete
+     * @param UserCredentials|null $userCredentials
+     *
+     * @return DeleteResult
+     */
     public function deleteStream(
         string $stream,
         int $expectedVersion,
         bool $hardDelete = false,
         ?UserCredentials $userCredentials = null
-    ): void {
+    ): DeleteResult {
         if (empty($stream)) {
             throw new InvalidArgumentException('Stream cannot be empty');
         }
 
-        (new ClientOperations\DeleteStreamOperation())(
+        return (new ClientOperations\DeleteStreamOperation())(
             $this->httpClient,
             $this->requestFactory,
             $this->uriFactory,
             $this->baseUri,
             $stream,
             $expectedVersion,
-            $hardDelete,
+            false,
             $userCredentials ?? $this->settings->defaultUserCredentials(),
             $this->settings->requireMaster()
         );
     }
 
     /**
+     * Note: The `WriteResult` will always contain ExpectedVersion::ANY with an invalid `Position`
+     *
      * @param string $stream
      * @param int $expectedVersion
      * @param EventData[] $events
      * @param null|UserCredentials $userCredentials
+     *
+     * @return WriteResult
      */
     public function appendToStream(
         string $stream,
         int $expectedVersion,
         array $events = [],
         ?UserCredentials $userCredentials = null
-    ): void {
+    ): WriteResult {
         if (empty($stream)) {
             throw new InvalidArgumentException('Stream cannot be empty');
         }
 
-        (new ClientOperations\AppendToStreamOperation())(
+        return (new ClientOperations\AppendToStreamOperation())(
             $this->httpClient,
             $this->requestFactory,
             $this->uriFactory,
@@ -127,6 +163,15 @@ class EventStoreHttpConnection implements EventStoreConnection
             $userCredentials ?? $this->settings->defaultUserCredentials(),
             $this->settings->requireMaster()
         );
+    }
+
+    public function conditionalAppendToStream(
+        string $stream,
+        int $expectedVersion,
+        array $events = [],
+        ?UserCredentials $userCredentials = null
+    ): ConditionalWriteResult {
+        throw new InvalidOperationException('Not implemented on HTTP client');
     }
 
     public function readEvent(
@@ -161,6 +206,47 @@ class EventStoreHttpConnection implements EventStoreConnection
     }
 
     public function readStreamEventsForward(
+        string $stream,
+        int $start,
+        int $count,
+        bool $resolveLinkTos = true,
+        ?UserCredentials $userCredentials = null
+    ): StreamEventsSlice {
+        if (empty($stream)) {
+            throw new InvalidArgumentException('Stream cannot be empty');
+        }
+
+        if ($start < 0) {
+            throw new InvalidArgumentException('Start must be positive');
+        }
+
+        if ($count < 1) {
+            throw new InvalidArgumentException('Count must be positive');
+        }
+
+        if ($count > Consts::MAX_READ_SIZE) {
+            throw new InvalidArgumentException(\sprintf(
+                'Count should be less than %s. For larger reads you should page.',
+                Consts::MAX_READ_SIZE
+            ));
+        }
+
+        return (new ClientOperations\ReadStreamEventsForwardOperation())(
+            $this->httpClient,
+            $this->requestFactory,
+            $this->uriFactory,
+            $this->baseUri,
+            $stream,
+            $start,
+            $count,
+            $resolveLinkTos,
+            0,
+            $userCredentials ?? $this->settings->defaultUserCredentials(),
+            $this->settings->requireMaster()
+        );
+    }
+
+    public function readStreamEventsForwardPolling(
         string $stream,
         int $start,
         int $count,
@@ -298,15 +384,25 @@ class EventStoreHttpConnection implements EventStoreConnection
         );
     }
 
+    /**
+     * Note: The `WriteResult` will always contain ExpectedVersion::ANY with an invalid `Position`
+     *
+     * @param string $stream
+     * @param int $expectedMetaStreamVersion
+     * @param StreamMetadata|null $metadata
+     * @param UserCredentials|null $userCredentials
+     *
+     * @return WriteResult
+     */
     public function setStreamMetadata(
         string $stream,
         int $expectedMetaStreamVersion,
         ?StreamMetadata $metadata = null,
         ?UserCredentials $userCredentials = null
-    ): void {
+    ): WriteResult {
         $string = $metadata ? Json::encode($metadata) : '';
 
-        $this->setRawStreamMetadata(
+        return $this->setRawStreamMetadata(
             $stream,
             $expectedMetaStreamVersion,
             $string,
@@ -314,12 +410,22 @@ class EventStoreHttpConnection implements EventStoreConnection
         );
     }
 
+    /**
+     * Note: The `WriteResult` will always contain ExpectedVersion::ANY with an invalid `Position`
+     *
+     * @param string $stream
+     * @param int $expectedMetaStreamVersion
+     * @param string $metadata
+     * @param UserCredentials|null $userCredentials
+     *
+     * @return WriteResult
+     */
     public function setRawStreamMetadata(
         string $stream,
         int $expectedMetaStreamVersion,
         string $metadata = '',
         ?UserCredentials $userCredentials = null
-    ): void {
+    ): WriteResult {
         if (empty($stream)) {
             throw new InvalidArgumentException('Stream cannot be empty');
         }
@@ -338,7 +444,7 @@ class EventStoreHttpConnection implements EventStoreConnection
             $metadata
         );
 
-        (new ClientOperations\AppendToStreamOperation())(
+        return (new ClientOperations\AppendToStreamOperation())(
             $this->httpClient,
             $this->requestFactory,
             $this->uriFactory,
@@ -429,11 +535,19 @@ class EventStoreHttpConnection implements EventStoreConnection
         }
     }
 
+    /**
+     * Note: The `WriteResult` will always contain ExpectedVersion::ANY with an invalid `Position`
+     *
+     * @param SystemSettings $settings
+     * @param UserCredentials|null $userCredentials
+     *
+     * @return WriteResult
+     */
     public function setSystemSettings(
         SystemSettings $settings,
         ?UserCredentials $userCredentials = null
-    ): void {
-        $this->appendToStream(
+    ): WriteResult {
+        return $this->appendToStream(
             SystemStreams::SETTINGS_STREAM,
             ExpectedVersion::ANY,
             [new EventData(null, SystemEventTypes::SETTINGS, true, Json::encode($settings))],
@@ -518,5 +632,74 @@ class EventStoreHttpConnection implements EventStoreConnection
             $userCredentials ?? $this->settings->defaultUserCredentials(),
             $this->settings->requireMaster()
         );
+    }
+
+    public function startTransaction(
+        string $stream,
+        int $expectedVersion,
+        ?UserCredentials $userCredentials = null
+    ): EventStoreTransaction {
+        throw new InvalidOperationException('Not implemented on HTTP client');
+    }
+
+    public function continueTransaction(
+        int $transactionId,
+        ?UserCredentials $userCredentials = null
+    ): EventStoreTransaction {
+        throw new InvalidOperationException('Not implemented on HTTP client');
+    }
+
+    public function subscribeToStreamAsync(
+        string $stream,
+        bool $resolveLinkTos,
+        EventAppearedOnSubscription $eventAppeared,
+        ?SubscriptionDropped $subscriptionDropped = null,
+        ?UserCredentials $userCredentials = null
+    ): EventStoreSubscription {
+        // TODO: Implement subscribeToStreamAsync() method.
+    }
+
+    public function subscribeToStreamFromAsync(
+        string $stream,
+        ?int $lastCheckpoint,
+        ?CatchUpSubscriptionSettings $settings,
+        EventAppearedOnCatchupSubscription $eventAppeared,
+        ?LiveProcessingStartedOnCatchUpSubscription $liveProcessingStarted = null,
+        ?CatchUpSubscriptionDropped $subscriptionDropped = null,
+        ?UserCredentials $userCredentials = null
+    ): EventStoreStreamCatchUpSubscription {
+        // TODO: Implement subscribeToStreamFromAsync() method.
+    }
+
+    public function subscribeToAllAsync(
+        bool $resolveLinkTos,
+        EventAppearedOnSubscription $eventAppeared,
+        ?SubscriptionDropped $subscriptionDropped = null,
+        ?UserCredentials $userCredentials = null
+    ): EventStoreSubscription {
+        // TODO: Implement subscribeToAllAsync() method.
+    }
+
+    public function subscribeToAllFromAsync(
+        ?Position $lastCheckpoint,
+        ?CatchUpSubscriptionSettings $settings,
+        EventAppearedOnCatchupSubscription $eventAppeared,
+        ?LiveProcessingStartedOnCatchUpSubscription $liveProcessingStarted = null,
+        ?CatchUpSubscriptionDropped $subscriptionDropped = null,
+        ?UserCredentials $userCredentials = null
+    ): EventStoreAllCatchUpSubscription {
+        // TODO: Implement subscribeToAllFromAsync() method.
+    }
+
+    public function connectToPersistentSubscription(
+        string $stream,
+        string $groupName,
+        EventAppearedOnPersistentSubscription $eventAppeared,
+        ?PersistentSubscriptionDropped $subscriptionDropped = null,
+        int $bufferSize = 10,
+        bool $autoAck = true,
+        ?UserCredentials $userCredentials = null
+    ): EventStorePersistentSubscription {
+        // TODO: Implement connectToPersistentSubscription() method.
     }
 }

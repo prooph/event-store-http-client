@@ -13,9 +13,11 @@ declare(strict_types=1);
 
 namespace Prooph\EventStoreHttpClient;
 
-use Prooph\EventStoreHttpClient\Http\EndpointExtensions;
+use Prooph\EventStore\EndPoint;
+use Prooph\EventStore\Transport\Http\EndpointExtensions;
+use Prooph\EventStore\UserCredentials;
 
-class ConnectionSettings
+class ConnectionSettings implements \Prooph\EventStore\ConnectionSettings
 {
     /** @var EndPoint */
     private $endPoint;

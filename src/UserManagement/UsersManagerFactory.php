@@ -17,10 +17,11 @@ use Http\Discovery\HttpClientDiscovery;
 use Http\Discovery\MessageFactoryDiscovery;
 use Http\Message\RequestFactory;
 use Http\Message\ResponseFactory;
-use Prooph\EventStoreHttpClient\EndPoint;
-use Prooph\EventStoreHttpClient\Http\EndpointExtensions;
+use Prooph\EventStore\EndPoint;
+use Prooph\EventStore\Transport\Http\EndpointExtensions;
+use Prooph\EventStore\UserCredentials;
+use Prooph\EventStore\UserManagement\UsersManager as SyncUsersManager;
 use Prooph\EventStoreHttpClient\Http\HttpClient;
-use Prooph\EventStoreHttpClient\UserCredentials;
 use Prooph\EventStoreHttpClient\UserManagement\UsersManager;
 use Psr\Http\Client\ClientInterface;
 
@@ -33,7 +34,7 @@ class UsersManagerFactory
         ClientInterface $client = null,
         RequestFactory $requestFactory = null,
         ResponseFactory $responseFactory = null
-    ): UsersManager {
+    ): SyncUsersManager {
         if (null === $client) {
             $client = HttpClientDiscovery::find();
         }

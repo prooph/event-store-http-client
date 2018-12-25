@@ -13,13 +13,15 @@ declare(strict_types=1);
 
 namespace Prooph\EventStoreHttpClient\PersistentSubscriptions;
 
-use Prooph\EventStoreHttpClient\EndPoint;
-use Prooph\EventStoreHttpClient\Exception\InvalidArgumentException;
-use Prooph\EventStoreHttpClient\Http\EndpointExtensions;
+use Prooph\EventStore\EndPoint;
+use Prooph\EventStore\Exception\InvalidArgumentException;
+use Prooph\EventStore\PersistentSubscriptions\PersistentSubscriptionDetails;
+use Prooph\EventStore\PersistentSubscriptions\PersistentSubscriptionsManager as SyncPersistentSubscriptionsManager;
+use Prooph\EventStore\Transport\Http\EndpointExtensions;
+use Prooph\EventStore\UserCredentials;
 use Prooph\EventStoreHttpClient\Http\HttpClient;
-use Prooph\EventStoreHttpClient\UserCredentials;
 
-class PersistentSubscriptionsManager
+class PersistentSubscriptionsManager implements SyncPersistentSubscriptionsManager
 {
     /** @var PersistentSubscriptionsClient */
     private $client;

@@ -14,9 +14,9 @@ declare(strict_types=1);
 namespace Prooph\EventStoreHttpClient\ClientOperations;
 
 use Http\Message\Authentication\BasicAuth;
-use Prooph\EventStoreHttpClient\Exception\EventStoreConnectionException;
+use Prooph\EventStore\Exception\EventStoreConnectionException;
+use Prooph\EventStore\UserCredentials;
 use Prooph\EventStoreHttpClient\Http\HttpClient;
-use Prooph\EventStoreHttpClient\UserCredentials;
 use Psr\Http\Client\ClientExceptionInterface;
 use Psr\Http\Message\RequestInterface;
 use Psr\Http\Message\ResponseInterface;

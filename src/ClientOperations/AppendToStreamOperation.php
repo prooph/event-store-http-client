@@ -15,15 +15,18 @@ namespace Prooph\EventStoreHttpClient\ClientOperations;
 
 use Http\Message\RequestFactory;
 use Http\Message\UriFactory;
-use Prooph\EventStoreHttpClient\EventData;
-use Prooph\EventStoreHttpClient\Exception\AccessDeniedException;
-use Prooph\EventStoreHttpClient\Exception\RuntimeException;
-use Prooph\EventStoreHttpClient\Exception\StreamDeletedException;
-use Prooph\EventStoreHttpClient\Exception\WrongExpectedVersionException;
+use Prooph\EventStore\EventData;
+use Prooph\EventStore\Exception\AccessDeniedException;
+use Prooph\EventStore\Exception\RuntimeException;
+use Prooph\EventStore\Exception\StreamDeletedException;
+use Prooph\EventStore\Exception\WrongExpectedVersionException;
+use Prooph\EventStore\ExpectedVersion;
+use Prooph\EventStore\Position;
+use Prooph\EventStore\Transport\Http\HttpMethod;
+use Prooph\EventStore\UserCredentials;
+use Prooph\EventStore\Util\Json;
+use Prooph\EventStore\WriteResult;
 use Prooph\EventStoreHttpClient\Http\HttpClient;
-use Prooph\EventStoreHttpClient\Http\HttpMethod;
-use Prooph\EventStoreHttpClient\UserCredentials;
-use Prooph\EventStoreHttpClient\Util\Json;
 
 /** @internal */
 class AppendToStreamOperation extends Operation
@@ -38,7 +41,7 @@ class AppendToStreamOperation extends Operation
         array $events,
         ?UserCredentials $userCredentials,
         bool $requireMaster
-    ): void {
+    ): WriteResult {
         $data = [];
 
         foreach ($events as $event) {
@@ -75,7 +78,7 @@ class AppendToStreamOperation extends Operation
 
         switch ($response->getStatusCode()) {
             case 201:
-                return;
+                return new WriteResult(ExpectedVersion::ANY, Position::invalid());
             case 400:
                 $header = $response->getHeader('ES-CurrentVersion');
 

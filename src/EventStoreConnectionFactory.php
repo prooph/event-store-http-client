@@ -19,6 +19,7 @@ use Http\Discovery\UriFactoryDiscovery;
 use Http\Message\RequestFactory;
 use Http\Message\ResponseFactory;
 use Http\Message\UriFactory;
+use Prooph\EventStore\EventStoreConnection;
 use Prooph\EventStoreHttpClient\Http\HttpClient;
 use Prooph\EventStoreHttpClient\Internal\EventStoreHttpConnection;
 use Psr\Http\Client\ClientInterface;

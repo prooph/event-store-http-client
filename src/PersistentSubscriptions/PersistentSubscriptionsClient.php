@@ -13,14 +13,15 @@ declare(strict_types=1);
 
 namespace Prooph\EventStoreHttpClient\PersistentSubscriptions;
 
-use Prooph\EventStoreHttpClient\EndPoint;
-use Prooph\EventStoreHttpClient\Exception\EventStoreConnectionException;
+use Prooph\EventStore\EndPoint;
+use Prooph\EventStore\Exception\EventStoreConnectionException;
+use Prooph\EventStore\PersistentSubscriptions\PersistentSubscriptionDetails;
+use Prooph\EventStore\Transport\Http\EndpointExtensions;
+use Prooph\EventStore\Transport\Http\HttpStatusCode;
+use Prooph\EventStore\UserCredentials;
+use Prooph\EventStore\Util\Json;
 use Prooph\EventStoreHttpClient\Exception\PersistentSubscriptionCommandFailedException;
-use Prooph\EventStoreHttpClient\Http\EndpointExtensions;
 use Prooph\EventStoreHttpClient\Http\HttpClient;
-use Prooph\EventStoreHttpClient\Http\HttpStatusCode;
-use Prooph\EventStoreHttpClient\UserCredentials;
-use Prooph\EventStoreHttpClient\Util\Json;
 use Throwable;
 
 /** @internal */

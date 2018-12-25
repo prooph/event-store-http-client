@@ -15,18 +15,18 @@ namespace Prooph\EventStoreHttpClient\ClientOperations;
 
 use Http\Message\RequestFactory;
 use Http\Message\UriFactory;
-use Prooph\EventStoreHttpClient\AllEventsSlice;
-use Prooph\EventStoreHttpClient\EventId;
-use Prooph\EventStoreHttpClient\Exception\AccessDeniedException;
+use Prooph\EventStore\AllEventsSlice;
+use Prooph\EventStore\EventId;
+use Prooph\EventStore\Exception\AccessDeniedException;
+use Prooph\EventStore\Position;
+use Prooph\EventStore\ReadDirection;
+use Prooph\EventStore\RecordedEvent;
+use Prooph\EventStore\ResolvedEvent;
+use Prooph\EventStore\Transport\Http\HttpMethod;
+use Prooph\EventStore\UserCredentials;
+use Prooph\EventStore\Util\DateTime;
+use Prooph\EventStore\Util\Json;
 use Prooph\EventStoreHttpClient\Http\HttpClient;
-use Prooph\EventStoreHttpClient\Http\HttpMethod;
-use Prooph\EventStoreHttpClient\Position;
-use Prooph\EventStoreHttpClient\ReadDirection;
-use Prooph\EventStoreHttpClient\RecordedEvent;
-use Prooph\EventStoreHttpClient\ResolvedEvent;
-use Prooph\EventStoreHttpClient\UserCredentials;
-use Prooph\EventStoreHttpClient\Util\DateTime;
-use Prooph\EventStoreHttpClient\Util\Json;
 
 /** @internal */
 class ReadAllEventsBackwardOperation extends Operation

@@ -15,14 +15,14 @@ namespace Prooph\EventStoreHttpClient\ClientOperations;
 
 use Http\Message\RequestFactory;
 use Http\Message\UriFactory;
-use Prooph\EventStoreHttpClient\Exception\AccessDeniedException;
+use Prooph\EventStore\Exception\AccessDeniedException;
+use Prooph\EventStore\Internal\PersistentSubscriptionCreateResult;
+use Prooph\EventStore\Internal\PersistentSubscriptionCreateStatus;
+use Prooph\EventStore\PersistentSubscriptionSettings;
+use Prooph\EventStore\Transport\Http\HttpMethod;
+use Prooph\EventStore\UserCredentials;
+use Prooph\EventStore\Util\Json;
 use Prooph\EventStoreHttpClient\Http\HttpClient;
-use Prooph\EventStoreHttpClient\Http\HttpMethod;
-use Prooph\EventStoreHttpClient\Internal\PersistentSubscriptionCreateResult;
-use Prooph\EventStoreHttpClient\Internal\PersistentSubscriptionCreateStatus;
-use Prooph\EventStoreHttpClient\PersistentSubscriptionSettings;
-use Prooph\EventStoreHttpClient\UserCredentials;
-use Prooph\EventStoreHttpClient\Util\Json;
 
 /** @internal  */
 class CreatePersistentSubscriptionOperation extends Operation

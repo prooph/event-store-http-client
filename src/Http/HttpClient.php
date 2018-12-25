@@ -15,7 +15,8 @@ namespace Prooph\EventStoreHttpClient\Http;
 
 use Http\Message\RequestFactory;
 use Http\Message\ResponseFactory;
-use Prooph\EventStoreHttpClient\UserCredentials;
+use Prooph\EventStore\Transport\Http\HttpMethod;
+use Prooph\EventStore\UserCredentials;
 use Psr\Http\Client\ClientExceptionInterface;
 use Psr\Http\Client\ClientInterface;
 use Psr\Http\Message\RequestInterface;

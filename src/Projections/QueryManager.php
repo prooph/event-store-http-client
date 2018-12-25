@@ -13,10 +13,11 @@ declare(strict_types=1);
 
 namespace Prooph\EventStoreHttpClient\Projections;
 
-use Prooph\EventStoreHttpClient\EndPoint;
-use Prooph\EventStoreHttpClient\Http\EndpointExtensions;
+use Prooph\EventStore\EndPoint;
+use Prooph\EventStore\Projections\QueryManager as SyncQueryManager;
+use Prooph\EventStore\Transport\Http\EndpointExtensions;
+use Prooph\EventStore\UserCredentials;
 use Prooph\EventStoreHttpClient\Http\HttpClient;
-use Prooph\EventStoreHttpClient\UserCredentials;
 
 /**
  * API for executing queries in the Event Store through PHP code.
@@ -24,7 +25,7 @@ use Prooph\EventStoreHttpClient\UserCredentials;
  *
  * Note: Configure the HTTP client with large enough timeout.
  */
-class QueryManager
+class QueryManager implements SyncQueryManager
 {
     /** @var ProjectionsManager */
     private $projectionsManager;

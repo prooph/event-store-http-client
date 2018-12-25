@@ -13,15 +13,20 @@ declare(strict_types=1);
 
 namespace Prooph\EventStoreHttpClient\UserManagement;
 
-use Prooph\EventStoreHttpClient\EndPoint;
-use Prooph\EventStoreHttpClient\Exception\EventStoreConnectionException;
-use Prooph\EventStoreHttpClient\Exception\UserCommandConflictException;
+use Prooph\EventStore\EndPoint;
+use Prooph\EventStore\Exception\EventStoreConnectionException;
+use Prooph\EventStore\Exception\UserCommandConflictException;
+use Prooph\EventStore\Transport\Http\EndpointExtensions;
+use Prooph\EventStore\Transport\Http\HttpStatusCode;
+use Prooph\EventStore\UserCredentials;
+use Prooph\EventStore\UserManagement\ChangePasswordDetails;
+use Prooph\EventStore\UserManagement\ResetPasswordDetails;
+use Prooph\EventStore\UserManagement\UserCreationInformation;
+use Prooph\EventStore\UserManagement\UserDetails;
+use Prooph\EventStore\UserManagement\UserUpdateInformation;
+use Prooph\EventStore\Util\Json;
 use Prooph\EventStoreHttpClient\Exception\UserCommandFailedException;
-use Prooph\EventStoreHttpClient\Http\EndpointExtensions;
 use Prooph\EventStoreHttpClient\Http\HttpClient;
-use Prooph\EventStoreHttpClient\Http\HttpStatusCode;
-use Prooph\EventStoreHttpClient\UserCredentials;
-use Prooph\EventStoreHttpClient\Util\Json;
 use Psr\Http\Message\ResponseInterface;
 use Throwable;
 

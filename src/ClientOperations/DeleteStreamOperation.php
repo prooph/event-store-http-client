@@ -15,10 +15,12 @@ namespace Prooph\EventStoreHttpClient\ClientOperations;
 
 use Http\Message\RequestFactory;
 use Http\Message\UriFactory;
-use Prooph\EventStoreHttpClient\Exception\AccessDeniedException;
+use Prooph\EventStore\DeleteResult;
+use Prooph\EventStore\Exception\AccessDeniedException;
+use Prooph\EventStore\Position;
+use Prooph\EventStore\Transport\Http\HttpMethod;
+use Prooph\EventStore\UserCredentials;
 use Prooph\EventStoreHttpClient\Http\HttpClient;
-use Prooph\EventStoreHttpClient\Http\HttpMethod;
-use Prooph\EventStoreHttpClient\UserCredentials;
 
 /** @internal */
 class DeleteStreamOperation extends Operation
@@ -33,7 +35,7 @@ class DeleteStreamOperation extends Operation
         bool $hardDelete,
         ?UserCredentials $userCredentials,
         bool $requireMaster
-    ): void {
+    ): DeleteResult {
         $headers = [
             'ES-ExpectedVersion' => $expectedVersion,
         ];
@@ -57,7 +59,7 @@ class DeleteStreamOperation extends Operation
         switch ($response->getStatusCode()) {
             case 204:
             case 410:
-                return;
+                return new DeleteResult(Position::invalid());
             case 401:
                 throw AccessDeniedException::toStream($stream);
             default:

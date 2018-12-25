@@ -13,14 +13,20 @@ declare(strict_types=1);
 
 namespace Prooph\EventStoreHttpClient\UserManagement;
 
-use Prooph\EventStoreHttpClient\EndPoint;
-use Prooph\EventStoreHttpClient\Exception\InvalidArgumentException;
+use Prooph\EventStore\EndPoint;
+use Prooph\EventStore\Exception\InvalidArgumentException;
+use Prooph\EventStore\Transport\Http\EndpointExtensions;
+use Prooph\EventStore\UserCredentials;
+use Prooph\EventStore\UserManagement\ChangePasswordDetails;
+use Prooph\EventStore\UserManagement\ResetPasswordDetails;
+use Prooph\EventStore\UserManagement\UserCreationInformation;
+use Prooph\EventStore\UserManagement\UserDetails;
+use Prooph\EventStore\UserManagement\UsersManager as SyncUsersManager;
+use Prooph\EventStore\UserManagement\UserUpdateInformation;
 use Prooph\EventStoreHttpClient\Exception\UserCommandFailedException;
-use Prooph\EventStoreHttpClient\Http\EndpointExtensions;
 use Prooph\EventStoreHttpClient\Http\HttpClient;
-use Prooph\EventStoreHttpClient\UserCredentials;
 
-class UsersManager
+class UsersManager implements SyncUsersManager
 {
     /** @var UsersClient */
     private $client;
