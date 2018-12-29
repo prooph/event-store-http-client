@@ -17,7 +17,7 @@ use Prooph\EventStore\EndPoint;
 use Prooph\EventStore\Transport\Http\EndpointExtensions;
 use Prooph\EventStore\UserCredentials;
 
-class ConnectionSettings implements \Prooph\EventStore\ConnectionSettings
+class ConnectionSettings
 {
     /** @var EndPoint */
     private $endPoint;

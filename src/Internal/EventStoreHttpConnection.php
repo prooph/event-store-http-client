@@ -21,7 +21,6 @@ use Prooph\EventStore\CatchUpSubscriptionSettings;
 use Prooph\EventStore\Common\SystemEventTypes;
 use Prooph\EventStore\Common\SystemStreams;
 use Prooph\EventStore\ConditionalWriteResult;
-use Prooph\EventStore\ConnectionSettings as BaseConnectionSettings;
 use Prooph\EventStore\DeleteResult;
 use Prooph\EventStore\EventAppearedOnCatchupSubscription;
 use Prooph\EventStore\EventAppearedOnPersistentSubscription;
@@ -94,7 +93,7 @@ class EventStoreHttpConnection implements EventStoreConnection
         );
     }
 
-    public function connectionSettings(): BaseConnectionSettings
+    public function connectionSettings(): ConnectionSettings
     {
         return $this->settings;
     }
