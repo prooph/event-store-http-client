@@ -24,7 +24,7 @@ use Prooph\EventStore\SubscriptionDropReason;
 use Prooph\EventStore\UserCredentials;
 use Throwable;
 
-class VolatileEventStoreSubscription extends EventStoreSubscription
+class VolatileEventStoreStreamSubscription extends EventStoreSubscription
 {
     /** @var EventStoreHttpConnection */
     private $connection;
@@ -69,11 +69,12 @@ class VolatileEventStoreSubscription extends EventStoreSubscription
         $this->running = true;
 
         $lastEventNumber = $this->lastEventNumber();
+        $stream = $this->streamId();
 
         while ($this->running) {
             try {
                 $streamEventsSlice = $this->connection->readStreamEventsForwardPolling(
-                    $this->streamId(),
+                    $stream,
                     $lastEventNumber,
                     Consts::CATCH_UP_DEFAULT_READ_BATCH_SIZE,
                     $this->resolveLinkTos,
@@ -121,10 +122,7 @@ class VolatileEventStoreSubscription extends EventStoreSubscription
 
             foreach ($streamEventsSlice->events() as $event) {
                 try {
-                    ($this->eventAppeared)(
-                        $this,
-                        $event
-                    );
+                    ($this->eventAppeared)($this, $event);
                 } catch (Throwable $e) {
                     if ($this->subscriptionDropped) {
                         ($this->subscriptionDropped)(

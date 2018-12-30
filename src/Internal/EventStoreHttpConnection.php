@@ -1210,7 +1210,7 @@ class EventStoreHttpConnection implements EventStoreConnection
             $lastEventNumber = $lastEvent->originalEventNumber();
         }
 
-        return new VolatileEventStoreSubscription(
+        return new VolatileEventStoreStreamSubscription(
             $this,
             $eventAppeared,
             $subscriptionDropped,
@@ -1239,7 +1239,22 @@ class EventStoreHttpConnection implements EventStoreConnection
         ?SubscriptionDropped $subscriptionDropped = null,
         ?UserCredentials $userCredentials = null
     ): EventStoreSubscription {
-        // TODO: Implement subscribeToAllAsync() method.
+        $allEventsSlice = $this->readAllEventsBackward(
+            Position::end(),
+            1,
+            $resolveLinkTos,
+            $userCredentials
+        );
+
+        return new VolatileEventStoreAllSubscription(
+            $this,
+            $eventAppeared,
+            $subscriptionDropped,
+            '',
+            $allEventsSlice->nextPosition(),
+            $resolveLinkTos,
+            $userCredentials
+        );
     }
 
     public function subscribeToAllFrom(
