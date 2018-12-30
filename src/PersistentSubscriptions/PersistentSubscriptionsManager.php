@@ -13,36 +13,46 @@ declare(strict_types=1);
 
 namespace Prooph\EventStoreHttpClient\PersistentSubscriptions;
 
-use Prooph\EventStore\EndPoint;
+use Http\Message\RequestFactory;
+use Prooph\EventStore\Exception\EventStoreConnectionException;
 use Prooph\EventStore\Exception\InvalidArgumentException;
 use Prooph\EventStore\PersistentSubscriptions\PersistentSubscriptionDetails;
 use Prooph\EventStore\PersistentSubscriptions\PersistentSubscriptionsManager as SyncPersistentSubscriptionsManager;
-use Prooph\EventStore\Transport\Http\EndpointExtensions;
+use Prooph\EventStore\Transport\Http\HttpStatusCode;
 use Prooph\EventStore\UserCredentials;
+use Prooph\EventStore\Util\Json;
+use Prooph\EventStoreHttpClient\ConnectionSettings;
+use Prooph\EventStoreHttpClient\Exception\PersistentSubscriptionCommandFailedException;
 use Prooph\EventStoreHttpClient\Http\HttpClient;
+use Psr\Http\Client\ClientInterface;
+use Throwable;
 
 class PersistentSubscriptionsManager implements SyncPersistentSubscriptionsManager
 {
-    /** @var PersistentSubscriptionsClient */
-    private $client;
-    /** @var EndPoint */
-    private $httpEndPoint;
-    /** @var string */
-    private $httpSchema;
-    /** @var UserCredentials|null */
-    private $defaultUserCredentials;
+    /** @var HttpClient */
+    private $httpClient;
+    /** @var ConnectionSettings */
+    private $settings;
 
     /** @internal */
     public function __construct(
-        HttpClient $client,
-        EndPoint $endPoint,
-        string $schema = EndpointExtensions::HTTP_SCHEMA,
-        ?UserCredentials $defaultUserCredentials = null
+        ClientInterface $client,
+        RequestFactory $requestFactory,
+        ?ConnectionSettings $settings = null
     ) {
-        $this->client = new PersistentSubscriptionsClient($client);
-        $this->httpEndPoint = $endPoint;
-        $this->httpSchema = $schema;
-        $this->defaultUserCredentials = $defaultUserCredentials;
+        $this->settings = $settings ?? ConnectionSettings::default();
+
+        $this->httpClient = new HttpClient(
+            $client,
+            $requestFactory,
+            $this->settings,
+            \sprintf(
+                '%s://%s:%s',
+                $this->settings->schema(),
+                $this->settings->endPoint()->host(),
+                $this->settings->endPoint()->port()
+            )
+        );
     }
 
     public function describe(
@@ -58,13 +68,17 @@ class PersistentSubscriptionsManager implements SyncPersistentSubscriptionsManag
             throw new InvalidArgumentException('Subscription name cannot be empty');
         }
 
-        return $this->client->describe(
-            $this->httpEndPoint,
-            $stream,
-            $subscriptionName,
+        $body = $this->sendGet(
+            \sprintf(
+                '/subscriptions/%s/%s/info',
+                \urlencode($stream),
+                \urlencode($subscriptionName)
+            ),
             $userCredentials,
-            $this->httpSchema
+            HttpStatusCode::OK
         );
+
+        return PersistentSubscriptionDetails::fromArray(Json::decode($body));
     }
 
     public function replayParkedMessages(
@@ -80,12 +94,15 @@ class PersistentSubscriptionsManager implements SyncPersistentSubscriptionsManag
             throw new InvalidArgumentException('Subscription name cannot be empty');
         }
 
-        $this->client->replayParkedMessages(
-            $this->httpEndPoint,
-            $stream,
-            $subscriptionName,
+        $this->sendPost(
+            \sprintf(
+                '/subscriptions/%s/%s/replayParked',
+                \urlencode($stream),
+                \urlencode($subscriptionName)
+            ),
+            '',
             $userCredentials,
-            $this->httpSchema
+            HttpStatusCode::OK
         );
     }
 
@@ -100,11 +117,79 @@ class PersistentSubscriptionsManager implements SyncPersistentSubscriptionsManag
             $stream = null;
         }
 
-        return $this->client->list(
-            $this->httpEndPoint,
-            $stream,
+        $uri = '/subscriptions';
+
+        if (null !== $stream) {
+            $uri .= "/$stream";
+        }
+
+        $body = $this->sendGet(
+            $uri,
             $userCredentials,
-            $this->httpSchema
+            HttpStatusCode::OK
         );
+
+        $details = [];
+
+        foreach (Json::decode($body) as $entry) {
+            $details[] = PersistentSubscriptionDetails::fromArray($entry);
+        }
+
+        return $details;
+    }
+
+    private function sendGet(string $url, ?UserCredentials $userCredentials, int $expectedCode): string
+    {
+        $response = $this->httpClient->get(
+            $url,
+            [],
+            $userCredentials,
+            static function (Throwable $e) {
+                throw new EventStoreConnectionException($e->getMessage());
+            }
+        );
+
+        if ($response->getStatusCode() !== $expectedCode) {
+            throw new PersistentSubscriptionCommandFailedException(
+                $response->getStatusCode(),
+                \sprintf(
+                    'Server returned %d (%s) for GET on %s',
+                    $response->getStatusCode(),
+                    $response->getReasonPhrase(),
+                    $url
+                )
+            );
+        }
+
+        return $response->getBody()->getContents();
+    }
+
+    private function sendPost(
+        string $url,
+        string $content,
+        ?UserCredentials $userCredentials,
+        int $expectedCode
+    ): void {
+        $response = $this->httpClient->post(
+            $url,
+            ['Content-Type' => 'application/json'],
+            $content,
+            $userCredentials,
+            static function (Throwable $e) {
+                throw new EventStoreConnectionException($e->getMessage());
+            }
+        );
+
+        if ($response->getStatusCode() !== $expectedCode) {
+            throw new PersistentSubscriptionCommandFailedException(
+                $response->getStatusCode(),
+                \sprintf(
+                    'Server returned %d (%s) for POST on %s',
+                    $response->getStatusCode(),
+                    $response->getReasonPhrase(),
+                    $url
+                )
+            );
+        }
     }
 }

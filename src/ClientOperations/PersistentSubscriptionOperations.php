@@ -24,7 +24,10 @@ use Prooph\EventStore\UserCredentials;
 use Prooph\EventStoreHttpClient\Http\HttpClient;
 use Prooph\EventStoreHttpClient\Internal\PersistentSubscriptionOperations as BasePersistentSubscriptionOperations;
 
-/** @internal */
+/**
+ * @internal
+ * @todo refactor this
+ */
 final class PersistentSubscriptionOperations extends Operation implements BasePersistentSubscriptionOperations
 {
     /** @var HttpClient */

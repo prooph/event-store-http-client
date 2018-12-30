@@ -497,9 +497,8 @@ class ProjectionsClient
     ): ResponseInterface {
         $response = $this->client->put(
             $uri,
-            [],
+            ['Content-Type' => 'application/json'],
             $content,
-            'application/json',
             $userCredentials,
             static function (Throwable $e) {
                 throw new EventStoreConnectionException($e->getMessage());
@@ -529,9 +528,8 @@ class ProjectionsClient
     ): ResponseInterface {
         $response = $this->client->post(
             $uri,
-            [],
+            ['Content-Type' => 'application/json'],
             $content,
-            'application/json',
             $userCredentials,
             static function (Throwable $e) {
                 throw new EventStoreConnectionException($e->getMessage());

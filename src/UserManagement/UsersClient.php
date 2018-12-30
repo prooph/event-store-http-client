@@ -292,9 +292,8 @@ class UsersClient
     ): void {
         $response = $this->client->put(
             $uri,
-            [],
+            ['Content-Type' => 'application/json'],
             $content,
-            'application/json',
             $userCredentials,
             static function (Throwable $e) {
                 throw new EventStoreConnectionException($e->getMessage());
@@ -322,9 +321,8 @@ class UsersClient
     ): void {
         $response = $this->client->put(
             $uri,
-            [],
+            ['Content-Type' => 'application/json'],
             $content,
-            'application/json',
             $userCredentials,
             static function (Throwable $e) {
                 throw new EventStoreConnectionException($e->getMessage());

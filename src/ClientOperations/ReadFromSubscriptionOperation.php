@@ -23,7 +23,10 @@ use Prooph\EventStore\UserCredentials;
 use Prooph\EventStore\Util\DateTime;
 use Prooph\EventStoreHttpClient\Http\HttpClient;
 
-/** @internal */
+/**
+ * @internal
+ * @todo refactor this
+ */
 class ReadFromSubscriptionOperation extends Operation
 {
     /**

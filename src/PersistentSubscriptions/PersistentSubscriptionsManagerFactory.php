@@ -16,43 +16,21 @@ namespace Prooph\EventStoreHttpClient\PersistentSubscriptions;
 use Http\Discovery\HttpClientDiscovery;
 use Http\Discovery\MessageFactoryDiscovery;
 use Http\Message\RequestFactory;
-use Http\Message\ResponseFactory;
-use Prooph\EventStore\EndPoint;
 use Prooph\EventStore\PersistentSubscriptions\PersistentSubscriptionsManager as SyncPersistentSubscriptionsManager;
-use Prooph\EventStore\Transport\Http\EndpointExtensions;
-use Prooph\EventStore\UserCredentials;
-use Prooph\EventStoreHttpClient\Http\HttpClient;
+use Prooph\EventStoreHttpClient\ConnectionSettings;
 use Psr\Http\Client\ClientInterface;
 
 class PersistentSubscriptionsManagerFactory
 {
     public static function create(
-        EndPoint $endPoint,
-        string $schema = EndpointExtensions::HTTP_SCHEMA,
-        ?UserCredentials $defaultUserCredentials = null,
         ClientInterface $client = null,
         RequestFactory $requestFactory = null,
-        ResponseFactory $responseFactory = null
+        ConnectionSettings $settings = null
     ): SyncPersistentSubscriptionsManager {
-        if (null === $client) {
-            $client = HttpClientDiscovery::find();
-        }
-
-        if (null === $requestFactory) {
-            $requestFactory = MessageFactoryDiscovery::find();
-        }
-
-        if (null === $responseFactory) {
-            $responseFactory = MessageFactoryDiscovery::find();
-        }
-
-        $httpClient = new HttpClient($client, $requestFactory, $responseFactory);
-
         return new PersistentSubscriptionsManager(
-            $httpClient,
-            $endPoint,
-            $schema,
-            $defaultUserCredentials
+            $client ?? HttpClientDiscovery::find(),
+            $requestFactory ?? MessageFactoryDiscovery::find(),
+            $settings ?? ConnectionSettings::default()
         );
     }
 }
