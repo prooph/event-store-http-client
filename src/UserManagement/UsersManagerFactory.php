@@ -16,44 +16,22 @@ namespace Prooph\EventStoreHttpClient\Projections;
 use Http\Discovery\HttpClientDiscovery;
 use Http\Discovery\MessageFactoryDiscovery;
 use Http\Message\RequestFactory;
-use Http\Message\ResponseFactory;
-use Prooph\EventStore\EndPoint;
-use Prooph\EventStore\Transport\Http\EndpointExtensions;
-use Prooph\EventStore\UserCredentials;
 use Prooph\EventStore\UserManagement\UsersManager as SyncUsersManager;
-use Prooph\EventStoreHttpClient\Http\HttpClient;
+use Prooph\EventStoreHttpClient\ConnectionSettings;
 use Prooph\EventStoreHttpClient\UserManagement\UsersManager;
 use Psr\Http\Client\ClientInterface;
 
 class UsersManagerFactory
 {
     public static function create(
-        EndPoint $endPoint,
-        string $schema = EndpointExtensions::HTTP_SCHEMA,
-        ?UserCredentials $defaultUserCredentials = null,
         ClientInterface $client = null,
         RequestFactory $requestFactory = null,
-        ResponseFactory $responseFactory = null
+        ConnectionSettings $settings = null
     ): SyncUsersManager {
-        if (null === $client) {
-            $client = HttpClientDiscovery::find();
-        }
-
-        if (null === $requestFactory) {
-            $requestFactory = MessageFactoryDiscovery::find();
-        }
-
-        if (null === $responseFactory) {
-            $responseFactory = MessageFactoryDiscovery::find();
-        }
-
-        $httpClient = new HttpClient($client, $requestFactory, $responseFactory);
-
         return new UsersManager(
-            $httpClient,
-            $endPoint,
-            $schema,
-            $defaultUserCredentials
+            $client ?? HttpClientDiscovery::find(),
+            $requestFactory ?? MessageFactoryDiscovery::find(),
+            $settings ?? ConnectionSettings::default()
         );
     }
 }

@@ -13,9 +13,11 @@ declare(strict_types=1);
 
 namespace Prooph\EventStoreHttpClient\UserManagement;
 
-use Prooph\EventStore\EndPoint;
+use Http\Message\RequestFactory;
+use Prooph\EventStore\Exception\EventStoreConnectionException;
 use Prooph\EventStore\Exception\InvalidArgumentException;
-use Prooph\EventStore\Transport\Http\EndpointExtensions;
+use Prooph\EventStore\Exception\UserCommandConflictException;
+use Prooph\EventStore\Transport\Http\HttpStatusCode;
 use Prooph\EventStore\UserCredentials;
 use Prooph\EventStore\UserManagement\ChangePasswordDetails;
 use Prooph\EventStore\UserManagement\ResetPasswordDetails;
@@ -23,30 +25,40 @@ use Prooph\EventStore\UserManagement\UserCreationInformation;
 use Prooph\EventStore\UserManagement\UserDetails;
 use Prooph\EventStore\UserManagement\UsersManager as SyncUsersManager;
 use Prooph\EventStore\UserManagement\UserUpdateInformation;
+use Prooph\EventStore\Util\Json;
+use Prooph\EventStoreHttpClient\ConnectionSettings;
 use Prooph\EventStoreHttpClient\Exception\UserCommandFailedException;
 use Prooph\EventStoreHttpClient\Http\HttpClient;
+use Psr\Http\Client\ClientInterface;
+use Psr\Http\Message\ResponseInterface;
+use Throwable;
 
 class UsersManager implements SyncUsersManager
 {
-    /** @var UsersClient */
-    private $client;
-    /** @var EndPoint */
-    private $endPoint;
-    /** @var string */
-    private $schema;
-    /** @var UserCredentials|null */
-    private $defaultUserCredentials;
+    /** @var HttpClient */
+    private $httpClient;
+    /** @var ConnectionSettings */
+    private $settings;
 
+    /** @internal */
     public function __construct(
-        HttpClient $client,
-        EndPoint $endPoint,
-        string $schema = EndpointExtensions::HTTP_SCHEMA,
-        ?UserCredentials $defaultUserCredentials = null
+        ClientInterface $client,
+        RequestFactory $requestFactory,
+        ConnectionSettings $settings
     ) {
-        $this->client = new UsersClient($client);
-        $this->endPoint = $endPoint;
-        $this->schema = $schema;
-        $this->defaultUserCredentials = $defaultUserCredentials;
+        $this->settings = $settings;
+
+        $this->httpClient = new HttpClient(
+            $client,
+            $requestFactory,
+            $settings,
+            \sprintf(
+                '%s://%s:%s',
+                $settings->schema(),
+                $settings->endPoint()->host(),
+                $settings->endPoint()->port()
+            )
+        );
     }
 
     public function enable(string $login, ?UserCredentials $userCredentials = null): void
@@ -55,9 +67,15 @@ class UsersManager implements SyncUsersManager
             throw new InvalidArgumentException('Login cannot be empty');
         }
 
-        $userCredentials = $userCredentials ?? $this->defaultUserCredentials;
-
-        $this->client->enable($this->endPoint, $login, $userCredentials, $this->schema);
+        $this->sendPost(
+            \sprintf(
+                '/users/%s/command/enable',
+                \urlencode($login)
+            ),
+            '',
+            $userCredentials,
+            HttpStatusCode::OK
+        );
     }
 
     public function disable(string $login, ?UserCredentials $userCredentials = null): void
@@ -66,9 +84,15 @@ class UsersManager implements SyncUsersManager
             throw new InvalidArgumentException('Login cannot be empty');
         }
 
-        $userCredentials = $userCredentials ?? $this->defaultUserCredentials;
-
-        $this->client->disable($this->endPoint, $login, $userCredentials, $this->schema);
+        $this->sendPost(
+            \sprintf(
+                '/users/%s/command/disable',
+                \urlencode($login)
+            ),
+            '',
+            $userCredentials,
+            HttpStatusCode::OK
+        );
     }
 
     /** @throws UserCommandFailedException */
@@ -78,24 +102,47 @@ class UsersManager implements SyncUsersManager
             throw new InvalidArgumentException('Login cannot be empty');
         }
 
-        $userCredentials = $userCredentials ?? $this->defaultUserCredentials;
-
-        $this->client->delete($this->endPoint, $login, $userCredentials, $this->schema);
+        $this->sendDelete(
+            \sprintf(
+                '/users/%s',
+                \urlencode($login)
+            ),
+            $userCredentials,
+            HttpStatusCode::OK
+        );
     }
 
     /** @return UserDetails[] */
     public function listAll(?UserCredentials $userCredentials = null): array
     {
-        $userCredentials = $userCredentials ?? $this->defaultUserCredentials;
+        $response = $this->sendGet(
+            '/users/',
+            $userCredentials,
+            HttpStatusCode::OK
+        );
 
-        return $this->client->listAll($this->endPoint, $userCredentials, $this->schema);
+        $data = Json::decode($response->getBody()->getContents());
+
+        $userDetails = [];
+
+        foreach ($data['data'] as $entry) {
+            $userDetails[] = UserDetails::fromArray($entry);
+        }
+
+        return $userDetails;
     }
 
     public function getCurrentUser(?UserCredentials $userCredentials = null): UserDetails
     {
-        $userCredentials = $userCredentials ?? $this->defaultUserCredentials;
+        $response = $this->sendGet(
+            '/users/$current',
+            $userCredentials,
+            HttpStatusCode::OK
+        );
 
-        return $this->client->getCurrentUser($this->endPoint, $userCredentials, $this->schema);
+        $data = Json::decode($response->getBody()->getContents());
+
+        return UserDetails::fromArray($data['data']);
     }
 
     public function getUser(string $login, ?UserCredentials $userCredentials = null): UserDetails
@@ -104,9 +151,18 @@ class UsersManager implements SyncUsersManager
             throw new InvalidArgumentException('Login cannot be empty');
         }
 
-        $userCredentials = $userCredentials ?? $this->defaultUserCredentials;
+        $response = $this->sendGet(
+            \sprintf(
+                '/users/%s',
+                \urlencode($login)
+            ),
+            $userCredentials,
+            HttpStatusCode::OK
+        );
 
-        return $this->client->getUser($this->endPoint, $login, $userCredentials, $this->schema);
+        $data = Json::decode($response->getBody()->getContents());
+
+        return UserDetails::fromArray($data['data']);
     }
 
     /**
@@ -142,18 +198,16 @@ class UsersManager implements SyncUsersManager
             }
         }
 
-        $userCredentials = $userCredentials ?? $this->defaultUserCredentials;
-
-        $this->client->createUser(
-            $this->endPoint,
-            new UserCreationInformation(
+        $this->sendPost(
+            '/users/',
+            Json::encode(new UserCreationInformation(
                 $login,
                 $fullName,
                 $groups,
                 $password
-            ),
+            )),
             $userCredentials,
-            $this->schema
+            HttpStatusCode::CREATED
         );
     }
 
@@ -184,14 +238,14 @@ class UsersManager implements SyncUsersManager
             }
         }
 
-        $userCredentials = $userCredentials ?? $this->defaultUserCredentials;
-
-        $this->client->updateUser(
-            $this->endPoint,
-            $login,
-            new UserUpdateInformation($fullName, $groups),
+        $this->sendPut(
+            \sprintf(
+                '/users/%s',
+                \urlencode($login)
+            ),
+            Json::encode(new UserUpdateInformation($fullName, $groups)),
             $userCredentials,
-            $this->schema
+            HttpStatusCode::OK
         );
     }
 
@@ -213,14 +267,14 @@ class UsersManager implements SyncUsersManager
             throw new InvalidArgumentException('New password cannot be empty');
         }
 
-        $userCredentials = $userCredentials ?? $this->defaultUserCredentials;
-
-        $this->client->changePassword(
-            $this->endPoint,
-            $login,
-            new ChangePasswordDetails($oldPassword, $newPassword),
+        $this->sendPost(
+            \sprintf(
+                '/users/%s/command/change-password',
+                \urlencode($login)
+            ),
+            Json::encode(new ChangePasswordDetails($oldPassword, $newPassword)),
             $userCredentials,
-            $this->schema
+            HttpStatusCode::OK
         );
     }
 
@@ -237,14 +291,120 @@ class UsersManager implements SyncUsersManager
             throw new InvalidArgumentException('New password cannot be empty');
         }
 
-        $userCredentials = $userCredentials ?? $this->defaultUserCredentials;
-
-        $this->client->resetPassword(
-            $this->endPoint,
-            $login,
-            new ResetPasswordDetails($newPassword),
+        $this->sendPost(
+            \sprintf(
+                '/users/%s/command/reset-password',
+                \urlencode($login)
+            ),
+            Json::encode(new ResetPasswordDetails($newPassword)),
             $userCredentials,
-            $this->schema
+            HttpStatusCode::OK
         );
+    }
+
+    private function sendGet(
+        string $uri,
+        ?UserCredentials $userCredentials,
+        int $expectedCode
+    ): ResponseInterface {
+        $response = $this->httpClient->get($uri, [], $userCredentials, static function (Throwable $e) {
+            throw new EventStoreConnectionException($e->getMessage());
+        });
+
+        if ($response->getStatusCode() !== $expectedCode) {
+            throw new UserCommandFailedException(
+                $response->getStatusCode(),
+                \sprintf(
+                    'Server returned %d (%s) for GET on %s',
+                    $response->getStatusCode(),
+                    $response->getReasonPhrase(),
+                    $uri
+                )
+            );
+        }
+    }
+
+    private function sendDelete(
+        string $uri,
+        ?UserCredentials $userCredentials,
+        int $expectedCode
+    ): void {
+        $response = $this->httpClient->delete($uri, [], $userCredentials, static function (Throwable $e) {
+            throw new EventStoreConnectionException($e->getMessage());
+        });
+
+        if ($response->getStatusCode() !== $expectedCode) {
+            throw new UserCommandFailedException(
+                $response->getStatusCode(),
+                \sprintf(
+                    'Server returned %d (%s) for DELETE on %s',
+                    $response->getStatusCode(),
+                    $response->getReasonPhrase(),
+                    $uri
+                )
+            );
+        }
+    }
+
+    private function sendPut(
+        string $uri,
+        string $content,
+        ?UserCredentials $userCredentials,
+        int $expectedCode
+    ): void {
+        $response = $this->httpClient->put(
+            $uri,
+            ['Content-Type' => 'application/json'],
+            $content,
+            $userCredentials,
+            static function (Throwable $e) {
+                throw new EventStoreConnectionException($e->getMessage());
+            }
+        );
+
+        if ($response->getStatusCode() !== $expectedCode) {
+            throw new UserCommandFailedException(
+                $response->getStatusCode(),
+                \sprintf(
+                    'Server returned %d (%s) for PUT on %s',
+                    $response->getStatusCode(),
+                    $response->getReasonPhrase(),
+                    $uri
+                )
+            );
+        }
+    }
+
+    private function sendPost(
+        string $uri,
+        string $content,
+        ?UserCredentials $userCredentials,
+        int $expectedCode
+    ): void {
+        $response = $this->httpClient->post(
+            $uri,
+            ['Content-Type' => 'application/json'],
+            $content,
+            $userCredentials,
+            static function (Throwable $e) {
+                throw new EventStoreConnectionException($e->getMessage());
+            }
+        );
+
+        if ($response->getStatusCode() === HttpStatusCode::CONFLICT) {
+            throw new UserCommandConflictException($response->getStatusCode(), $response->getReasonPhrase());
+        }
+
+        if ($response->getStatusCode() !== $expectedCode) {
+            throw new UserCommandFailedException(
+                $response->getStatusCode(),
+                \sprintf(
+                    'Server returned %d (%s) for POST on %s',
+                    $response->getStatusCode(),
+                    $response->getReasonPhrase(),
+                    $uri
+                )
+            );
+        }
     }
 }

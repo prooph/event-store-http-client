@@ -89,7 +89,7 @@ class EventStoreHttpConnection implements EventStoreConnection
     public function __construct(
         ClientInterface $httpClient,
         RequestFactory $requestFactory,
-        ConnectionSettings $settings = null
+        ConnectionSettings $settings
     ) {
         $this->baseUri = \sprintf(
             '%s://%s:%s',
@@ -98,12 +98,12 @@ class EventStoreHttpConnection implements EventStoreConnection
             $this->settings->endPoint()->port()
         );
 
-        $this->settings = $settings ?? ConnectionSettings::default();
+        $this->settings = $settings;
 
         $this->httpClient = new HttpClient(
             $httpClient,
             $requestFactory,
-            $this->settings,
+            $settings,
             $this->baseUri
         );
 

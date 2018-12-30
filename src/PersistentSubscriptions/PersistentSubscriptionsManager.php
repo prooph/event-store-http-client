@@ -38,19 +38,19 @@ class PersistentSubscriptionsManager implements SyncPersistentSubscriptionsManag
     public function __construct(
         ClientInterface $client,
         RequestFactory $requestFactory,
-        ?ConnectionSettings $settings = null
+        ConnectionSettings $settings
     ) {
-        $this->settings = $settings ?? ConnectionSettings::default();
+        $this->settings = $settings;
 
         $this->httpClient = new HttpClient(
             $client,
             $requestFactory,
-            $this->settings,
+            $settings,
             \sprintf(
                 '%s://%s:%s',
-                $this->settings->schema(),
-                $this->settings->endPoint()->host(),
-                $this->settings->endPoint()->port()
+                $settings->schema(),
+                $settings->endPoint()->host(),
+                $settings->endPoint()->port()
             )
         );
     }

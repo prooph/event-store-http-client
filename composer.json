@@ -13,9 +13,7 @@
     "EventStore",
     "EventSourcing",
     "DDD",
-    "prooph",
-    "Amp",
-    "Async"
+    "prooph"
   ],
   "prefer-stable": true,
   "require": {
