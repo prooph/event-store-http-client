@@ -16,42 +16,21 @@ namespace Prooph\EventStoreHttpClient\Projections;
 use Http\Discovery\HttpClientDiscovery;
 use Http\Discovery\MessageFactoryDiscovery;
 use Http\Message\RequestFactory;
-use Http\Message\ResponseFactory;
-use Prooph\EventStoreHttpClient\EndPoint;
-use Prooph\EventStoreHttpClient\Http\EndpointExtensions;
-use Prooph\EventStoreHttpClient\Http\HttpClient;
-use Prooph\EventStoreHttpClient\UserCredentials;
+use Prooph\EventStore\Projections\ProjectionsManager as SyncProjectionsManager;
+use Prooph\EventStoreHttpClient\ConnectionSettings;
 use Psr\Http\Client\ClientInterface;
 
 class ProjectionsManagerFactory
 {
     public static function create(
-        EndPoint $endPoint,
-        string $schema = EndpointExtensions::HTTP_SCHEMA,
-        ?UserCredentials $defaultUserCredentials = null,
         ClientInterface $client = null,
         RequestFactory $requestFactory = null,
-        ResponseFactory $responseFactory = null
-    ): ProjectionsManager {
-        if (null === $client) {
-            $client = HttpClientDiscovery::find();
-        }
-
-        if (null === $requestFactory) {
-            $requestFactory = MessageFactoryDiscovery::find();
-        }
-
-        if (null === $responseFactory) {
-            $responseFactory = MessageFactoryDiscovery::find();
-        }
-
-        $httpClient = new HttpClient($client, $requestFactory, $responseFactory);
-
+        ConnectionSettings $settings = null
+    ): SyncProjectionsManager {
         return new ProjectionsManager(
-            $httpClient,
-            $endPoint,
-            $schema,
-            $defaultUserCredentials
+            $client ?? HttpClientDiscovery::find(),
+            $requestFactory ?? MessageFactoryDiscovery::find(),
+            $settings ?? ConnectionSettings::default()
         );
     }
 }

@@ -13,10 +13,11 @@ declare(strict_types=1);
 
 namespace Prooph\EventStoreHttpClient\Projections;
 
-use Prooph\EventStoreHttpClient\EndPoint;
-use Prooph\EventStoreHttpClient\Http\EndpointExtensions;
-use Prooph\EventStoreHttpClient\Http\HttpClient;
-use Prooph\EventStoreHttpClient\UserCredentials;
+use Http\Message\RequestFactory;
+use Prooph\EventStore\Projections\QueryManager as SyncQueryManager;
+use Prooph\EventStore\UserCredentials;
+use Prooph\EventStoreHttpClient\ConnectionSettings;
+use Psr\Http\Client\ClientInterface;
 
 /**
  * API for executing queries in the Event Store through PHP code.
@@ -24,23 +25,21 @@ use Prooph\EventStoreHttpClient\UserCredentials;
  *
  * Note: Configure the HTTP client with large enough timeout.
  */
-class QueryManager
+class QueryManager implements SyncQueryManager
 {
     /** @var ProjectionsManager */
     private $projectionsManager;
 
-    /** @internal  */
+    /** @internal */
     public function __construct(
-        HttpClient $client,
-        EndPoint $endPoint,
-        string $schema = EndpointExtensions::HTTP_SCHEMA,
-        ?UserCredentials $defaultUserCredentials = null
+        ClientInterface $client,
+        RequestFactory $requestFactory,
+        ConnectionSettings $settings
     ) {
         $this->projectionsManager = new ProjectionsManager(
             $client,
-            $endPoint,
-            $schema,
-            $defaultUserCredentials
+            $requestFactory,
+            $settings
         );
     }
 
@@ -55,6 +54,7 @@ class QueryManager
      * @param string $query The source code for the query
      * @param int $initialPollingDelay Initial time to wait between polling for projection status
      * @param int $maximumPollingDelay Maximum time to wait between polling for projection status
+     * @param string $type The type to use, defaults to JS
      * @param UserCredentials|null $userCredentials Credentials for a user with permission to create a query
      *
      * @return string
@@ -64,11 +64,13 @@ class QueryManager
         string $query,
         int $initialPollingDelay,
         int $maximumPollingDelay,
+        string $type = 'JS',
         ?UserCredentials $userCredentials = null
     ): string {
         $this->projectionsManager->createTransient(
             $name,
             $query,
+            $type,
             $userCredentials
         );
 

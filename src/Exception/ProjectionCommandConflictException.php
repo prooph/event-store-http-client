@@ -13,6 +13,22 @@ declare(strict_types=1);
 
 namespace Prooph\EventStoreHttpClient\Exception;
 
-class ProjectionCommandConflictException extends ProjectionCommandFailedException
+use Prooph\EventStore\Exception\ProjectionCommandConflictException as BaseException;
+
+class ProjectionCommandConflictException extends BaseException
 {
+    /** @var int */
+    private $httpStatusCode;
+
+    public function __construct(int $httpStatusCode, string $message)
+    {
+        $this->httpStatusCode = $httpStatusCode;
+
+        parent::__construct($message);
+    }
+
+    public function httpStatusCode(): int
+    {
+        return $this->httpStatusCode;
+    }
 }

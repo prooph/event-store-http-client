@@ -14,9 +14,9 @@ declare(strict_types=1);
 namespace Prooph\EventStoreHttpClient\Http;
 
 use Http\Message\RequestFactory;
-use Http\Message\ResponseFactory;
-use Prooph\EventStoreHttpClient\UserCredentials;
-use Psr\Http\Client\ClientExceptionInterface;
+use Prooph\EventStore\Transport\Http\HttpMethod;
+use Prooph\EventStore\UserCredentials;
+use Prooph\EventStoreHttpClient\ConnectionSettings;
 use Psr\Http\Client\ClientInterface;
 use Psr\Http\Message\RequestInterface;
 use Psr\Http\Message\ResponseInterface;
@@ -29,25 +29,21 @@ class HttpClient
     private $client;
     /** @var RequestFactory */
     private $requestFactory;
-    /** @var ResponseFactory */
-    private $responseFactory;
+    /** @var ConnectionSettings */
+    private $settings;
+    /** @var string */
+    private $baseUri;
 
     public function __construct(
         ClientInterface $client,
         RequestFactory $requestFactory,
-        ResponseFactory $responseFactory
+        ConnectionSettings $settings,
+        string $baseUri
     ) {
         $this->client = $client;
         $this->requestFactory = $requestFactory;
-        $this->responseFactory = $responseFactory;
-    }
-
-    /**
-     * @throws ClientExceptionInterface
-     */
-    public function sendRequest(RequestInterface $request): ResponseInterface
-    {
-        return $this->client->sendRequest($request);
+        $this->settings = $settings;
+        $this->baseUri = $baseUri;
     }
 
     public function get(
@@ -58,9 +54,9 @@ class HttpClient
     ): ResponseInterface {
         return $this->receive(
             HttpMethod::GET,
-            $uri,
+            $this->baseUri . $uri,
             $headers,
-            $userCredentials,
+            $userCredentials ?? $this->settings->defaultUserCredentials(),
             $onException
         );
     }
@@ -69,17 +65,15 @@ class HttpClient
         string $uri,
         array $headers,
         string $body,
-        string $contentType,
         ?UserCredentials $userCredentials,
         callable $onException
     ): ResponseInterface {
         return $this->send(
             HttpMethod::POST,
-            $uri,
+            $this->baseUri . $uri,
             $headers,
             $body,
-            $contentType,
-            $userCredentials,
+            $userCredentials ?? $this->settings->defaultUserCredentials(),
             $onException
         );
     }
@@ -92,9 +86,9 @@ class HttpClient
     ): ResponseInterface {
         return $this->receive(
             HttpMethod::DELETE,
-            $uri,
+            $this->baseUri . $uri,
             $headers,
-            $userCredentials,
+            $userCredentials ?? $this->settings->defaultUserCredentials(),
             $onException
         );
     }
@@ -103,17 +97,15 @@ class HttpClient
         string $url,
         array $headers,
         string $body,
-        string $contentType,
         ?UserCredentials $userCredentials,
         callable $onException
     ): ResponseInterface {
         return $this->send(
             HttpMethod::PUT,
-            $url,
+            $this->baseUri . $url,
             $headers,
             $body,
-            $contentType,
-            $userCredentials,
+            $userCredentials ?? $this->settings->defaultUserCredentials(),
             $onException
         );
     }
@@ -143,7 +135,6 @@ class HttpClient
         string $uri,
         array $headers,
         string $body,
-        string $contentType,
         ?UserCredentials $userCredentials,
         callable $onException
     ): ResponseInterface {
@@ -153,7 +144,6 @@ class HttpClient
             $request = $this->addAuthenticationHeader($request, $userCredentials);
         }
 
-        $request = $request->withHeader('Content-Type', $contentType);
         $request = $request->withHeader('Content-Length', (string) \strlen($body));
 
         try {

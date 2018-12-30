@@ -15,47 +15,21 @@ namespace Prooph\EventStoreHttpClient;
 
 use Http\Discovery\HttpClientDiscovery;
 use Http\Discovery\MessageFactoryDiscovery;
-use Http\Discovery\UriFactoryDiscovery;
 use Http\Message\RequestFactory;
-use Http\Message\ResponseFactory;
-use Http\Message\UriFactory;
-use Prooph\EventStoreHttpClient\Http\HttpClient;
+use Prooph\EventStore\EventStoreConnection;
 use Prooph\EventStoreHttpClient\Internal\EventStoreHttpConnection;
 use Psr\Http\Client\ClientInterface;
 
 class EventStoreConnectionFactory
 {
     public static function create(
-        ConnectionSettings $settings = null,
         ClientInterface $client = null,
         RequestFactory $requestFactory = null,
-        ResponseFactory $responseFactory = null,
-        UriFactory $uriFactory = null
+        ConnectionSettings $settings = null
     ): EventStoreConnection {
-        if (null === $settings) {
-            $settings = ConnectionSettings::default();
-        }
-
-        if (null === $client) {
-            $client = HttpClientDiscovery::find();
-        }
-
-        if (null === $requestFactory) {
-            $requestFactory = MessageFactoryDiscovery::find();
-        }
-
-        if (null === $responseFactory) {
-            $responseFactory = MessageFactoryDiscovery::find();
-        }
-
-        if (null === $uriFactory) {
-            $uriFactory = UriFactoryDiscovery::find();
-        }
-
         return new EventStoreHttpConnection(
-            new HttpClient($client, $requestFactory, $responseFactory),
-            $requestFactory,
-            $uriFactory,
+            $client ?? HttpClientDiscovery::find(),
+            $requestFactory ?? MessageFactoryDiscovery::find(),
             $settings ?? ConnectionSettings::default()
         );
     }

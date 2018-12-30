@@ -15,16 +15,19 @@ namespace Prooph\EventStoreHttpClient\ClientOperations;
 
 use Http\Message\RequestFactory;
 use Http\Message\UriFactory;
-use Prooph\EventStoreHttpClient\EventId;
-use Prooph\EventStoreHttpClient\Exception\AccessDeniedException;
+use Prooph\EventStore\EventId;
+use Prooph\EventStore\Exception\AccessDeniedException;
+use Prooph\EventStore\PersistentSubscriptionNakEventAction;
+use Prooph\EventStore\RecordedEvent;
+use Prooph\EventStore\Transport\Http\HttpMethod;
+use Prooph\EventStore\UserCredentials;
 use Prooph\EventStoreHttpClient\Http\HttpClient;
-use Prooph\EventStoreHttpClient\Http\HttpMethod;
 use Prooph\EventStoreHttpClient\Internal\PersistentSubscriptionOperations as BasePersistentSubscriptionOperations;
-use Prooph\EventStoreHttpClient\PersistentSubscriptionNakEventAction;
-use Prooph\EventStoreHttpClient\RecordedEvent;
-use Prooph\EventStoreHttpClient\UserCredentials;
 
-/** @internal */
+/**
+ * @internal
+ * @todo refactor this
+ */
 final class PersistentSubscriptionOperations extends Operation implements BasePersistentSubscriptionOperations
 {
     /** @var HttpClient */
