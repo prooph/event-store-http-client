@@ -2,8 +2,8 @@
 
 /**
  * This file is part of `prooph/event-store-http-client`.
- * (c) 2018-2018 prooph software GmbH <contact@prooph.de>
- * (c) 2018-2018 Sascha-Oliver Prolic <saschaprolic@googlemail.com>
+ * (c) 2018-2019 prooph software GmbH <contact@prooph.de>
+ * (c) 2018-2019 Sascha-Oliver Prolic <saschaprolic@googlemail.com>
  *
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
@@ -1230,7 +1230,24 @@ class EventStoreHttpConnection implements EventStoreConnection
         ?CatchUpSubscriptionDropped $subscriptionDropped = null,
         ?UserCredentials $userCredentials = null
     ): EventStoreStreamCatchUpSubscription {
-        // TODO: Implement subscribeToStreamFromAsync() method.
+        if (empty($stream)) {
+            throw new InvalidArgumentException('Stream cannot be empty');
+        }
+
+        if (null === $settings) {
+            $settings = CatchUpSubscriptionSettings::default();
+        }
+
+        return new EventStoreHttpStreamCatchUpSubscription(
+            $this,
+            $stream,
+            $lastCheckpoint,
+            $userCredentials,
+            $eventAppeared,
+            $liveProcessingStarted,
+            $subscriptionDropped,
+            $settings
+        );
     }
 
     public function subscribeToAll(
@@ -1265,7 +1282,19 @@ class EventStoreHttpConnection implements EventStoreConnection
         ?CatchUpSubscriptionDropped $subscriptionDropped = null,
         ?UserCredentials $userCredentials = null
     ): EventStoreAllCatchUpSubscription {
-        // TODO: Implement subscribeToAllFromAsync() method.
+        if (null === $settings) {
+            $settings = CatchUpSubscriptionSettings::default();
+        }
+
+        return new EventStoreHttpAllCatchUpSubscription(
+            $this,
+            $lastCheckpoint,
+            $userCredentials,
+            $eventAppeared,
+            $liveProcessingStarted,
+            $subscriptionDropped,
+            $settings
+        );
     }
 
     public function connectToPersistentSubscription(
