@@ -62,6 +62,7 @@ use Prooph\EventStore\SliceReadStatus;
 use Prooph\EventStore\StreamEventsSlice;
 use Prooph\EventStore\StreamMetadata;
 use Prooph\EventStore\StreamMetadataResult;
+use Prooph\EventStore\StreamPosition;
 use Prooph\EventStore\SubscriptionDropped;
 use Prooph\EventStore\SystemSettings;
 use Prooph\EventStore\UserCredentials;
@@ -1185,17 +1186,42 @@ class EventStoreHttpConnection implements EventStoreConnection
         throw new InvalidOperationException('Not implemented on HTTP client');
     }
 
-    public function subscribeToStreamAsync(
+    public function subscribeToStream(
         string $stream,
         bool $resolveLinkTos,
         EventAppearedOnSubscription $eventAppeared,
         ?SubscriptionDropped $subscriptionDropped = null,
         ?UserCredentials $userCredentials = null
     ): EventStoreSubscription {
-        // TODO: Implement subscribeToStreamAsync() method.
+        $streamEventsSlice = $this->readStreamEventsBackward(
+            $stream,
+            StreamPosition::END,
+            1,
+            $resolveLinkTos,
+            $userCredentials
+        );
+
+        $lastEventNumber = StreamPosition::START;
+
+        if ($streamEventsSlice->status()->equals(SliceReadStatus::success())
+            && ! empty($streamEventsSlice->events())
+        ) {
+            $lastEvent = $streamEventsSlice->events()[0];
+            $lastEventNumber = $lastEvent->originalEventNumber();
+        }
+
+        return new VolatileEventStoreStreamSubscription(
+            $this,
+            $eventAppeared,
+            $subscriptionDropped,
+            $stream,
+            $lastEventNumber,
+            $resolveLinkTos,
+            $userCredentials
+        );
     }
 
-    public function subscribeToStreamFromAsync(
+    public function subscribeToStreamFrom(
         string $stream,
         ?int $lastCheckpoint,
         ?CatchUpSubscriptionSettings $settings,
@@ -1207,16 +1233,31 @@ class EventStoreHttpConnection implements EventStoreConnection
         // TODO: Implement subscribeToStreamFromAsync() method.
     }
 
-    public function subscribeToAllAsync(
+    public function subscribeToAll(
         bool $resolveLinkTos,
         EventAppearedOnSubscription $eventAppeared,
         ?SubscriptionDropped $subscriptionDropped = null,
         ?UserCredentials $userCredentials = null
     ): EventStoreSubscription {
-        // TODO: Implement subscribeToAllAsync() method.
+        $allEventsSlice = $this->readAllEventsBackward(
+            Position::end(),
+            1,
+            $resolveLinkTos,
+            $userCredentials
+        );
+
+        return new VolatileEventStoreAllSubscription(
+            $this,
+            $eventAppeared,
+            $subscriptionDropped,
+            '',
+            $allEventsSlice->nextPosition(),
+            $resolveLinkTos,
+            $userCredentials
+        );
     }
 
-    public function subscribeToAllFromAsync(
+    public function subscribeToAllFrom(
         ?Position $lastCheckpoint,
         ?CatchUpSubscriptionSettings $settings,
         EventAppearedOnCatchupSubscription $eventAppeared,
