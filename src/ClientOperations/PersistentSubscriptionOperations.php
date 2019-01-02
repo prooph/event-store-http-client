@@ -16,7 +16,7 @@ namespace Prooph\EventStoreHttpClient\ClientOperations;
 use Http\Message\RequestFactory;
 use Http\Message\UriFactory;
 use Prooph\EventStore\EventId;
-use Prooph\EventStore\Exception\AccessDeniedException;
+use Prooph\EventStore\Exception\AccessDenied;
 use Prooph\EventStore\PersistentSubscriptionNakEventAction;
 use Prooph\EventStore\RecordedEvent;
 use Prooph\EventStore\Transport\Http\HttpMethod;
@@ -108,7 +108,7 @@ final class PersistentSubscriptionOperations extends Operation implements BasePe
             case 202:
                 return;
             case 401:
-                throw AccessDeniedException::toStream($this->stream);
+                throw AccessDenied::toStream($this->stream);
             default:
                 throw new \UnexpectedValueException('Unexpected status code ' . $response->getStatusCode() . ' returned');
         }
@@ -142,7 +142,7 @@ final class PersistentSubscriptionOperations extends Operation implements BasePe
             case 202:
                 return;
             case 401:
-                throw AccessDeniedException::toStream($this->stream);
+                throw AccessDenied::toStream($this->stream);
             default:
                 throw new \UnexpectedValueException('Unexpected status code ' . $response->getStatusCode() . ' returned');
         }

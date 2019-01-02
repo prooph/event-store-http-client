@@ -34,14 +34,14 @@ use Prooph\EventStore\EventStorePersistentSubscription;
 use Prooph\EventStore\EventStoreStreamCatchUpSubscription;
 use Prooph\EventStore\EventStoreSubscription;
 use Prooph\EventStore\EventStoreTransaction;
-use Prooph\EventStore\Exception\AccessDeniedException;
+use Prooph\EventStore\Exception\AccessDenied;
 use Prooph\EventStore\Exception\EventStoreConnectionException;
 use Prooph\EventStore\Exception\InvalidArgumentException;
 use Prooph\EventStore\Exception\InvalidOperationException;
 use Prooph\EventStore\Exception\OutOfRangeException;
-use Prooph\EventStore\Exception\StreamDeletedException;
+use Prooph\EventStore\Exception\StreamDeleted;
 use Prooph\EventStore\Exception\UnexpectedValueException;
-use Prooph\EventStore\Exception\WrongExpectedVersionException;
+use Prooph\EventStore\Exception\WrongExpectedVersion;
 use Prooph\EventStore\ExpectedVersion;
 use Prooph\EventStore\Internal\Consts;
 use Prooph\EventStore\Internal\PersistentSubscriptionCreateResult;
@@ -162,9 +162,9 @@ class EventStoreHttpConnection implements EventStoreConnection
             case 410:
                 return new DeleteResult(Position::invalid());
             case 400:
-                throw WrongExpectedVersionException::with($stream, $expectedVersion);
+                throw WrongExpectedVersion::with($stream, $expectedVersion);
             case 401:
-                throw AccessDeniedException::toStream($stream);
+                throw AccessDenied::toStream($stream);
             default:
                 throw new EventStoreConnectionException(\sprintf(
                     'Unexpected status code %d returned',
@@ -238,11 +238,11 @@ class EventStoreHttpConnection implements EventStoreConnection
 
                 $currentVersion = (int) $header[0];
 
-                throw WrongExpectedVersionException::with($stream, $expectedVersion, $currentVersion);
+                throw WrongExpectedVersion::with($stream, $expectedVersion, $currentVersion);
             case 401:
-                throw AccessDeniedException::toStream($stream);
+                throw AccessDenied::toStream($stream);
             case 410:
-                throw StreamDeletedException::with($stream);
+                throw StreamDeleted::with($stream);
             default:
                 throw new EventStoreConnectionException(\sprintf(
                     'Unexpected status code %d returned',
@@ -349,7 +349,7 @@ class EventStoreHttpConnection implements EventStoreConnection
 
                 return new EventReadResult(EventReadStatus::success(), $stream, $eventNumber, $event);
             case 401:
-                throw AccessDeniedException::toStream($stream);
+                throw AccessDenied::toStream($stream);
             case 404:
                 return new EventReadResult(EventReadStatus::notFound(), $stream, $eventNumber, null);
             case 410:
@@ -431,7 +431,7 @@ class EventStoreHttpConnection implements EventStoreConnection
 
         switch ($response->getStatusCode()) {
             case 401:
-                throw AccessDeniedException::toStream($stream);
+                throw AccessDenied::toStream($stream);
             case 404:
                 return new StreamEventsSlice(
                     SliceReadStatus::streamNotFound(),
@@ -628,7 +628,7 @@ class EventStoreHttpConnection implements EventStoreConnection
                     false
                 );
             case 401:
-                throw AccessDeniedException::toStream($stream);
+                throw AccessDenied::toStream($stream);
             case 404:
                 return new StreamEventsSlice(
                     SliceReadStatus::streamNotFound(),
@@ -717,7 +717,7 @@ class EventStoreHttpConnection implements EventStoreConnection
 
         switch ($response->getStatusCode()) {
             case 401:
-                throw AccessDeniedException::toStream('$all');
+                throw AccessDenied::toStream('$all');
             case 200:
                 $json = Json::decode($response->getBody()->getContents());
 
@@ -808,7 +808,7 @@ class EventStoreHttpConnection implements EventStoreConnection
 
         switch ($response->getStatusCode()) {
             case 401:
-                throw AccessDeniedException::toStream('$all');
+                throw AccessDenied::toStream('$all');
             case 200:
                 $json = Json::decode($response->getBody()->getContents());
 
@@ -1064,7 +1064,7 @@ class EventStoreHttpConnection implements EventStoreConnection
 
         switch ($response->getStatusCode()) {
             case 401:
-                throw AccessDeniedException::toStream($stream);
+                throw AccessDenied::toStream($stream);
             case 201:
             case 409:
                 return new PersistentSubscriptionCreateResult(
@@ -1117,7 +1117,7 @@ class EventStoreHttpConnection implements EventStoreConnection
                     PersistentSubscriptionUpdateStatus::success()
                 );
             case 401:
-                throw AccessDeniedException::toStream($stream);
+                throw AccessDenied::toStream($stream);
             case 404:
                 return new PersistentSubscriptionUpdateResult(
                     PersistentSubscriptionUpdateStatus::notFound()
@@ -1160,7 +1160,7 @@ class EventStoreHttpConnection implements EventStoreConnection
 
         switch ($response->getStatusCode()) {
             case 401:
-                throw AccessDeniedException::toStream($stream);
+                throw AccessDenied::toStream($stream);
             case 200:
             case 404:
                 return new PersistentSubscriptionDeleteResult(

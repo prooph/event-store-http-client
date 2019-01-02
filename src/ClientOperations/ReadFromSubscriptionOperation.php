@@ -16,7 +16,7 @@ namespace Prooph\EventStoreHttpClient\ClientOperations;
 use Http\Message\RequestFactory;
 use Http\Message\UriFactory;
 use Prooph\EventStore\EventId;
-use Prooph\EventStore\Exception\AccessDeniedException;
+use Prooph\EventStore\Exception\AccessDenied;
 use Prooph\EventStore\RecordedEvent;
 use Prooph\EventStore\Transport\Http\HttpMethod;
 use Prooph\EventStore\UserCredentials;
@@ -60,7 +60,7 @@ class ReadFromSubscriptionOperation extends Operation
 
         switch ($response->getStatusCode()) {
             case 401:
-                throw AccessDeniedException::toStream($stream);
+                throw AccessDenied::toStream($stream);
             case 404:
                 throw new \RuntimeException(\sprintf(
                     'Subscription with stream \'%s\' and group name \'%s\' not found',

@@ -19,7 +19,7 @@ use Prooph\EventStore\EventAppearedOnCatchupSubscription;
 use Prooph\EventStore\EventStoreConnection;
 use Prooph\EventStore\EventStoreStreamCatchUpSubscription;
 use Prooph\EventStore\Exception\OutOfRangeException;
-use Prooph\EventStore\Exception\StreamDeletedException;
+use Prooph\EventStore\Exception\StreamDeleted;
 use Prooph\EventStore\LiveProcessingStartedOnCatchUpSubscription;
 use Prooph\EventStore\ResolvedEvent;
 use Prooph\EventStore\SliceReadStatus;
@@ -125,7 +125,7 @@ class EventStoreHttpStreamCatchUpSubscription extends EventStoreCatchUpSubscript
 
                 break;
             case SliceReadStatus::STREAM_DELETED:
-                throw StreamDeletedException::with($this->streamId());
+                throw StreamDeleted::with($this->streamId());
             default:
                 throw new OutOfRangeException(\sprintf(
                     'Unexpected SliceReadStatus "%s" received',

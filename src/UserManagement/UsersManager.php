@@ -27,7 +27,7 @@ use Prooph\EventStore\UserManagement\UserUpdateInformation;
 use Prooph\EventStore\Util\Json;
 use Prooph\EventStoreHttpClient\ConnectionSettings;
 use Prooph\EventStoreHttpClient\Exception\UserCommandConflictException;
-use Prooph\EventStoreHttpClient\Exception\UserCommandFailedException;
+use Prooph\EventStoreHttpClient\Exception\UserCommandFailed;
 use Prooph\EventStoreHttpClient\Http\HttpClient;
 use Psr\Http\Client\ClientInterface;
 use Psr\Http\Message\ResponseInterface;
@@ -95,7 +95,7 @@ class UsersManager implements SyncUsersManager
         );
     }
 
-    /** @throws UserCommandFailedException */
+    /** @throws UserCommandFailed */
     public function deleteUser(string $login, ?UserCredentials $userCredentials = null): void
     {
         if (empty($login)) {
@@ -312,7 +312,7 @@ class UsersManager implements SyncUsersManager
         });
 
         if ($response->getStatusCode() !== $expectedCode) {
-            throw new UserCommandFailedException(
+            throw new UserCommandFailed(
                 $response->getStatusCode(),
                 \sprintf(
                     'Server returned %d (%s) for GET on %s',
@@ -334,7 +334,7 @@ class UsersManager implements SyncUsersManager
         });
 
         if ($response->getStatusCode() !== $expectedCode) {
-            throw new UserCommandFailedException(
+            throw new UserCommandFailed(
                 $response->getStatusCode(),
                 \sprintf(
                     'Server returned %d (%s) for DELETE on %s',
@@ -363,7 +363,7 @@ class UsersManager implements SyncUsersManager
         );
 
         if ($response->getStatusCode() !== $expectedCode) {
-            throw new UserCommandFailedException(
+            throw new UserCommandFailed(
                 $response->getStatusCode(),
                 \sprintf(
                     'Server returned %d (%s) for PUT on %s',
@@ -396,7 +396,7 @@ class UsersManager implements SyncUsersManager
         }
 
         if ($response->getStatusCode() !== $expectedCode) {
-            throw new UserCommandFailedException(
+            throw new UserCommandFailed(
                 $response->getStatusCode(),
                 \sprintf(
                     'Server returned %d (%s) for POST on %s',

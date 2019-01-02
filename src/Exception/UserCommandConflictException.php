@@ -13,7 +13,7 @@ declare(strict_types=1);
 
 namespace Prooph\EventStoreHttpClient\Exception;
 
-use Prooph\EventStore\Exception\UserCommandConflictException as BaseException;
+use Prooph\EventStore\Exception\UserCommandConflict as BaseException;
 
 class UserCommandConflictException extends BaseException
 {
