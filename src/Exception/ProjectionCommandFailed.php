@@ -13,9 +13,9 @@ declare(strict_types=1);
 
 namespace Prooph\EventStoreHttpClient\Exception;
 
-use Prooph\EventStore\Exception\ProjectionCommandFailedException as BaseException;
+use Prooph\EventStore\Exception\ProjectionCommandFailed as BaseException;
 
-class ProjectionCommandFailedException extends BaseException
+class ProjectionCommandFailed extends BaseException
 {
     /** @var int */
     private $httpStatusCode;

@@ -22,8 +22,8 @@ use Prooph\EventStore\Transport\Http\HttpStatusCode;
 use Prooph\EventStore\UserCredentials;
 use Prooph\EventStore\Util\Json;
 use Prooph\EventStoreHttpClient\ConnectionSettings;
-use Prooph\EventStoreHttpClient\Exception\ProjectionCommandConflictException;
-use Prooph\EventStoreHttpClient\Exception\ProjectionCommandFailedException;
+use Prooph\EventStoreHttpClient\Exception\ProjectionCommandConflict;
+use Prooph\EventStoreHttpClient\Exception\ProjectionCommandFailed;
 use Prooph\EventStoreHttpClient\Http\HttpClient;
 use Psr\Http\Client\ClientInterface;
 use Psr\Http\Message\ResponseInterface;
@@ -538,7 +538,7 @@ class ProjectionsManager implements SyncProjectionsManager
         );
 
         if ($response->getStatusCode() !== $expectedCode) {
-            throw new ProjectionCommandFailedException(
+            throw new ProjectionCommandFailed(
                 $response->getStatusCode(),
                 \sprintf(
                     'Server returned %d (%s) for GET on %s',
@@ -567,7 +567,7 @@ class ProjectionsManager implements SyncProjectionsManager
         );
 
         if ($response->getStatusCode() !== $expectedCode) {
-            throw new ProjectionCommandFailedException(
+            throw new ProjectionCommandFailed(
                 $response->getStatusCode(),
                 \sprintf(
                     'Server returned %d (%s) for DELETE on %s',
@@ -596,7 +596,7 @@ class ProjectionsManager implements SyncProjectionsManager
         );
 
         if ($response->getStatusCode() !== $expectedCode) {
-            throw new ProjectionCommandFailedException(
+            throw new ProjectionCommandFailed(
                 $response->getStatusCode(),
                 \sprintf(
                     'Server returned %d (%s) for PUT on %s',
@@ -625,11 +625,11 @@ class ProjectionsManager implements SyncProjectionsManager
         );
 
         if ($response->getStatusCode() === HttpStatusCode::CONFLICT) {
-            throw new ProjectionCommandConflictException($response->getStatusCode(), $response->getReasonPhrase());
+            throw new ProjectionCommandConflict($response->getStatusCode(), $response->getReasonPhrase());
         }
 
         if ($response->getStatusCode() !== $expectedCode) {
-            throw new ProjectionCommandFailedException(
+            throw new ProjectionCommandFailed(
                 $response->getStatusCode(),
                 \sprintf(
                     'Server returned %d (%s) for POST on %s',

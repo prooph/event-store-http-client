@@ -15,8 +15,8 @@ namespace Prooph\EventStoreHttpClient\Internal;
 
 use Prooph\EventStore\EventAppearedOnSubscription;
 use Prooph\EventStore\EventStoreSubscription;
-use Prooph\EventStore\Exception\AccessDeniedException;
-use Prooph\EventStore\Exception\ObjectDisposedException;
+use Prooph\EventStore\Exception\AccessDenied;
+use Prooph\EventStore\Exception\ObjectDisposed;
 use Prooph\EventStore\Internal\Consts;
 use Prooph\EventStore\SliceReadStatus;
 use Prooph\EventStore\SubscriptionDropped;
@@ -63,7 +63,7 @@ class VolatileEventStoreStreamSubscription extends EventStoreSubscription
     public function start(): void
     {
         if ($this->disposed) {
-            throw new ObjectDisposedException('This volatile subscription was already stopped');
+            throw new ObjectDisposed('This volatile subscription was already stopped');
         }
 
         $this->running = true;
@@ -81,7 +81,7 @@ class VolatileEventStoreStreamSubscription extends EventStoreSubscription
                     1,
                     $this->userCredentials
                 );
-            } catch (AccessDeniedException $e) {
+            } catch (AccessDenied $e) {
                 if ($this->subscriptionDropped) {
                     ($this->subscriptionDropped)(
                         $this,
