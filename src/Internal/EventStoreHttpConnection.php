@@ -94,9 +94,9 @@ class EventStoreHttpConnection implements EventStoreConnection
     ) {
         $this->baseUri = \sprintf(
             '%s://%s:%s',
-            $this->settings->schema(),
-            $this->settings->endPoint()->host(),
-            $this->settings->endPoint()->port()
+            $settings->schema(),
+            $settings->endPoint()->host(),
+            $settings->endPoint()->port()
         );
 
         $this->settings = $settings;
