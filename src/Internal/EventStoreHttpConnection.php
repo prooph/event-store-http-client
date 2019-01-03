@@ -414,7 +414,8 @@ class EventStoreHttpConnection implements EventStoreConnection
                 $json = Json::decode($response->getBody()->getContents());
 
                 $events = [];
-                $lastEventNumber = 0;
+                $lastEventNumber = $start - 1;
+
                 foreach (\array_reverse($json['entries']) as $entry) {
                     $events[] = ResolvedEventParser::parse($entry);
 
@@ -1051,7 +1052,7 @@ class EventStoreHttpConnection implements EventStoreConnection
             && ! empty($streamEventsSlice->events())
         ) {
             $lastEvent = $streamEventsSlice->events()[0];
-            $lastEventNumber = $lastEvent->originalEventNumber();
+            $lastEventNumber = $lastEvent->originalEventNumber() + 1;
         }
 
         return new VolatileEventStoreStreamSubscription(

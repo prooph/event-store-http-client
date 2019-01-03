@@ -27,7 +27,7 @@ require __DIR__ . '/../vendor/autoload.php';
 
 $connection = EventStoreConnectionFactory::create();
 
-$connection->subscribeToAllFrom(
+$subscription = $connection->subscribeToAllFrom(
     null,
     CatchUpSubscriptionSettings::default(),
     new class() implements EventAppearedOnCatchupSubscription {
@@ -60,3 +60,5 @@ $connection->subscribeToAllFrom(
     },
     new UserCredentials('admin', 'changeit')
 );
+
+$subscription->start();
