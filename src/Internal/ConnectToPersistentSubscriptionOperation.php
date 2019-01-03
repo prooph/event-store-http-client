@@ -22,6 +22,7 @@ use Prooph\EventStore\Exception\RuntimeException;
 use Prooph\EventStore\Internal\ConnectToPersistentSubscriptions;
 use Prooph\EventStore\Internal\PersistentEventStoreSubscription;
 use Prooph\EventStore\PersistentSubscriptionNakEventAction;
+use Prooph\EventStore\PersistentSubscriptionResolvedEvent;
 use Prooph\EventStore\SubscriptionDropReason;
 use Prooph\EventStore\UserCredentials;
 use Prooph\EventStoreHttpClient\Http\HttpClient;
@@ -121,7 +122,10 @@ class ConnectToPersistentSubscriptionOperation implements ConnectToPersistentSub
                 }
 
                 foreach (\array_reverse($json['entries']) as $entry) {
-                    $events[] = ResolvedEventParser::parse($entry);
+                    $events[] = new PersistentSubscriptionResolvedEvent(
+                        ResolvedEventParser::parse($entry),
+                        null
+                    );
                 }
 
                 return $events;

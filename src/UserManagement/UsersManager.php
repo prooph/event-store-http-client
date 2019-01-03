@@ -322,6 +322,8 @@ class UsersManager implements SyncUsersManager
                 )
             );
         }
+
+        return $response;
     }
 
     private function sendDelete(
