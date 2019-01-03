@@ -460,47 +460,7 @@ class EventStoreHttpConnection implements EventStoreConnection
                 $events = [];
                 $lastEventNumber = 0;
                 foreach (\array_reverse($json['entries']) as $entry) {
-                    if ($json['streamId'] !== $stream) {
-                        $data = $entry['data'] ?? '';
-
-                        if (\is_array($data)) {
-                            $data = Json::encode($data);
-                        }
-
-                        $field = isset($json['isLinkMetaData']) && $json['isLinkMetaData'] ? 'linkMetaData' : 'metaData';
-
-                        $metadata = $json[$field] ?? '';
-
-                        if (\is_array($metadata)) {
-                            $metadata = Json::encode($metadata);
-                        }
-
-                        $link = new RecordedEvent(
-                            $stream,
-                            $json['positionEventNumber'],
-                            EventId::fromString($json['eventId']),
-                            $json['eventType'],
-                            $json['isJson'],
-                            $data,
-                            $metadata,
-                            DateTime::create($json['updated'])
-                        );
-                    } else {
-                        $link = null;
-                    }
-
-                    $record = new RecordedEvent(
-                        $json['streamId'],
-                        $json['eventNumber'],
-                        EventId::fromString($json['eventId']),
-                        SystemEventTypes::LINK_TO,
-                        false,
-                        $json['title'],
-                        '',
-                        DateTime::create($json['updated'])
-                    );
-
-                    $events[] = new ResolvedEvent($record, $link, null);
+                    $events[] = ResolvedEventParser::parse($entry);
 
                     $lastEventNumber = $entry['eventNumber'];
                 }
@@ -571,47 +531,7 @@ class EventStoreHttpConnection implements EventStoreConnection
                 $events = [];
                 $lastEventNumber = 0;
                 foreach ($json['entries'] as $entry) {
-                    if ($json['streamId'] !== $stream) {
-                        $data = $entry['data'] ?? '';
-
-                        if (\is_array($data)) {
-                            $data = Json::encode($data);
-                        }
-
-                        $field = isset($json['isLinkMetaData']) && $json['isLinkMetaData'] ? 'linkMetaData' : 'metaData';
-
-                        $metadata = $json[$field] ?? '';
-
-                        if (\is_array($metadata)) {
-                            $metadata = Json::encode($metadata);
-                        }
-
-                        $link = new RecordedEvent(
-                            $stream,
-                            $json['positionEventNumber'],
-                            EventId::fromString($json['eventId']),
-                            $json['eventType'],
-                            $json['isJson'],
-                            $data,
-                            $metadata,
-                            DateTime::create($json['updated'])
-                        );
-                    } else {
-                        $link = null;
-                    }
-
-                    $record = new RecordedEvent(
-                        $json['streamId'],
-                        $json['eventNumber'],
-                        EventId::fromString($json['eventId']),
-                        SystemEventTypes::LINK_TO,
-                        false,
-                        $json['title'],
-                        '',
-                        DateTime::create($json['updated'])
-                    );
-
-                    $events[] = new ResolvedEvent($record, $link, null);
+                    $events[] = ResolvedEventParser::parse($entry);
 
                     $lastEventNumber = $entry['eventNumber'];
                 }
@@ -730,30 +650,7 @@ class EventStoreHttpConnection implements EventStoreConnection
 
                 $events = [];
                 foreach (\array_reverse($json['entries']) as $entry) {
-                    $data = $entry['data'] ?? '';
-
-                    if (\is_array($data)) {
-                        $data = Json::encode($data);
-                    }
-
-                    $metadata = $json['metadata'] ?? '';
-
-                    if (\is_array($metadata)) {
-                        $metadata = Json::encode($metadata);
-                    }
-
-                    $event = new RecordedEvent(
-                        $json['streamId'],
-                        $json['positionEventNumber'],
-                        EventId::fromString($json['eventId']),
-                        $json['eventType'],
-                        $json['isJson'],
-                        $data,
-                        $metadata,
-                        DateTime::create($json['updated'])
-                    );
-
-                    $events[] = new ResolvedEvent($event, null, null);
+                    $events[] = ResolvedEventParser::parse($entry);
                 }
 
                 return new AllEventsSlice(
@@ -821,30 +718,7 @@ class EventStoreHttpConnection implements EventStoreConnection
 
                 $events = [];
                 foreach ($json['entries'] as $entry) {
-                    $data = $entry['data'] ?? '';
-
-                    if (\is_array($data)) {
-                        $data = Json::encode($data);
-                    }
-
-                    $metadata = $json['metadata'] ?? '';
-
-                    if (\is_array($metadata)) {
-                        $metadata = Json::encode($metadata);
-                    }
-
-                    $event = new RecordedEvent(
-                        $json['streamId'],
-                        $json['positionEventNumber'],
-                        EventId::fromString($json['eventId']),
-                        $json['eventType'],
-                        $json['isJson'],
-                        $data,
-                        $metadata,
-                        DateTime::create($json['updated'])
-                    );
-
-                    $events[] = new ResolvedEvent($event, null, null);
+                    $events[] = ResolvedEventParser::parse($entry);
                 }
 
                 return new AllEventsSlice(
@@ -1168,7 +1042,10 @@ class EventStoreHttpConnection implements EventStoreConnection
                     PersistentSubscriptionDeleteStatus::failure()
                 );
             default:
-                throw new \UnexpectedValueException('Unexpected status code ' . $response->getStatusCode() . ' returned');
+                throw new EventStoreConnectionException(\sprintf(
+                    'Unexpected status code %d returned',
+                    $response->getStatusCode()
+                ));
         }
     }
 
@@ -1307,6 +1184,23 @@ class EventStoreHttpConnection implements EventStoreConnection
         bool $autoAck = true,
         ?UserCredentials $userCredentials = null
     ): EventStorePersistentSubscription {
-        // TODO: Implement connectToPersistentSubscription() method.
+        if (empty($stream)) {
+            throw new InvalidArgumentException('Stream cannot be empty');
+        }
+
+        if (empty($groupName)) {
+            throw new InvalidArgumentException('Group cannot be empty');
+        }
+
+        return new EventStorePersistentHttpSubscription(
+            $this->httpClient,
+            $groupName,
+            $stream,
+            $eventAppeared,
+            $subscriptionDropped,
+            $userCredentials,
+            $bufferSize,
+            $autoAck
+        );
     }
 }

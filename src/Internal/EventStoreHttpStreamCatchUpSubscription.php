@@ -19,6 +19,7 @@ use Prooph\EventStore\EventAppearedOnCatchupSubscription;
 use Prooph\EventStore\EventStoreConnection;
 use Prooph\EventStore\EventStoreStreamCatchUpSubscription;
 use Prooph\EventStore\Exception\OutOfRangeException;
+use Prooph\EventStore\Exception\RuntimeException;
 use Prooph\EventStore\Exception\StreamDeleted;
 use Prooph\EventStore\LiveProcessingStartedOnCatchUpSubscription;
 use Prooph\EventStore\ResolvedEvent;
@@ -114,7 +115,7 @@ class EventStoreHttpStreamCatchUpSubscription extends EventStoreCatchUpSubscript
                 break;
             case SliceReadStatus::STREAM_NOT_FOUND:
                 if (null !== $lastEventNumber && $lastEventNumber !== -1) {
-                    throw new \Exception(\sprintf(
+                    throw new RuntimeException(\sprintf(
                         'Impossible: stream %s disappeared in the middle of catching up subscription %s',
                         $this->streamId(),
                         $this->subscriptionName()

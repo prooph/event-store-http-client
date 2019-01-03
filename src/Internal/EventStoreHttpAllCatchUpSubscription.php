@@ -19,6 +19,7 @@ use Prooph\EventStore\CatchUpSubscriptionSettings;
 use Prooph\EventStore\EventAppearedOnCatchupSubscription;
 use Prooph\EventStore\EventStoreAllCatchUpSubscription;
 use Prooph\EventStore\EventStoreConnection;
+use Prooph\EventStore\Exception\RuntimeException;
 use Prooph\EventStore\LiveProcessingStartedOnCatchUpSubscription;
 use Prooph\EventStore\Position;
 use Prooph\EventStore\ResolvedEvent;
@@ -101,7 +102,7 @@ class EventStoreHttpAllCatchUpSubscription extends EventStoreCatchUpSubscription
     {
         foreach ($slice->events() as $e) {
             if (null === $e->originalPosition()) {
-                throw new \Exception(\sprintf(
+                throw new RuntimeException(\sprintf(
                     'Subscription %s event came up with no OriginalPosition',
                     $this->subscriptionName()
                 ));
