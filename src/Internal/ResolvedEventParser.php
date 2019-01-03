@@ -33,7 +33,7 @@ class ResolvedEventParser
                 $data = Json::encode($data);
             }
 
-            $metadata = $entry['metadata'] ?? '';
+            $metadata = $entry['metaData'] ?? '';
 
             if (\is_array($metadata)) {
                 $metadata = Json::encode($metadata);
@@ -59,7 +59,7 @@ class ResolvedEventParser
 
         $metadata = $link
             ? $entry['linkMetaData']
-            : $entry['metadata'] ?? '';
+            : $entry['metaData'] ?? '';
 
         if (\is_array($metadata)) {
             $metadata = Json::encode($metadata);
