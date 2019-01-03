@@ -68,9 +68,9 @@ class ResolvedEventParser
         $eventId = $entry['eventId'];
 
         if ($link) {
-            foreach ($entry['links'] as $link) {
-                if ('ack' === $link['relation']) {
-                    $eventId = \substr($link['uri'], 0, -36);
+            foreach ($entry['links'] as $elink) {
+                if ('ack' === $elink['relation']) {
+                    $eventId = \substr($elink['uri'], 0, -36);
                     break;
                 }
             }

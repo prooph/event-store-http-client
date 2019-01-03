@@ -604,7 +604,7 @@ class EventStoreHttpConnection implements EventStoreConnection
                 $json = Json::decode($response->getBody()->getContents());
 
                 foreach ($json['links'] as $link) {
-                    if ($link['relation'] === 'next') {
+                    if ($link['relation'] === 'previous') {
                         $start = \strlen($this->baseUri . '/streams/%24all' . '/');
                         $nextPosition = Position::parse(\substr($link['uri'], $start, 32));
                     }
@@ -677,7 +677,7 @@ class EventStoreHttpConnection implements EventStoreConnection
                 $json = Json::decode($response->getBody()->getContents());
 
                 foreach ($json['links'] as $link) {
-                    if ($link['relation'] === 'previous') {
+                    if ($link['relation'] === 'next') {
                         $start = \strlen($this->baseUri . '/streams/%24all' . '/');
                         $nextPosition = Position::parse(\substr($link['uri'], $start, 32));
                     }
