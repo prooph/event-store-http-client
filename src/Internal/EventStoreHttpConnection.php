@@ -1156,15 +1156,16 @@ class EventStoreHttpConnection implements EventStoreConnection
             $this->onException
         );
 
-        $json = Json::decode($response->getBody()->getContents());
-
         switch ($response->getStatusCode()) {
             case 401:
                 throw AccessDenied::toStream($stream);
             case 200:
+                return new PersistentSubscriptionDeleteResult(
+                    PersistentSubscriptionDeleteStatus::success()
+                );
             case 404:
                 return new PersistentSubscriptionDeleteResult(
-                    PersistentSubscriptionDeleteStatus::byName($json['result'])
+                    PersistentSubscriptionDeleteStatus::failure()
                 );
             default:
                 throw new \UnexpectedValueException('Unexpected status code ' . $response->getStatusCode() . ' returned');
