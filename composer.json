@@ -31,7 +31,8 @@
     "phpunit/phpunit": "^7.5",
     "doctrine/instantiator": "^1.1",
     "sebastian/object-enumerator": "^3.0.3",
-    "php-coveralls/php-coveralls": "^2.1"
+    "php-coveralls/php-coveralls": "^2.1",
+    "php-http/guzzle6-adapter": "^2.0.1"
   },
   "autoload": {
     "psr-4": {

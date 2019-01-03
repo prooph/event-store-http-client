@@ -25,7 +25,6 @@ use Prooph\EventStore\EventAppearedOnCatchupSubscription;
 use Prooph\EventStore\EventAppearedOnPersistentSubscription;
 use Prooph\EventStore\EventAppearedOnSubscription;
 use Prooph\EventStore\EventData;
-use Prooph\EventStore\EventId;
 use Prooph\EventStore\EventReadResult;
 use Prooph\EventStore\EventReadStatus;
 use Prooph\EventStore\EventStoreAllCatchUpSubscription;
@@ -56,8 +55,6 @@ use Prooph\EventStore\PersistentSubscriptionSettings;
 use Prooph\EventStore\Position;
 use Prooph\EventStore\RawStreamMetadataResult;
 use Prooph\EventStore\ReadDirection;
-use Prooph\EventStore\RecordedEvent;
-use Prooph\EventStore\ResolvedEvent;
 use Prooph\EventStore\SliceReadStatus;
 use Prooph\EventStore\StreamEventsSlice;
 use Prooph\EventStore\StreamMetadata;
@@ -66,7 +63,6 @@ use Prooph\EventStore\StreamPosition;
 use Prooph\EventStore\SubscriptionDropped;
 use Prooph\EventStore\SystemSettings;
 use Prooph\EventStore\UserCredentials;
-use Prooph\EventStore\Util\DateTime;
 use Prooph\EventStore\Util\Json;
 use Prooph\EventStore\WriteResult;
 use Prooph\EventStoreHttpClient\ConnectionSettings;
@@ -286,12 +282,12 @@ class EventStoreHttpConnection implements EventStoreConnection
             $headers['ES-RequiresMaster'] = 'true';
         }
 
-        if (-1 === $eventNumber) {
-            $eventNumber = 'head';
-        }
-
         $response = $this->httpClient->get(
-            '/streams/' . \urlencode($stream) . '/' . $eventNumber . '?embed=tryharder',
+            \sprintf(
+                '/streams/%s/%s?embed=tryharder',
+                \urlencode($stream),
+                -1 === $eventNumber ? 'head' : $eventNumber
+            ),
             $headers,
             $userCredentials,
             $this->onException
@@ -305,47 +301,7 @@ class EventStoreHttpConnection implements EventStoreConnection
                     return new EventReadResult(EventReadStatus::notFound(), $stream, $eventNumber, null);
                 }
 
-                if ($resolveLinkTos && $json['streamId'] !== $stream) {
-                    $data = $json['data'] ?? '';
-
-                    if (\is_array($data)) {
-                        $data = Json::encode($data);
-                    }
-
-                    $field = isset($json['isLinkMetaData']) && $json['isLinkMetaData'] ? 'linkMetaData' : 'metaData';
-
-                    $metadata = $json[$field] ?? '';
-
-                    if (\is_array($metadata)) {
-                        $metadata = Json::encode($metadata);
-                    }
-
-                    $link = new RecordedEvent(
-                        $stream,
-                        $json['positionEventNumber'],
-                        EventId::fromString($json['eventId']),
-                        $json['eventType'],
-                        $json['isJson'],
-                        $data,
-                        $metadata,
-                        DateTime::create($json['updated'])
-                    );
-                } else {
-                    $link = null;
-                }
-
-                $record = new RecordedEvent(
-                    $json['streamId'],
-                    $json['eventNumber'],
-                    EventId::fromString($json['eventId']),
-                    SystemEventTypes::LINK_TO,
-                    false,
-                    $json['title'],
-                    '',
-                    DateTime::create($json['updated'])
-                );
-
-                $event = new ResolvedEvent($record, $link, null);
+                $event = ResolvedEventParser::parse($json);
 
                 return new EventReadResult(EventReadStatus::success(), $stream, $eventNumber, $event);
             case 401:
@@ -518,7 +474,12 @@ class EventStoreHttpConnection implements EventStoreConnection
         }
 
         $response = $this->httpClient->get(
-            '/streams/' . \urlencode($stream) . '/' . $start . '/backward/' . $count . '?embed=tryharder',
+            \sprintf(
+                '/streams/%s/%s/backward/%d?embed=tryharder',
+                \urlencode($stream),
+                -1 === $start ? 'head' : $start,
+                $count
+            ),
             $headers,
             $userCredentials,
             $this->onException
@@ -697,7 +658,12 @@ class EventStoreHttpConnection implements EventStoreConnection
         }
 
         $response = $this->httpClient->get(
-            '/streams/%24all' . '/' . $position->asString() . '/backward/' . $count . '?embed=tryharder',
+            \sprintf(
+                '/streams/%s/%s/backward/%d?embed=tryharder',
+                \urlencode('$all'),
+                $position->equals(Position::end()) ? 'head' : $position->asString(),
+                $count
+            ),
             $headers,
             $userCredentials,
             $this->onException
