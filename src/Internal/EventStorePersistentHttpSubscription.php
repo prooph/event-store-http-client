@@ -306,13 +306,13 @@ class EventStorePersistentHttpSubscription implements EventStorePersistentSubscr
 
                     $this->dropSubscription($this->dropData->reason(), $this->dropData->error());
 
-                    return null;
+                    return;
                 }
 
                 if (null !== $this->dropData) {
                     $this->dropSubscription($this->dropData->reason(), $this->dropData->error());
 
-                    return null;
+                    return;
                 }
 
                 try {
@@ -326,7 +326,7 @@ class EventStorePersistentHttpSubscription implements EventStorePersistentSubscr
 
                     $this->dropSubscription(SubscriptionDropReason::eventHandlerException(), $ex);
 
-                    return null;
+                    return;
                 }
             }
         } while (! $this->queue->isEmpty() && $this->isProcessing);

@@ -328,7 +328,7 @@ abstract class EventStoreCatchUpSubscription implements SyncEventStoreCatchUpSub
 
                     $this->isProcessing = false;
 
-                    return null;
+                    return;
                 }
 
                 try {
@@ -336,7 +336,7 @@ abstract class EventStoreCatchUpSubscription implements SyncEventStoreCatchUpSub
                 } catch (Throwable $ex) {
                     $this->dropSubscription(SubscriptionDropReason::eventHandlerException(), $ex);
 
-                    return null;
+                    return;
                 }
             }
         } while ($this->liveQueue->count() > 0);
