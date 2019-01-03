@@ -11,14 +11,13 @@
 
 declare(strict_types=1);
 
-namespace Prooph\EventStoreHttpClient\Projections;
+namespace Prooph\EventStoreHttpClient\UserManagement;
 
 use Http\Discovery\HttpClientDiscovery;
 use Http\Discovery\MessageFactoryDiscovery;
 use Http\Message\RequestFactory;
 use Prooph\EventStore\UserManagement\UsersManager as SyncUsersManager;
 use Prooph\EventStoreHttpClient\ConnectionSettings;
-use Prooph\EventStoreHttpClient\UserManagement\UsersManager;
 use Psr\Http\Client\ClientInterface;
 
 class UsersManagerFactory
