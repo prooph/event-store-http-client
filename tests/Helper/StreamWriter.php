@@ -14,7 +14,6 @@ declare(strict_types=1);
 namespace ProophTest\EventStoreHttpClient\Helper;
 
 use Prooph\EventStore\EventStoreConnection;
-use Prooph\EventStore\Exception\RuntimeException;
 use Prooph\EventStore\ExpectedVersion;
 use Prooph\EventStore\WriteResult;
 
