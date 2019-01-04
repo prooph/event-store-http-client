@@ -51,8 +51,6 @@ class deleting_stream extends TestCase
     /** @test */
     public function with_invalid_expected_version_should_fail(): void
     {
-        $this->markTestSkipped('see https://github.com/EventStore/EventStore/issues/1815');
-
         $stream = 'with_invalid_expected_version_should_fail';
 
         $connection = TestConnection::create();
