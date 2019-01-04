@@ -202,6 +202,10 @@ class EventStoreHttpConnection implements EventStoreConnection
             ];
         }
 
+        if (empty($data)) {
+            return new WriteResult(ExpectedVersion::ANY, Position::invalid());
+        }
+
         $body = Json::encode($data);
 
         $headers = [
