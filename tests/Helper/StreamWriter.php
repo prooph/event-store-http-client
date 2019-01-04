@@ -41,15 +41,8 @@ class StreamWriter
             $expVer = $this->version === ExpectedVersion::ANY ? ExpectedVersion::ANY : $this->version + $key;
             $result = $this->connection->appendToStream($this->stream, $expVer, [$event]);
             \assert($result instanceof WriteResult);
-            $nextExpVer = $result->nextExpectedVersion();
-
-            if ($this->version !== ExpectedVersion::ANY
-                && ($expVer + 1) !== $nextExpVer
-            ) {
-                throw new RuntimeException('Wrong next expected version');
-            }
         }
 
-        new TailWriter($this->connection, $this->stream);
+        return new TailWriter($this->connection, $this->stream);
     }
 }
