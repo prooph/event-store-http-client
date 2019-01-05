@@ -17,7 +17,7 @@ use PHPUnit\Framework\TestCase;
 use Prooph\EventStore\PersistentSubscriptionSettings;
 use Prooph\EventStore\Util\Guid;
 
-class deleting_existing_persistent_subscription_group_with_permissions extends TestCase
+class can_create_duplicate_persistent_subscription_group_name_on_different_streams extends TestCase
 {
     use SpecificationWithConnection;
 
@@ -39,7 +39,7 @@ class deleting_existing_persistent_subscription_group_with_permissions extends T
     {
         $this->conn->createPersistentSubscription(
             $this->stream,
-            'groupname123',
+            'group3211',
             $this->settings,
             DefaultData::adminCredentials()
         );
@@ -49,12 +49,13 @@ class deleting_existing_persistent_subscription_group_with_permissions extends T
      * @test
      * @doesNotPerformAssertions
      */
-    public function the_delete_of_group_succeeds(): void
+    public function the_completion_succeeds(): void
     {
         $this->execute(function (): void {
-            $this->conn->deletePersistentSubscription(
-                $this->stream,
-                'groupname123',
+            $this->conn->createPersistentSubscription(
+                'someother' . $this->stream,
+                'group3211',
+                $this->settings,
                 DefaultData::adminCredentials()
             );
         });
