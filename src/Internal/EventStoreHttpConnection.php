@@ -578,6 +578,10 @@ class EventStoreHttpConnection implements EventStoreConnection
             ));
         }
 
+        if ($position->equals(Position::end())) {
+            return new AllEventsSlice(ReadDirection::forward(), $position, $position, []);
+        }
+
         $headers = [
             'Accept' => 'application/vnd.eventstore.atom+json',
         ];
@@ -905,16 +909,20 @@ class EventStoreHttpConnection implements EventStoreConnection
             $this->onException
         );
 
-        $json = Json::decode($response->getBody()->getContents());
-
         switch ($response->getStatusCode()) {
             case 401:
                 throw AccessDenied::toStream($stream);
             case 201:
-            case 409:
                 return new PersistentSubscriptionCreateResult(
-                    PersistentSubscriptionCreateStatus::byName($json['result'])
+                    PersistentSubscriptionCreateStatus::success()
                 );
+            case 409:
+                throw new InvalidOperationException(\sprintf(
+                    'Subscription group \'%s\' on stream \'%s\' failed \'%s\'',
+                    $groupName,
+                    $stream,
+                    $response->getReasonPhrase()
+                ));
             default:
                 throw new EventStoreConnectionException(\sprintf(
                     'Unexpected status code %d returned',
@@ -964,9 +972,11 @@ class EventStoreHttpConnection implements EventStoreConnection
             case 401:
                 throw AccessDenied::toStream($stream);
             case 404:
-                return new PersistentSubscriptionUpdateResult(
-                    PersistentSubscriptionUpdateStatus::notFound()
-                );
+                throw new InvalidOperationException(\sprintf(
+                    'Subscription group \'%s\' on stream \'%s\' does not exist',
+                    $groupName,
+                    $stream
+                ));
             default:
                 throw new EventStoreConnectionException(\sprintf(
                     'Unexpected status code %d returned',
@@ -1009,9 +1019,12 @@ class EventStoreHttpConnection implements EventStoreConnection
                     PersistentSubscriptionDeleteStatus::success()
                 );
             case 404:
-                return new PersistentSubscriptionDeleteResult(
-                    PersistentSubscriptionDeleteStatus::failure()
-                );
+                throw new InvalidOperationException(\sprintf(
+                'Subscription group \'%s\' on stream \'%s\' failed \'%s\'',
+                $groupName,
+                $stream,
+                $response->getReasonPhrase()
+            ));
             default:
                 throw new EventStoreConnectionException(\sprintf(
                     'Unexpected status code %d returned',
