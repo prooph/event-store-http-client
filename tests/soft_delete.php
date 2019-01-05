@@ -58,9 +58,10 @@ class soft_delete extends TestCase
                 ExpectedVersion::NO_STREAM,
                 TestEvent::newAmount(2)
             );
-            \assert($result instanceof WriteResult);
 
             $this->conn->deleteStream($stream, 1);
+
+            \usleep(100000); // wait for the server
 
             $result = $this->conn->readStreamEventsForward(
                 $stream,
@@ -68,7 +69,6 @@ class soft_delete extends TestCase
                 100,
                 false
             );
-            \assert($result instanceof StreamEventsSlice);
 
             $this->assertTrue(SliceReadStatus::streamNotFound()->equals($result->status()));
             $this->assertCount(0, $result->events());
@@ -89,14 +89,15 @@ class soft_delete extends TestCase
 
             $this->conn->deleteStream($stream, 1);
 
+            \usleep(100000); // wait for the server
+
             $events = TestEvent::newAmount(3);
 
-            $result = $this->conn->appendToStream(
+            $this->conn->appendToStream(
                 $stream,
                 ExpectedVersion::ANY,
                 $events
             );
-            \assert($result instanceof WriteResult);
 
             $result = $this->conn->readStreamEventsForward(
                 $stream,
@@ -104,7 +105,6 @@ class soft_delete extends TestCase
                 100,
                 false
             );
-            \assert($result instanceof StreamEventsSlice);
 
             $this->assertTrue(SliceReadStatus::success()->equals($result->status()));
             $this->assertSame(4, $result->lastEventNumber());
@@ -136,7 +136,6 @@ class soft_delete extends TestCase
             $this->assertSame([2, 3, 4], $actualNumbers);
 
             $meta = $this->conn->getStreamMetadata($stream);
-            \assert($meta instanceof StreamMetadataResult);
 
             $this->assertSame(2, $meta->streamMetadata()->truncateBefore());
             $this->assertSame(1, $meta->metastreamVersion());
@@ -157,14 +156,15 @@ class soft_delete extends TestCase
 
             $this->conn->deleteStream($stream, 1);
 
+            \usleep(100000); // wait for the server
+
             $events = TestEvent::newAmount(3);
 
-            $result = $this->conn->appendToStream(
+            $this->conn->appendToStream(
                 $stream,
                 ExpectedVersion::NO_STREAM,
                 $events
             );
-            \assert($result instanceof WriteResult);
 
             $result = $this->conn->readStreamEventsForward(
                 $stream,
@@ -172,7 +172,6 @@ class soft_delete extends TestCase
                 100,
                 false
             );
-            \assert($result instanceof StreamEventsSlice);
 
             $this->assertTrue(SliceReadStatus::success()->equals($result->status()));
             $this->assertSame(4, $result->lastEventNumber());
@@ -204,7 +203,6 @@ class soft_delete extends TestCase
             $this->assertSame([2, 3, 4], $actualNumbers);
 
             $meta = $this->conn->getStreamMetadata($stream);
-            \assert($meta instanceof StreamMetadataResult);
 
             $this->assertSame(2, $meta->streamMetadata()->truncateBefore());
             $this->assertSame(1, $meta->metastreamVersion());
@@ -229,12 +227,11 @@ class soft_delete extends TestCase
 
             $events = TestEvent::newAmount(3);
 
-            $result = $this->conn->appendToStream(
+            $this->conn->appendToStream(
                 $stream,
                 1,
                 $events
             );
-            \assert($result instanceof WriteResult);
 
             $result = $this->conn->readStreamEventsForward(
                 $stream,
@@ -242,7 +239,6 @@ class soft_delete extends TestCase
                 100,
                 false
             );
-            \assert($result instanceof StreamEventsSlice);
 
             $this->assertTrue(SliceReadStatus::success()->equals($result->status()));
             $this->assertSame(4, $result->lastEventNumber());
@@ -274,7 +270,6 @@ class soft_delete extends TestCase
             $this->assertSame([2, 3, 4], $actualNumbers);
 
             $meta = $this->conn->getStreamMetadata($stream);
-            \assert($meta instanceof StreamMetadataResult);
 
             $this->assertSame(2, $meta->streamMetadata()->truncateBefore());
             $this->assertSame(1, $meta->metastreamVersion());
@@ -292,9 +287,8 @@ class soft_delete extends TestCase
                 ExpectedVersion::NO_STREAM,
                 TestEvent::newAmount(2)
             );
-            \assert($result instanceof WriteResult);
 
-            $result = $this->conn->setStreamMetadata(
+            $this->conn->setStreamMetadata(
                 $stream,
                 ExpectedVersion::NO_STREAM,
                 StreamMetadata::create()
@@ -306,16 +300,14 @@ class soft_delete extends TestCase
                     ->setCustomProperty('key3', 'some value')
                     ->build()
             );
-            \assert($result instanceof WriteResult);
 
             $events = TestEvent::newAmount(3);
 
-            $result = $this->conn->appendToStream(
+            $this->conn->appendToStream(
                 $stream,
                 1,
                 $events
             );
-            \assert($result instanceof WriteResult);
 
             $result = $this->conn->readStreamEventsForward(
                 $stream,
@@ -323,7 +315,6 @@ class soft_delete extends TestCase
                 100,
                 false
             );
-            \assert($result instanceof StreamEventsSlice);
 
             $this->assertTrue(SliceReadStatus::success()->equals($result->status()));
             $this->assertSame(4, $result->lastEventNumber());
@@ -339,7 +330,6 @@ class soft_delete extends TestCase
             $this->assertSame([2, 3, 4], $actualNumbers);
 
             $meta = $this->conn->getStreamMetadata($stream);
-            \assert($meta instanceof StreamMetadataResult);
 
             $this->assertSame(1, $meta->metastreamVersion());
             $this->assertSame(2, $meta->streamMetadata()->truncateBefore());
@@ -357,15 +347,16 @@ class soft_delete extends TestCase
         $this->execute(function () {
             $stream = 'soft_deleted_stream_can_be_deleted';
 
-            $result = $this->conn->appendToStream(
+            $this->conn->appendToStream(
                 $stream,
                 ExpectedVersion::NO_STREAM,
                 TestEvent::newAmount(2)
             );
-            \assert($result instanceof WriteResult);
 
             $this->conn->deleteStream($stream, 1);
             $this->conn->deleteStream($stream, ExpectedVersion::ANY, true);
+
+            \usleep(100000); // wait for the server
 
             $result = $this->conn->readStreamEventsForward(
                 $stream,
@@ -373,12 +364,10 @@ class soft_delete extends TestCase
                 100,
                 false
             );
-            \assert($result instanceof StreamEventsSlice);
 
             $this->assertTrue(SliceReadStatus::streamDeleted()->equals($result->status()));
 
             $meta = $this->conn->getStreamMetadata($stream);
-            \assert($meta instanceof StreamMetadataResult);
 
             $this->assertTrue($meta->isStreamDeleted());
 
@@ -398,21 +387,21 @@ class soft_delete extends TestCase
         $this->execute(function () {
             $stream = 'soft_deleted_stream_allows_recreation_only_for_first_write';
 
-            $result = $this->conn->appendToStream(
+            $this->conn->appendToStream(
                 $stream,
                 ExpectedVersion::NO_STREAM,
                 TestEvent::newAmount(2)
             );
-            \assert($result instanceof WriteResult);
 
             $this->conn->deleteStream($stream, 1);
 
-            $result = $this->conn->appendToStream(
+            \usleep(100000); // wait for the server
+
+            $this->conn->appendToStream(
                 $stream,
                 ExpectedVersion::NO_STREAM,
                 TestEvent::newAmount(3)
             );
-            \assert($result instanceof WriteResult);
 
             try {
                 $this->conn->appendToStream(
@@ -432,7 +421,6 @@ class soft_delete extends TestCase
                 100,
                 false
             );
-            \assert($result instanceof StreamEventsSlice);
 
             $this->assertTrue(SliceReadStatus::success()->equals($result->status()));
             $this->assertSame(4, $result->lastEventNumber());
@@ -448,7 +436,6 @@ class soft_delete extends TestCase
             $this->assertSame([2, 3, 4], $actualNumbers);
 
             $meta = $this->conn->getStreamMetadata($stream);
-            \assert($meta instanceof StreamMetadataResult);
 
             $this->assertSame(2, $meta->streamMetadata()->truncateBefore());
             $this->assertSame(1, $meta->metastreamVersion());
@@ -461,28 +448,27 @@ class soft_delete extends TestCase
         $this->execute(function () {
             $stream = 'soft_deleted_stream_appends_both_concurrent_writes_when_expver_any';
 
-            $result = $this->conn->appendToStream(
+            $this->conn->appendToStream(
                 $stream,
                 ExpectedVersion::NO_STREAM,
                 TestEvent::newAmount(2)
             );
-            \assert($result instanceof WriteResult);
 
             $this->conn->deleteStream($stream, 1);
 
-            $result = $this->conn->appendToStream(
+            \usleep(100000); // wait for the server
+
+            $this->conn->appendToStream(
                 $stream,
                 ExpectedVersion::ANY,
                 TestEvent::newAmount(3)
             );
-            \assert($result instanceof WriteResult);
 
-            $result = $this->conn->appendToStream(
+            $this->conn->appendToStream(
                 $stream,
                 ExpectedVersion::ANY,
                 TestEvent::newAmount(2)
             );
-            \assert($result instanceof WriteResult);
 
             $result = $this->conn->readStreamEventsForward(
                 $stream,
@@ -490,7 +476,6 @@ class soft_delete extends TestCase
                 100,
                 false
             );
-            \assert($result instanceof StreamEventsSlice);
 
             $this->assertTrue(SliceReadStatus::success()->equals($result->status()));
             $this->assertSame(6, $result->lastEventNumber());
@@ -506,7 +491,6 @@ class soft_delete extends TestCase
             $this->assertSame([2, 3, 4, 5, 6], $actualNumbers);
 
             $meta = $this->conn->getStreamMetadata($stream);
-            \assert($meta instanceof StreamMetadataResult);
 
             $this->assertSame(2, $meta->streamMetadata()->truncateBefore());
             $this->assertSame(1, $meta->metastreamVersion());
@@ -521,7 +505,9 @@ class soft_delete extends TestCase
 
             $this->conn->deleteStream($stream, ExpectedVersion::NO_STREAM, false);
 
-            $result = $this->conn->setStreamMetadata(
+            \usleep(100000); // wait for the server
+
+            $this->conn->setStreamMetadata(
                 $stream,
                 0,
                 StreamMetadata::create()
@@ -533,7 +519,6 @@ class soft_delete extends TestCase
                     ->setCustomProperty('key3', 'some value')
                     ->build()
             );
-            \assert($result instanceof WriteResult);
 
             $result = $this->conn->readStreamEventsForward(
                 $stream,
@@ -541,13 +526,11 @@ class soft_delete extends TestCase
                 100,
                 false
             );
-            \assert($result instanceof StreamEventsSlice);
 
             $this->assertTrue(SliceReadStatus::streamNotFound()->equals($result->status()));
             $this->assertCount(0, $result->events());
 
             $meta = $this->conn->getStreamMetadata($stream);
-            \assert($meta instanceof StreamMetadataResult);
 
             $this->assertSame(2, $meta->metastreamVersion());
             $this->assertSame(0, $meta->streamMetadata()->truncateBefore());
@@ -565,16 +548,17 @@ class soft_delete extends TestCase
         $this->execute(function () {
             $stream = 'setting_json_metadata_on_nonempty_soft_deleted_stream_recreates_stream_not_overriding_metadata';
 
-            $result = $this->conn->appendToStream(
+            $this->conn->appendToStream(
                 $stream,
                 ExpectedVersion::NO_STREAM,
                 TestEvent::newAmount(2)
             );
-            \assert($result instanceof WriteResult);
 
             $this->conn->deleteStream($stream, 1, false);
 
-            $result = $this->conn->setStreamMetadata(
+            \usleep(100000); // wait for the server
+
+            $this->conn->setStreamMetadata(
                 $stream,
                 0,
                 StreamMetadata::create()
@@ -586,7 +570,6 @@ class soft_delete extends TestCase
                     ->setCustomProperty('key3', 'some value')
                     ->build()
             );
-            \assert($result instanceof WriteResult);
 
             $result = $this->conn->readStreamEventsForward(
                 $stream,
@@ -594,13 +577,11 @@ class soft_delete extends TestCase
                 100,
                 false
             );
-            \assert($result instanceof StreamEventsSlice);
 
             $this->assertTrue(SliceReadStatus::success()->equals($result->status()));
             $this->assertCount(0, $result->events());
 
             $meta = $this->conn->getStreamMetadata($stream);
-            \assert($meta instanceof StreamMetadataResult);
 
             $this->assertSame(2, $meta->metastreamVersion());
             $this->assertSame(2, $meta->streamMetadata()->truncateBefore());
@@ -621,17 +602,16 @@ class soft_delete extends TestCase
 
             $this->conn->deleteStream($stream, ExpectedVersion::NO_STREAM, false);
 
-            $result = $this->conn->setRawStreamMetadata($stream, 0, $metadata);
-            \assert($result instanceof WriteResult);
+            \usleep(100000); // wait for the server
+
+            $this->conn->setRawStreamMetadata($stream, 0, $metadata);
 
             $result = $this->conn->readStreamEventsForward($stream, 0, 100, false);
-            \assert($result instanceof StreamEventsSlice);
 
             $this->assertTrue(SliceReadStatus::streamNotFound()->equals($result->status()));
             $this->assertCount(0, $result->events());
 
             $meta = $this->conn->getRawStreamMetadata($stream);
-            \assert($meta instanceof RawStreamMetadataResult);
 
             $this->assertSame(1, $meta->metastreamVersion());
             $this->assertSame($metadata, $meta->streamMetadata());
@@ -645,31 +625,29 @@ class soft_delete extends TestCase
             $stream = 'setting_nonjson_metadata_on_nonempty_soft_deleted_stream_recreates_stream_overriding_metadata';
             $metadata = \base64_encode(\random_bytes(256));
 
-            $result = $this->conn->appendToStream(
+            $this->conn->appendToStream(
                 $stream,
                 ExpectedVersion::NO_STREAM,
                 TestEvent::newAmount(2)
             );
-            \assert($result instanceof WriteResult);
 
             $this->conn->deleteStream($stream, 1, false);
 
-            $result = $this->conn->setRawStreamMetadata(
+            \usleep(100000); // wait for the server
+
+            $this->conn->setRawStreamMetadata(
                 $stream,
                 0,
                 $metadata
             );
-            \assert($result instanceof WriteResult);
 
             $result = $this->conn->readStreamEventsForward($stream, 0, 100, false);
-            \assert($result instanceof StreamEventsSlice);
 
             $this->assertTrue(SliceReadStatus::success()->equals($result->status()));
             $this->assertSame(1, $result->lastEventNumber());
             $this->assertCount(2, $result->events());
 
             $meta = $this->conn->getRawStreamMetadata($stream);
-            \assert($meta instanceof RawStreamMetadataResult);
 
             $this->assertSame($metadata, $meta->streamMetadata());
         });
