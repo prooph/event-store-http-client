@@ -19,7 +19,6 @@ use Prooph\EventStore\CatchUpSubscriptionSettings;
 use Prooph\EventStore\EventAppearedOnCatchupSubscription;
 use Prooph\EventStore\EventStoreAllCatchUpSubscription;
 use Prooph\EventStore\EventStoreConnection;
-use Prooph\EventStore\Exception\RuntimeException;
 use Prooph\EventStore\LiveProcessingStartedOnCatchUpSubscription;
 use Prooph\EventStore\Position;
 use Prooph\EventStore\ResolvedEvent;
