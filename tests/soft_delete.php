@@ -225,6 +225,8 @@ class soft_delete extends TestCase
 
             $this->conn->deleteStream($stream, 1);
 
+            \usleep(100000); // wait for the server
+
             $events = TestEvent::newAmount(3);
 
             $result = $this->conn->appendToStream(

@@ -578,6 +578,10 @@ class EventStoreHttpConnection implements EventStoreConnection
             ));
         }
 
+        if ($position->equals(Position::end())) {
+            return new AllEventsSlice(ReadDirection::forward(), $position, $position, []);
+        }
+
         $headers = [
             'Accept' => 'application/vnd.eventstore.atom+json',
         ];
