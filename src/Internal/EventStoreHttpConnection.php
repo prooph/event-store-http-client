@@ -189,6 +189,10 @@ class EventStoreHttpConnection implements EventStoreConnection
             throw new InvalidArgumentException('Stream cannot be empty');
         }
 
+        if (empty($events)) {
+            return new WriteResult(ExpectedVersion::ANY, Position::invalid());
+        }
+
         $data = [];
 
         foreach ($events as $event) {
@@ -200,10 +204,6 @@ class EventStoreHttpConnection implements EventStoreConnection
                 'data' => $event->data(),
                 'metadata' => $event->metaData(),
             ];
-        }
-
-        if (empty($data)) {
-            return new WriteResult(ExpectedVersion::ANY, Position::invalid());
         }
 
         $body = Json::encode($data);
