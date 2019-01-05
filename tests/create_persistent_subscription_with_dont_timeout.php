@@ -14,15 +14,15 @@ declare(strict_types=1);
 namespace ProophTest\EventStoreHttpClient;
 
 use PHPUnit\Framework\TestCase;
-use Prooph\EventStore\EventData;
-use Prooph\EventStore\ExpectedVersion;
+use Prooph\EventStore\EventStoreConnection;
 use Prooph\EventStore\PersistentSubscriptionSettings;
 use Prooph\EventStore\Util\Guid;
+use ProophTest\EventStoreHttpClient\Helper\TestConnection;
 
-class create_persistent_subscription_on_existing_stream extends TestCase
+class create_persistent_subscription_with_dont_timeout extends TestCase
 {
-    use SpecificationWithConnection;
-
+    /** @var EventStoreConnection */
+    protected $conn;
     /** @var string */
     private $stream;
     /** @var PersistentSubscriptionSettings */
@@ -30,35 +30,32 @@ class create_persistent_subscription_on_existing_stream extends TestCase
 
     protected function setUp(): void
     {
+        $this->conn = TestConnection::create();
         $this->stream = Guid::generateAsHex();
         $this->settings = PersistentSubscriptionSettings::create()
             ->doNotResolveLinkTos()
             ->startFromCurrent()
+            ->dontTimeoutMessages()
             ->build();
     }
 
-    protected function when(): void
+    /** @test */
+    public function the_message_timeout_should_be_zero(): void
     {
-        $this->conn->appendToStream(
-            $this->stream,
-            ExpectedVersion::ANY,
-            [new EventData(null, 'whatever', true, '{"foo":"bar"}')]
-        );
+        $this->assertSame(0, $this->settings->messageTimeoutMilliseconds());
     }
 
     /**
      * @test
      * @doesNotPerformAssertions
      */
-    public function the_completion_succeeds(): void
+    public function the_subscription_is_created_without_error(): void
     {
-        $this->execute(function () {
-            $this->conn->createPersistentSubscription(
-                $this->stream,
-                'existing',
-                $this->settings,
-                DefaultData::adminCredentials()
-            );
-        });
+        $this->conn->createPersistentSubscription(
+            $this->stream,
+            'dont-timeout',
+            $this->settings,
+            DefaultData::adminCredentials()
+        );
     }
 }
