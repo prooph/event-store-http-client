@@ -767,7 +767,7 @@ class EventStoreHttpConnection implements EventStoreConnection
         );
 
         return $this->appendToStream(
-            $stream,
+            SystemStreams::metastreamOf($stream),
             $expectedMetaStreamVersion,
             [$metaEvent],
             $userCredentials
