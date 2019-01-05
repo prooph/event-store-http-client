@@ -972,9 +972,11 @@ class EventStoreHttpConnection implements EventStoreConnection
             case 401:
                 throw AccessDenied::toStream($stream);
             case 404:
-                return new PersistentSubscriptionUpdateResult(
-                    PersistentSubscriptionUpdateStatus::notFound()
-                );
+                throw new InvalidOperationException(\sprintf(
+                    'Subscription group \'%s\' on stream \'%s\' does not exist',
+                    $groupName,
+                    $stream
+                ));
             default:
                 throw new EventStoreConnectionException(\sprintf(
                     'Unexpected status code %d returned',
