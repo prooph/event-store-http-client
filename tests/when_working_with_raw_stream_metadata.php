@@ -21,7 +21,6 @@ use Prooph\EventStore\ExpectedVersion;
 use Prooph\EventStore\Util\Guid;
 use ProophTest\EventStoreHttpClient\Helper\TestConnection;
 use ProophTest\EventStoreHttpClient\Helper\TestEvent;
-use Throwable;
 
 class when_working_with_raw_stream_metadata extends TestCase
 {
@@ -52,10 +51,7 @@ class when_working_with_raw_stream_metadata extends TestCase
         $this->assertEquals('', $meta->streamMetadata());
     }
 
-    /**
-     * @test
-     * @throws Throwable
-     */
+    /** @test */
     public function setting_metadata_few_times_returns_last_metadata(): void
     {
         $this->conn->setStreamMetadata(
@@ -83,10 +79,7 @@ class when_working_with_raw_stream_metadata extends TestCase
         $this->assertEquals('', $meta->streamMetadata());
     }
 
-    /**
-     * @test
-     * @throws Throwable
-     */
+    /** @test */
     public function trying_to_set_metadata_with_wrong_expected_version_fails(): void
     {
         $this->expectException(WrongExpectedVersion::class);
@@ -97,10 +90,7 @@ class when_working_with_raw_stream_metadata extends TestCase
         );
     }
 
-    /**
-     * @test
-     * @throws Throwable
-     */
+    /** @test */
     public function setting_metadata_with_expected_version_any_works(): void
     {
         $this->conn->setStreamMetadata(
@@ -128,10 +118,7 @@ class when_working_with_raw_stream_metadata extends TestCase
         $this->assertEquals('', $meta->streamMetadata());
     }
 
-    /**
-     * @test
-     * @throws Throwable
-     */
+    /** @test */
     public function setting_metadata_for_not_existing_stream_works(): void
     {
         $this->conn->setStreamMetadata(
@@ -147,10 +134,7 @@ class when_working_with_raw_stream_metadata extends TestCase
         $this->assertEquals('', $meta->streamMetadata());
     }
 
-    /**
-     * @test
-     * @throws Throwable
-     */
+    /** @test */
     public function setting_metadata_for_existing_stream_works(): void
     {
         $this->conn->appendToStream(
@@ -172,10 +156,7 @@ class when_working_with_raw_stream_metadata extends TestCase
         $this->assertEquals('', $meta->streamMetadata());
     }
 
-    /**
-     * @test
-     * @throws Throwable
-     */
+    /** @test */
     public function setting_metadata_for_deleted_stream_throws_stream_deleted_exception(): void
     {
         $this->conn->deleteStream(
@@ -192,10 +173,7 @@ class when_working_with_raw_stream_metadata extends TestCase
         );
     }
 
-    /**
-     * @test
-     * @throws Throwable
-     */
+    /** @test */
     public function getting_metadata_for_nonexisting_stream_returns_empty_string(): void
     {
         $meta = $this->conn->getRawStreamMetadata($this->stream);
@@ -206,10 +184,7 @@ class when_working_with_raw_stream_metadata extends TestCase
         $this->assertEquals('', $meta->streamMetadata());
     }
 
-    /**
-     * @test
-     * @throws Throwable
-     */
+    /** @test */
     public function getting_metadata_for_deleted_stream_returns_empty_string_and_signals_stream_deletion(): void
     {
         $this->conn->setStreamMetadata($this->stream, ExpectedVersion::EMPTY_STREAM);
