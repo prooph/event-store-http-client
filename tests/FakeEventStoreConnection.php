@@ -170,7 +170,7 @@ class FakeEventStoreConnection implements EventStoreConnection
         throw new \RuntimeException('Not implemented');
     }
 
-    public function setSystemSettings(SystemSettings $settings, ?UserCredentials $userCredentials = null): void
+    public function setSystemSettings(SystemSettings $settings, ?UserCredentials $userCredentials = null): WriteResult
     {
         throw new \RuntimeException('Not implemented');
     }
