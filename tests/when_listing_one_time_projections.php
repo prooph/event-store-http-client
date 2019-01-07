@@ -13,45 +13,31 @@ declare(strict_types=1);
 
 namespace ProophTest\EventStoreHttpClient;
 
-use Generator;
 use PHPUnit\Framework\TestCase;
 use Prooph\EventStore\Projections\ProjectionDetails;
-use Prooph\EventStore\Util\Guid;
 
-class when_listing_continuous_projections extends TestCase
+class when_listing_one_time_projections extends TestCase
 {
     use ProjectionSpecification;
 
     /** @var ProjectionDetails[] */
     private $result;
-    /** @var string */
-    private $projectionName;
 
     protected function given(): void
     {
-        $this->projectionName = Guid::generateAsHex();
-        $this->createContinuousProjection($this->projectionName);
+        $this->createOneTimeProjection();
     }
 
     protected function when(): void
     {
-        $this->result = $this->projectionsManager->listContinuous($this->credentials);
+        $this->result = $this->projectionsManager->listOneTime($this->credentials);
     }
 
     /** @test */
     public function should_return_continuous_projections(): void
     {
         $this->execute(function () {
-            $found = false;
-
-            foreach ($this->result as $value) {
-                if ($value->effectiveName() === $this->projectionName) {
-                    $found = true;
-                    break;
-                }
-            }
-
-            $this->assertTrue($found);
+            $this->assertNotEmpty($this->result);
         });
     }
 }
