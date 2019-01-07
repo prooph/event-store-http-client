@@ -13,7 +13,6 @@ declare(strict_types=1);
 
 namespace ProophTest\EventStoreHttpClient;
 
-use Generator;
 use PHPUnit\Framework\TestCase;
 use Prooph\EventStore\Projections\ProjectionDetails;
 use Prooph\EventStore\Util\Guid;
