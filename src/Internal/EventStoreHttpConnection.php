@@ -399,8 +399,8 @@ class EventStoreHttpConnection implements EventStoreConnection
                     $start,
                     ReadDirection::forward(),
                     [],
-                    0,
-                    0,
+                    -1,
+                    -1,
                     true
                 );
             case 410:
@@ -410,8 +410,8 @@ class EventStoreHttpConnection implements EventStoreConnection
                     $start,
                     ReadDirection::forward(),
                     [],
-                    0,
-                    0,
+                    -1,
+                    -1,
                     true
                 );
             case 200:
@@ -522,8 +522,8 @@ class EventStoreHttpConnection implements EventStoreConnection
                     $start,
                     ReadDirection::backward(),
                     [],
-                    0,
-                    0,
+                    -1,
+                    -1,
                     true
                 );
             case 410:
@@ -533,8 +533,8 @@ class EventStoreHttpConnection implements EventStoreConnection
                     $start,
                     ReadDirection::backward(),
                     [],
-                    0,
-                    0,
+                    -1,
+                    -1,
                     true
                 );
             default:
