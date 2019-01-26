@@ -43,8 +43,6 @@ trait ProjectionSpecification
         $this->connection = TestConnection::create();
 
         $this->projectionsManager = ProjectionsManagerFactory::create(
-            null,
-            null,
             TestConnection::settings()
         );
 

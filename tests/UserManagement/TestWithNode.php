@@ -26,8 +26,6 @@ abstract class TestWithNode extends TestCase
     protected function setUp(): void
     {
         $this->manager = UsersManagerFactory::create(
-            null,
-            null,
             TestConnection::settings()
         );
     }

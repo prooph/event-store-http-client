@@ -32,14 +32,14 @@ class QueryManager implements SyncQueryManager
 
     /** @internal */
     public function __construct(
+        ConnectionSettings $settings,
         ClientInterface $client,
-        RequestFactory $requestFactory,
-        ConnectionSettings $settings
+        RequestFactory $requestFactory
     ) {
         $this->projectionsManager = new ProjectionsManager(
+            $settings,
             $client,
-            $requestFactory,
-            $settings
+            $requestFactory
         );
     }
 

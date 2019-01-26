@@ -46,8 +46,6 @@ class persistent_subscription_manager extends TestCase
     protected function setUp(): void
     {
         $this->manager = PersistentSubscriptionsManagerFactory::create(
-            null,
-            null,
             TestConnection::settings()
         );
         $this->stream = Guid::generateAsHex();

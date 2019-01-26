@@ -23,14 +23,14 @@ use Psr\Http\Client\ClientInterface;
 class ProjectionsManagerFactory
 {
     public static function create(
+        ConnectionSettings $settings = null,
         ClientInterface $client = null,
-        RequestFactory $requestFactory = null,
-        ConnectionSettings $settings = null
+        RequestFactory $requestFactory = null
     ): SyncProjectionsManager {
         return new ProjectionsManager(
+            $settings ?? ConnectionSettings::default(),
             $client ?? HttpClientDiscovery::find(),
-            $requestFactory ?? MessageFactoryDiscovery::find(),
-            $settings ?? ConnectionSettings::default()
+            $requestFactory ?? MessageFactoryDiscovery::find()
         );
     }
 }
