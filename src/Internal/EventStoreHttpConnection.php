@@ -25,6 +25,7 @@ use Prooph\EventStore\EventAppearedOnCatchupSubscription;
 use Prooph\EventStore\EventAppearedOnPersistentSubscription;
 use Prooph\EventStore\EventAppearedOnSubscription;
 use Prooph\EventStore\EventData;
+use Prooph\EventStore\EventId;
 use Prooph\EventStore\EventReadResult;
 use Prooph\EventStore\EventReadStatus;
 use Prooph\EventStore\EventStoreAllCatchUpSubscription;
@@ -763,19 +764,47 @@ class EventStoreHttpConnection implements EventStoreConnection
             ));
         }
 
-        $metaEvent = new EventData(
-            null,
-            SystemEventTypes::STREAM_METADATA,
-            true,
-            $metadata
+        $headers = [
+            'ES-ExpectedVersion' => $expectedMetaStreamVersion,
+            'Content-Type' => 'application/json',
+            'ES-EventId' => EventId::generate()->toString(),
+        ];
+
+        if ($this->settings->requireMaster()) {
+            $headers['ES-RequiresMaster'] = 'true';
+        }
+
+        $response = $this->httpClient->post(
+            '/streams/' . \urlencode($stream) . '/metadata',
+            $headers,
+            $metadata,
+            $userCredentials,
+            $this->onException
         );
 
-        return $this->appendToStream(
-            SystemStreams::metastreamOf($stream),
-            $expectedMetaStreamVersion,
-            [$metaEvent],
-            $userCredentials
-        );
+        switch ($response->getStatusCode()) {
+            case 201:
+                return new WriteResult(ExpectedVersion::ANY, Position::invalid());
+            case 400:
+                $header = $response->getHeader('ES-CurrentVersion');
+
+                if (empty($header)) {
+                    throw new EventStoreConnectionException($response->getReasonPhrase());
+                }
+
+                $currentVersion = (int) $header[0];
+
+                throw WrongExpectedVersion::with($stream, $expectedMetaStreamVersion, $currentVersion);
+            case 401:
+                throw AccessDenied::toStream($stream);
+            case 410:
+                throw StreamDeleted::with($stream);
+            default:
+                throw new EventStoreConnectionException(\sprintf(
+                    'Unexpected status code %d returned',
+                    $response->getStatusCode()
+                ));
+        }
     }
 
     public function getStreamMetadata(
