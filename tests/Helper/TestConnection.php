@@ -28,8 +28,6 @@ class TestConnection
         self::checkRequiredEnvironmentSettings();
 
         return EventStoreConnectionFactory::create(
-            null,
-            null,
             self::settings($userCredentials)
         );
     }

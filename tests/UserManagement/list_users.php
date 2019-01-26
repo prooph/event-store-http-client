@@ -56,8 +56,6 @@ class list_users extends TestWithNode
     public function list_all_users_falls_back_to_default_credentials(): void
     {
         $manager = UsersManagerFactory::create(
-            null,
-            null,
             TestConnection::settings()
         );
 

@@ -29,16 +29,16 @@ use Throwable;
 
 class PersistentSubscriptionsManager implements SyncPersistentSubscriptionsManager
 {
-    /** @var HttpClient */
-    private $httpClient;
     /** @var ConnectionSettings */
     private $settings;
+    /** @var HttpClient */
+    private $httpClient;
 
     /** @internal */
     public function __construct(
+        ConnectionSettings $settings,
         ClientInterface $client,
-        RequestFactory $requestFactory,
-        ConnectionSettings $settings
+        RequestFactory $requestFactory
     ) {
         $this->settings = $settings;
 

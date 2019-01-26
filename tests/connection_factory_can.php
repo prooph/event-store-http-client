@@ -26,8 +26,6 @@ final class connection_factory_can extends TestCase
     public function create_from_settings_and_discover_client_and_request_factory(): void
     {
         $conn = Factory::create(
-            null,
-            null,
             ConnectionSettings::default()
         );
 
@@ -43,8 +41,6 @@ final class connection_factory_can extends TestCase
     public function create_from_connection_string(): void
     {
         $conn = Factory::create(
-            null,
-            null,
             ConnectionString::getConnectionSettings(
                 'endpoint=foo:21345'
             )

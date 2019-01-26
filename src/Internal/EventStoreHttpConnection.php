@@ -74,10 +74,10 @@ use Throwable;
 /** @internal */
 class EventStoreHttpConnection implements EventStoreConnection
 {
-    /** @var HttpClient */
-    private $httpClient;
     /** @var ConnectionSettings */
     private $settings;
+    /** @var HttpClient */
+    private $httpClient;
     /** @var callable */
     private $onException;
     /** @var string */
@@ -85,9 +85,9 @@ class EventStoreHttpConnection implements EventStoreConnection
 
     /** @internal */
     public function __construct(
+        ConnectionSettings $settings,
         ClientInterface $httpClient,
-        RequestFactory $requestFactory,
-        ConnectionSettings $settings
+        RequestFactory $requestFactory
     ) {
         $this->baseUri = \sprintf(
             '%s://%s:%s',
