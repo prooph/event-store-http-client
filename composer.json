@@ -23,7 +23,7 @@
     "php-http/httplug": "^2.0",
     "php-http/message": "^1.7.1",
     "php-http/message-factory": "^1.0.2",
-    "prooph/event-store": "^8.0.0@beta",
+    "prooph/event-store": "^8.0.0-BETA-2",
     "ramsey/uuid": "^3.8"
   },
   "require-dev": {

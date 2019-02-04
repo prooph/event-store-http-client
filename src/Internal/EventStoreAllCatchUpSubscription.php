@@ -26,7 +26,7 @@ use Prooph\EventStore\SubscriptionDropReason;
 use Prooph\EventStore\UserCredentials;
 use Throwable;
 
-class EventStoreHttpAllCatchUpSubscription extends EventStoreCatchUpSubscription implements EventStoreAllCatchUpSubscription
+class EventStoreAllCatchUpSubscription extends EventStoreCatchUpSubscription implements EventStoreAllCatchUpSubscription
 {
     /** @var Position */
     private $nextReadPosition;
