@@ -15,7 +15,7 @@ namespace Prooph\EventStoreHttpClient\Internal;
 
 use Prooph\EventStore\EventAppearedOnPersistentSubscription;
 use Prooph\EventStore\EventId;
-use Prooph\EventStore\EventStorePersistentSubscription;
+use Prooph\EventStore\EventStorePersistentSubscription as EventStorePersistentSubscriptionInterface;
 use Prooph\EventStore\Exception\RuntimeException;
 use Prooph\EventStore\Internal\DropData;
 use Prooph\EventStore\Internal\PersistentEventStoreSubscription;
@@ -30,7 +30,7 @@ use Prooph\EventStoreHttpClient\Http\HttpClient;
 use SplQueue;
 use Throwable;
 
-class EventStorePersistentHttpSubscription implements EventStorePersistentSubscription
+class EventStorePersistentSubscription implements EventStorePersistentSubscriptionInterface
 {
     /** @var HttpClient */
     private $httpClient;
@@ -51,7 +51,7 @@ class EventStorePersistentHttpSubscription implements EventStorePersistentSubscr
     /** @var bool */
     private $autoAck;
 
-    /** @var PersistentEventStoreHttpSubscription */
+    /** @var PersistentEventStoreSubscription */
     private $subscription;
     /** @var SplQueue */
     private $queue;
@@ -134,7 +134,7 @@ class EventStorePersistentHttpSubscription implements EventStorePersistentSubscr
             $this->onSubscriptionDropped($reason, $exception);
         };
 
-        /** @var PersistentEventStoreHttpSubscription $subscription */
+        /** @var PersistentEventStoreSubscription $subscription */
         $this->subscription = $subscription = $this->startSubscription(
             $this->subscriptionId,
             $this->streamId,
@@ -245,6 +245,20 @@ class EventStorePersistentHttpSubscription implements EventStorePersistentSubscr
         );
 
         $this->subscription->notifyEventsFailed($ids, $action, $reason);
+    }
+
+    public function failEventId(EventId $eventId, PersistentSubscriptionNakEventAction $action, string $reason): void
+    {
+        $this->subscription->notifyEventsFailed([$eventId], $action, $reason);
+    }
+
+    public function failMultipleEventIds(array $eventIds, PersistentSubscriptionNakEventAction $action, string $reason): void
+    {
+        foreach ($eventIds as $eventId) {
+            \assert($eventId instanceof EventId);
+        }
+
+        $this->subscription->notifyEventsFailed($eventIds, $action, $reason);
     }
 
     public function stop(): void

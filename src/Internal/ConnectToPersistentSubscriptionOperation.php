@@ -139,7 +139,7 @@ class ConnectToPersistentSubscriptionOperation implements ConnectToPersistentSub
 
     public function createSubscriptionObject(): PersistentEventStoreSubscription
     {
-        return new PersistentEventStoreHttpSubscription(
+        return new PersistentEventStoreSubscription(
             $this,
             $this->streamId
         );

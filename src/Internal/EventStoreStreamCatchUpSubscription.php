@@ -17,7 +17,7 @@ use Prooph\EventStore\CatchUpSubscriptionDropped;
 use Prooph\EventStore\CatchUpSubscriptionSettings;
 use Prooph\EventStore\EventAppearedOnCatchupSubscription;
 use Prooph\EventStore\EventStoreConnection;
-use Prooph\EventStore\EventStoreStreamCatchUpSubscription;
+use Prooph\EventStore\EventStoreStreamCatchUpSubscription as EventStoreStreamCatchUpSubscriptionInterface;
 use Prooph\EventStore\Exception\OutOfRangeException;
 use Prooph\EventStore\Exception\RuntimeException;
 use Prooph\EventStore\Exception\StreamDeleted;
@@ -29,7 +29,9 @@ use Prooph\EventStore\SubscriptionDropReason;
 use Prooph\EventStore\UserCredentials;
 use Throwable;
 
-class EventStoreHttpStreamCatchUpSubscription extends EventStoreCatchUpSubscription implements EventStoreStreamCatchUpSubscription
+class EventStoreStreamCatchUpSubscription
+    extends EventStoreCatchUpSubscription
+    implements EventStoreStreamCatchUpSubscriptionInterface
 {
     /** @var int */
     private $nextReadEventNumber;

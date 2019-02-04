@@ -1129,7 +1129,7 @@ class EventStoreHttpConnection implements EventStoreConnection
             $settings = CatchUpSubscriptionSettings::default();
         }
 
-        return new EventStoreHttpStreamCatchUpSubscription(
+        return new EventStoreStreamCatchUpSubscription(
             $this,
             $stream,
             $lastCheckpoint,
@@ -1177,7 +1177,7 @@ class EventStoreHttpConnection implements EventStoreConnection
             $settings = CatchUpSubscriptionSettings::default();
         }
 
-        return new EventStoreHttpAllCatchUpSubscription(
+        return new EventStoreAllCatchUpSubscription(
             $this,
             $lastCheckpoint,
             $userCredentials,
@@ -1205,7 +1205,7 @@ class EventStoreHttpConnection implements EventStoreConnection
             throw new InvalidArgumentException('Group cannot be empty');
         }
 
-        return new EventStorePersistentHttpSubscription(
+        return new EventStorePersistentSubscription(
             $this->httpClient,
             $groupName,
             $stream,

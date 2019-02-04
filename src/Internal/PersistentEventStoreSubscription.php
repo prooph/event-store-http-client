@@ -13,9 +13,9 @@ declare(strict_types=1);
 
 namespace Prooph\EventStoreHttpClient\Internal;
 
-use Prooph\EventStore\Internal\PersistentEventStoreSubscription;
+use Prooph\EventStore\Internal\PersistentEventStoreSubscription as PersistentEventStoreSubscriptionBase;
 
-class PersistentEventStoreHttpSubscription extends PersistentEventStoreSubscription
+class PersistentEventStoreSubscription extends PersistentEventStoreSubscriptionBase
 {
     /** @var ConnectToPersistentSubscriptionOperation */
     private $operation;
