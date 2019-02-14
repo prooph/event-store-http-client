@@ -24,7 +24,7 @@ class ResolvedEventParser
 {
     public static function parse(array $entry): ResolvedEvent
     {
-        $link = null;
+        $linkedEvent = null;
 
         if ($entry['isLinkMetaData']) {
             $data = $entry['data'];
@@ -39,7 +39,7 @@ class ResolvedEventParser
                 $metadata = Json::encode($metadata);
             }
 
-            $link = new RecordedEvent(
+            $linkedEvent = new RecordedEvent(
                 $entry['streamId'],
                 $entry['eventNumber'],
                 EventId::fromString($entry['eventId']),
@@ -51,13 +51,13 @@ class ResolvedEventParser
             );
         }
 
-        $data = $link ? $entry['title'] : $entry['data'];
+        $data = $linkedEvent ? $entry['title'] : $entry['data'];
 
         if (\is_array($data)) {
             $data = Json::encode($data);
         }
 
-        $metadata = $link
+        $metadata = $linkedEvent
             ? $entry['linkMetaData']
             : $entry['metaData'] ?? '';
 
@@ -67,7 +67,7 @@ class ResolvedEventParser
 
         $eventId = $entry['eventId'];
 
-        if ($link) {
+        if ($linkedEvent) {
             foreach ($entry['links'] as $elink) {
                 if ('ack' === $elink['relation']) {
                     $eventId = \substr($elink['uri'], -36);
@@ -87,6 +87,6 @@ class ResolvedEventParser
             DateTime::create($entry['updated'])
         );
 
-        return new ResolvedEvent($record, $link, null);
+        return new ResolvedEvent($linkedEvent, $record, null);
     }
 }
