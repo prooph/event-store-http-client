@@ -508,7 +508,7 @@ class ProjectionsManager implements SyncProjectionsManager
             $entry['mode'],
             $entry['position'],
             $entry['progress'],
-            $entry['lastCheckpoint'],
+            $entry['lastCheckpoint'] ?? '',
             $entry['eventsProcessedAfterRestart'],
             $entry['statusUrl'],
             $entry['stateUrl'],
@@ -516,7 +516,7 @@ class ProjectionsManager implements SyncProjectionsManager
             $entry['queryUrl'],
             $entry['enableCommandUrl'],
             $entry['disableCommandUrl'],
-            $entry['checkpointStatus'],
+            $entry['checkpointStatus'] ?? '',
             $entry['bufferedEvents'],
             $entry['writePendingEventsBeforeCheckpoint'],
             $entry['writePendingEventsAfterCheckpoint']
