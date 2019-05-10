@@ -17,7 +17,7 @@ use Prooph\EventStore\AllEventsSlice;
 use Prooph\EventStore\CatchUpSubscriptionDropped;
 use Prooph\EventStore\CatchUpSubscriptionSettings;
 use Prooph\EventStore\EventAppearedOnCatchupSubscription;
-use Prooph\EventStore\EventStoreAllCatchUpSubscription;
+use Prooph\EventStore\EventStoreAllCatchUpSubscription as EventStoreAllCatchUpSubscriptionInterface;
 use Prooph\EventStore\EventStoreConnection;
 use Prooph\EventStore\LiveProcessingStartedOnCatchUpSubscription;
 use Prooph\EventStore\Position;
@@ -26,7 +26,9 @@ use Prooph\EventStore\SubscriptionDropReason;
 use Prooph\EventStore\UserCredentials;
 use Throwable;
 
-class EventStoreAllCatchUpSubscription extends EventStoreCatchUpSubscription implements EventStoreAllCatchUpSubscription
+class EventStoreAllCatchUpSubscription
+    extends EventStoreCatchUpSubscription
+    implements EventStoreAllCatchUpSubscriptionInterface
 {
     /** @var Position */
     private $nextReadPosition;

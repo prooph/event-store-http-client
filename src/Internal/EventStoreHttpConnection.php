@@ -68,6 +68,9 @@ use Prooph\EventStore\Util\Json;
 use Prooph\EventStore\WriteResult;
 use Prooph\EventStoreHttpClient\ConnectionSettings;
 use Prooph\EventStoreHttpClient\Http\HttpClient;
+use Prooph\EventStoreHttpClient\Internal\EventStoreAllCatchUpSubscription as EventStoreAllCatchUpSubscriptionImpl;
+use Prooph\EventStoreHttpClient\Internal\EventStorePersistentSubscription as EventStorePersistentSubscriptionImpl;
+use Prooph\EventStoreHttpClient\Internal\EventStoreStreamCatchUpSubscription as EventStoreStreamCatchUpSubscriptionImpl;
 use Psr\Http\Client\ClientInterface;
 use Throwable;
 
@@ -1129,7 +1132,7 @@ class EventStoreHttpConnection implements EventStoreConnection
             $settings = CatchUpSubscriptionSettings::default();
         }
 
-        return new EventStoreStreamCatchUpSubscription(
+        return new EventStoreStreamCatchUpSubscriptionImpl(
             $this,
             $stream,
             $lastCheckpoint,
@@ -1177,7 +1180,7 @@ class EventStoreHttpConnection implements EventStoreConnection
             $settings = CatchUpSubscriptionSettings::default();
         }
 
-        return new EventStoreAllCatchUpSubscription(
+        return new EventStoreAllCatchUpSubscriptionImpl(
             $this,
             $lastCheckpoint,
             $userCredentials,
@@ -1205,7 +1208,7 @@ class EventStoreHttpConnection implements EventStoreConnection
             throw new InvalidArgumentException('Group cannot be empty');
         }
 
-        return new EventStorePersistentSubscription(
+        return new EventStorePersistentSubscriptionImpl(
             $this->httpClient,
             $groupName,
             $stream,
