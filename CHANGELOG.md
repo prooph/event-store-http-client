@@ -1,7 +1,23 @@
 # Change Log
 
-## [v1.0.0-BETA-2](https://github.com/prooph/event-store-http-client/tree/1.0.0-BETA-2)
+## [v1.0.0-BETA-3](https://github.com/prooph/event-store-http-client/tree/v1.0.0-BETA-3)
 
+[Full Changelog](https://github.com/prooph/event-store-http-client/compare/v1.0.0-BETA-2...v1.0.0-BETA-3)
+
+**Fixed bugs:**
+
+- ResolvedEvent inconsistency [\#32](https://github.com/prooph/event-store-http-client/issues/32)
+
+**Closed issues:**
+
+- Event data body with escaped quotes [\#35](https://github.com/prooph/event-store-http-client/issues/35)
+- Notice: Undefined index: lastCheckpoint   [\#31](https://github.com/prooph/event-store-http-client/issues/31)
+
+**Merged pull requests:**
+
+- Fix undefined index [\#34](https://github.com/prooph/event-store-http-client/pull/34) ([enumag](https://github.com/enumag))
+
+## [v1.0.0-BETA-2](https://github.com/prooph/event-store-http-client/tree/v1.0.0-BETA-2) (2019-02-04)
 [Full Changelog](https://github.com/prooph/event-store-http-client/compare/v1.0.0-BETA-1...v1.0.0-BETA-2)
 
 **Implemented enhancements:**
