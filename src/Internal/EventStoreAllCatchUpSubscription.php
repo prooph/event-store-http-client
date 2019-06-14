@@ -24,6 +24,7 @@ use Prooph\EventStore\Position;
 use Prooph\EventStore\ResolvedEvent;
 use Prooph\EventStore\SubscriptionDropReason;
 use Prooph\EventStore\UserCredentials;
+use RuntimeException;
 use Throwable;
 
 class EventStoreAllCatchUpSubscription
