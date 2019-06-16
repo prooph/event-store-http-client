@@ -419,7 +419,8 @@ class EventStoreHttpConnection implements EventStoreConnection
                     true
                 );
             case 200:
-                $json = Json::decode($response->getBody()->getContents());
+                $contents = $response->getBody()->getContents();
+                $json = Json::decode($contents);
 
                 $events = [];
                 $lastEventNumber = $start - 1;
@@ -427,7 +428,13 @@ class EventStoreHttpConnection implements EventStoreConnection
                 foreach (\array_reverse($json['entries']) as $entry) {
                     $events[] = ResolvedEventParser::parse($entry);
 
-                    $lastEventNumber = $entry['eventNumber'];
+                    if (! isset($entry['eventNumber'])) {
+                        $matches = [];
+                        \preg_match('/^(\d+)@(.+)$/', $entry['title'], $matches);
+                        $entry['eventNumber'] = $matches[1];
+                    }
+
+                    $lastEventNumber = (int) $entry['eventNumber'];
                 }
 
                 return new StreamEventsSlice(

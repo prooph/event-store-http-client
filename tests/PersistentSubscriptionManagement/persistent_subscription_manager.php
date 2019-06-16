@@ -200,7 +200,6 @@ class persistent_subscription_manager extends TestCase
     /**
      * @test
      * @doesNotPerformAssertions
-     * @group by
      */
     public function can_replay_parked_messages(): void
     {
