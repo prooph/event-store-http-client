@@ -48,7 +48,9 @@ class ResolvedEventParser
                 $entry['isJson'],
                 $data,
                 $metadata,
-                self::createDateTime($entry['updated'])
+                DateTime::create(DateTimeStringBugWorkaround::fixDateTimeString(
+                    $entry['updated']
+                ))
             );
         }
 
@@ -94,7 +96,9 @@ class ResolvedEventParser
             $entry['isJson'] ?? false,
             $data,
             $metadata,
-            self::createDateTime($entry['updated'])
+            DateTime::create(DateTimeStringBugWorkaround::fixDateTimeString(
+                $entry['updated']
+            ))
         );
 
         if (null === $record && null !== $link) {
@@ -103,21 +107,5 @@ class ResolvedEventParser
         }
 
         return new ResolvedEvent($record ?? $link, $link, null);
-    }
-
-    private static function createDateTime(string $dateTimeString): DateTimeImmutable
-    {
-        $micros = \substr($dateTimeString, 20, -1);
-        $length = \strlen($micros);
-
-        if ($length < 6) {
-            $micros .= \str_repeat('0', 6 - $length);
-        } elseif ($length > 6) {
-            $micros = \substr($micros, 0, 6);
-        }
-
-        $dateTimeString = \substr($dateTimeString, 0, 20) . $micros . 'Z';
-
-        return DateTime::create($dateTimeString);
     }
 }
