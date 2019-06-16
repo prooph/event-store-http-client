@@ -27,6 +27,7 @@ use Prooph\EventStore\ResolvedEvent;
 use Prooph\EventStore\SubscriptionDropReason;
 use Prooph\EventStore\UserCredentials;
 use Prooph\EventStoreHttpClient\Http\HttpClient;
+use ReflectionProperty;
 use SplQueue;
 use Throwable;
 
@@ -144,7 +145,11 @@ class EventStorePersistentSubscription implements EventStorePersistentSubscripti
             $subscriptionDropped
         );
 
-        $operation = $subscription->operation();
+        // @todo dirty hack
+        $property = new ReflectionProperty($subscription, 'subscriptionOperation');
+        $property->setAccessible(true);
+
+        $operation = $property->getValue($subscription);
 
         while (! $this->isDropped) {
             foreach ($operation->readFromSubscription($this->bufferSize) as $event) {

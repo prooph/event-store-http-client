@@ -68,7 +68,7 @@ class when_resetting_projections extends TestCase
             );
             $status = $projectionStatus['status'];
 
-            $this->assertStringStartsWith('Preparing', $status);
+            $this->assertTrue(\in_array($status, ['Running', 'Preparing', 'Preparing/Stopping'], true));
 
             \usleep(500000);
 
@@ -81,7 +81,7 @@ class when_resetting_projections extends TestCase
             );
             $status = $projectionStatus['status'];
 
-            $this->assertSame('Running', $status);
+            $this->assertTrue(\in_array($status, ['Running', 'Preparing'], true));
         });
     }
 }

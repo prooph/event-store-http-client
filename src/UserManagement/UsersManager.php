@@ -29,6 +29,7 @@ use Prooph\EventStoreHttpClient\ConnectionSettings;
 use Prooph\EventStoreHttpClient\Exception\UserCommandConflictException;
 use Prooph\EventStoreHttpClient\Exception\UserCommandFailed;
 use Prooph\EventStoreHttpClient\Http\HttpClient;
+use Prooph\EventStoreHttpClient\Internal\DateTimeStringBugWorkaround;
 use Psr\Http\Client\ClientInterface;
 use Psr\Http\Message\ResponseInterface;
 use Throwable;
@@ -126,6 +127,12 @@ class UsersManager implements SyncUsersManager
         $userDetails = [];
 
         foreach ($data['data'] as $entry) {
+            if (isset($entry['dateLastUpdated'])) {
+                $entry['dateLastUpdated'] = DateTimeStringBugWorkaround::fixDateTimeString(
+                    $entry['dateLastUpdated']
+                );
+            }
+
             $userDetails[] = UserDetails::fromArray($entry);
         }
 
@@ -141,6 +148,12 @@ class UsersManager implements SyncUsersManager
         );
 
         $data = Json::decode($response->getBody()->getContents());
+
+        if (isset($data['data']['dateLastUpdated'])) {
+            $data['data']['dateLastUpdated'] = DateTimeStringBugWorkaround::fixDateTimeString(
+                $data['data']['dateLastUpdated']
+            );
+        }
 
         return UserDetails::fromArray($data['data']);
     }
@@ -161,6 +174,12 @@ class UsersManager implements SyncUsersManager
         );
 
         $data = Json::decode($response->getBody()->getContents());
+
+        if (isset($data['data']['dateLastUpdated'])) {
+            $data['data']['dateLastUpdated'] = DateTimeStringBugWorkaround::fixDateTimeString(
+                $data['data']['dateLastUpdated']
+            );
+        }
 
         return UserDetails::fromArray($data['data']);
     }

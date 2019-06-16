@@ -13,6 +13,7 @@ declare(strict_types=1);
 
 namespace Prooph\EventStoreHttpClient\Internal;
 
+use DateTimeImmutable;
 use Prooph\EventStore\EventId;
 use Prooph\EventStore\RecordedEvent;
 use Prooph\EventStore\ResolvedEvent;
@@ -26,7 +27,7 @@ class ResolvedEventParser
     {
         $record = null;
 
-        if ($entry['isLinkMetaData']) {
+        if (isset($entry['isLinkMetaData']) && $entry['isLinkMetaData']) {
             $data = $entry['data'];
 
             if (\is_array($data)) {
@@ -47,11 +48,13 @@ class ResolvedEventParser
                 $entry['isJson'],
                 $data,
                 $metadata,
-                DateTime::create($entry['updated'])
+                DateTime::create(DateTimeStringBugWorkaround::fixDateTimeString(
+                    $entry['updated']
+                ))
             );
         }
 
-        $data = $record ? $entry['title'] : $entry['data'];
+        $data = $record ? $entry['title'] : $entry['data'] ?? $entry['title'];
 
         if (\is_array($data)) {
             $data = Json::encode($data);
@@ -65,7 +68,7 @@ class ResolvedEventParser
             $metadata = Json::encode($metadata);
         }
 
-        $eventId = $entry['eventId'];
+        $eventId = $entry['eventId'] ?? null;
 
         if ($record) {
             foreach ($entry['links'] as $elink) {
@@ -76,15 +79,26 @@ class ResolvedEventParser
             }
         }
 
+        if (! isset($entry['positionEventNumber'])
+            || ! isset($entry['positionStreamId'])
+        ) {
+            $matches = [];
+            \preg_match('/^(\d+)@(.+)$/', $entry['title'], $matches);
+            $entry['positionEventNumber'] = (int) $matches[1];
+            $entry['positionStreamId'] = $matches[2];
+        }
+
         $link = new RecordedEvent(
             $entry['positionStreamId'],
             $entry['positionEventNumber'],
-            EventId::fromString($eventId),
+            EventId::fromString($eventId ?? '00000000-0000-0000-0000-000000000000'),
             $entry['summary'],
-            $entry['isJson'],
+            $entry['isJson'] ?? false,
             $data,
             $metadata,
-            DateTime::create($entry['updated'])
+            DateTime::create(DateTimeStringBugWorkaround::fixDateTimeString(
+                $entry['updated']
+            ))
         );
 
         if (null === $record && null !== $link) {

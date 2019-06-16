@@ -141,7 +141,9 @@ class ConnectToPersistentSubscriptionOperation implements ConnectToPersistentSub
     {
         return new PersistentEventStoreSubscription(
             $this,
-            $this->streamId
+            $this->streamId,
+            0,
+            null
         );
     }
 

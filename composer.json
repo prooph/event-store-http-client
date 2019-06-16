@@ -19,16 +19,16 @@
   "require": {
     "php": "^7.2",
     "ext-json": "*",
-    "php-http/discovery": "^1.1.1",
+    "php-http/discovery": "^1.6.1",
     "php-http/httplug": "^2.0",
     "php-http/message": "^1.7.1",
     "php-http/message-factory": "^1.0.2",
-    "prooph/event-store": "^8.0.0-BETA-2",
+    "prooph/event-store": "dev-master",
     "ramsey/uuid": "^3.8"
   },
   "require-dev": {
-    "phpspec/prophecy": "^1.7",
-    "phpunit/phpunit": "^7.5",
+    "phpspec/prophecy": "^1.8.1",
+    "phpunit/phpunit": "^8.2.2",
     "doctrine/instantiator": "^1.1",
     "guzzlehttp/guzzle": "^6.3.3",
     "sebastian/object-enumerator": "^3.0.3",
