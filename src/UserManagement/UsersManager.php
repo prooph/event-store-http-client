@@ -126,6 +126,10 @@ class UsersManager implements SyncUsersManager
         $userDetails = [];
 
         foreach ($data['data'] as $entry) {
+            if (isset($entry['dateLastUpdated'])) {
+                $entry['dateLastUpdated'] = $this->createDateTimeString($entry['dateLastUpdated']);
+            }
+
             $userDetails[] = UserDetails::fromArray($entry);
         }
 
@@ -141,6 +145,10 @@ class UsersManager implements SyncUsersManager
         );
 
         $data = Json::decode($response->getBody()->getContents());
+
+        if (isset($data['data']['dateLastUpdated'])) {
+            $data['data']['dateLastUpdated'] = $this->createDateTimeString($data['data']['dateLastUpdated']);
+        }
 
         return UserDetails::fromArray($data['data']);
     }
@@ -161,6 +169,10 @@ class UsersManager implements SyncUsersManager
         );
 
         $data = Json::decode($response->getBody()->getContents());
+
+        if (isset($data['data']['dateLastUpdated'])) {
+            $data['data']['dateLastUpdated'] = $this->createDateTimeString($data['data']['dateLastUpdated']);
+        }
 
         return UserDetails::fromArray($data['data']);
     }
@@ -408,5 +420,19 @@ class UsersManager implements SyncUsersManager
                 )
             );
         }
+    }
+
+    private function createDateTimeString(string $dateTimeString): string
+    {
+        $micros = \substr($dateTimeString, 20, -1);
+        $length = \strlen($micros);
+
+        if ($length < 6) {
+            $micros .= \str_repeat('0', 6 - $length);
+        } elseif ($length > 6) {
+            $micros = \substr($micros, 0, 6);
+        }
+
+        return \substr($dateTimeString, 0, 20) . $micros . 'Z';
     }
 }
