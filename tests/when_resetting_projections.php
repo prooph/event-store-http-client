@@ -68,7 +68,7 @@ class when_resetting_projections extends TestCase
             );
             $status = $projectionStatus['status'];
 
-            $this->assertTrue(\in_array($status, ['Running', 'Preparing', 'Preparing/Stopping']));
+            $this->assertTrue(\in_array($status, ['Running', 'Preparing', 'Preparing/Stopping'], true));
 
             \usleep(500000);
 
