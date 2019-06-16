@@ -55,7 +55,10 @@ class when_resetting_projections extends TestCase
         );
     }
 
-    /** @test */
+    /**
+     * @test
+     * @group by
+     */
     public function should_reset_the_projection(): void
     {
         $this->execute(function () {
@@ -67,7 +70,7 @@ class when_resetting_projections extends TestCase
                 true
             );
             $status = $projectionStatus['status'];
-
+\var_dump($status);
             $this->assertTrue(\in_array($status, ['Running', 'Preparing']));
 
             \usleep(500000);
