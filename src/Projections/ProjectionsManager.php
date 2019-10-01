@@ -503,7 +503,7 @@ class ProjectionsManager implements SyncProjectionsManager
             $entry['readsInProgress'],
             $entry['partitionsCached'],
             $entry['status'],
-            $entry['stateReason'],
+            $entry['stateReason'] ?? '',
             $entry['name'],
             $entry['mode'],
             $entry['position'],
