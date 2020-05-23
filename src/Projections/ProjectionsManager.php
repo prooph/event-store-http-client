@@ -378,7 +378,7 @@ class ProjectionsManager implements SyncProjectionsManager
         string $name,
         string $partition,
         ?UserCredentials $userCredentials = null
-    ): string {
+    ): State {
         if ('' === $name) {
             throw new InvalidArgumentException('Name is required');
         }
