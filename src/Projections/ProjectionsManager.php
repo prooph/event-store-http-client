@@ -18,6 +18,9 @@ use Prooph\EventStore\Exception\EventStoreConnectionException;
 use Prooph\EventStore\Exception\InvalidArgumentException;
 use Prooph\EventStore\Projections\ProjectionDetails;
 use Prooph\EventStore\Projections\ProjectionsManager as SyncProjectionsManager;
+use Prooph\EventStore\Projections\ProjectionStatistics;
+use Prooph\EventStore\Projections\Query;
+use Prooph\EventStore\Projections\State;
 use Prooph\EventStore\Transport\Http\HttpStatusCode;
 use Prooph\EventStore\UserCredentials;
 use Prooph\EventStore\Util\Json;
@@ -287,7 +290,7 @@ class ProjectionsManager implements SyncProjectionsManager
     /**
      * Returns String of JSON containing projection status
      */
-    public function getStatus(string $name, ?UserCredentials $userCredentials = null): string
+    public function getStatus(string $name, ?UserCredentials $userCredentials = null): ProjectionDetails
     {
         if ('' === $name) {
             throw new InvalidArgumentException('Name is required');
@@ -306,7 +309,7 @@ class ProjectionsManager implements SyncProjectionsManager
     /**
      * Returns String of JSON containing projection state
      */
-    public function getState(string $name, ?UserCredentials $userCredentials = null): string
+    public function getState(string $name, ?UserCredentials $userCredentials = null): State
     {
         if ('' === $name) {
             throw new InvalidArgumentException('Name is required');
@@ -329,7 +332,7 @@ class ProjectionsManager implements SyncProjectionsManager
         string $name,
         string $partition,
         ?UserCredentials $userCredentials = null
-    ): string {
+    ): State {
         if ('' === $name) {
             throw new InvalidArgumentException('Name is required');
         }
@@ -352,7 +355,7 @@ class ProjectionsManager implements SyncProjectionsManager
     /**
      * Returns String of JSON containing projection result
      */
-    public function getResult(string $name, ?UserCredentials $userCredentials = null): string
+    public function getResult(string $name, ?UserCredentials $userCredentials = null): State
     {
         if ('' === $name) {
             throw new InvalidArgumentException('Name is required');
@@ -398,7 +401,7 @@ class ProjectionsManager implements SyncProjectionsManager
     /**
      * Returns String of JSON containing projection statistics
      */
-    public function getStatistics(string $name, ?UserCredentials $userCredentials = null): string
+    public function getStatistics(string $name, ?UserCredentials $userCredentials = null): ProjectionStatistics
     {
         if ('' === $name) {
             throw new InvalidArgumentException('Name is required');
@@ -414,7 +417,7 @@ class ProjectionsManager implements SyncProjectionsManager
         )->getBody()->getContents();
     }
 
-    public function getQuery(string $name, ?UserCredentials $userCredentials = null): string
+    public function getQuery(string $name, ?UserCredentials $userCredentials = null): Query
     {
         if ('' === $name) {
             throw new InvalidArgumentException('Name is required');
