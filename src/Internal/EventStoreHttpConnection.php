@@ -13,6 +13,7 @@ declare(strict_types=1);
 
 namespace Prooph\EventStoreHttpClient\Internal;
 
+use Closure;
 use Http\Message\RequestFactory;
 use Prooph\EventStore\AllEventsSlice;
 use Prooph\EventStore\CatchUpSubscriptionDropped;
@@ -1090,8 +1091,8 @@ class EventStoreHttpConnection implements EventStoreConnection
     public function subscribeToStream(
         string $stream,
         bool $resolveLinkTos,
-        EventAppearedOnSubscription $eventAppeared,
-        ?SubscriptionDropped $subscriptionDropped = null,
+        Closure $eventAppeared,
+        ?Closure $subscriptionDropped = null,
         ?UserCredentials $userCredentials = null
     ): EventStoreSubscription {
         $streamEventsSlice = $this->readStreamEventsBackward(
@@ -1126,9 +1127,9 @@ class EventStoreHttpConnection implements EventStoreConnection
         string $stream,
         ?int $lastCheckpoint,
         ?CatchUpSubscriptionSettings $settings,
-        EventAppearedOnCatchupSubscription $eventAppeared,
-        ?LiveProcessingStartedOnCatchUpSubscription $liveProcessingStarted = null,
-        ?CatchUpSubscriptionDropped $subscriptionDropped = null,
+        Closure $eventAppeared,
+        ?Closure $liveProcessingStarted = null,
+        ?Closure $subscriptionDropped = null,
         ?UserCredentials $userCredentials = null
     ): EventStoreStreamCatchUpSubscription {
         if (empty($stream)) {
@@ -1153,8 +1154,8 @@ class EventStoreHttpConnection implements EventStoreConnection
 
     public function subscribeToAll(
         bool $resolveLinkTos,
-        EventAppearedOnSubscription $eventAppeared,
-        ?SubscriptionDropped $subscriptionDropped = null,
+        Closure $eventAppeared,
+        ?Closure $subscriptionDropped = null,
         ?UserCredentials $userCredentials = null
     ): EventStoreSubscription {
         $allEventsSlice = $this->readAllEventsBackward(
@@ -1178,9 +1179,9 @@ class EventStoreHttpConnection implements EventStoreConnection
     public function subscribeToAllFrom(
         ?Position $lastCheckpoint,
         ?CatchUpSubscriptionSettings $settings,
-        EventAppearedOnCatchupSubscription $eventAppeared,
-        ?LiveProcessingStartedOnCatchUpSubscription $liveProcessingStarted = null,
-        ?CatchUpSubscriptionDropped $subscriptionDropped = null,
+        Closure $eventAppeared,
+        ?Closure $liveProcessingStarted = null,
+        ?Closure $subscriptionDropped = null,
         ?UserCredentials $userCredentials = null
     ): EventStoreAllCatchUpSubscription {
         if (null === $settings) {
@@ -1201,8 +1202,8 @@ class EventStoreHttpConnection implements EventStoreConnection
     public function connectToPersistentSubscription(
         string $stream,
         string $groupName,
-        EventAppearedOnPersistentSubscription $eventAppeared,
-        ?PersistentSubscriptionDropped $subscriptionDropped = null,
+        Closure $eventAppeared,
+        ?Closure $subscriptionDropped = null,
         int $bufferSize = 10,
         bool $autoAck = true,
         ?UserCredentials $userCredentials = null
