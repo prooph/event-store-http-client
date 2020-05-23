@@ -436,7 +436,7 @@ class ProjectionsManager implements SyncProjectionsManager
     public function updateQuery(
         string $name,
         string $query,
-        bool $emitEnabled = false,
+        ?bool $emitEnabled = null,
         ?UserCredentials $userCredentials = null
     ): void {
         if ('' === $name) {
