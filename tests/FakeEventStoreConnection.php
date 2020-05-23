@@ -13,6 +13,7 @@ declare(strict_types=1);
 
 namespace ProophTest\EventStoreHttpClient;
 
+use Closure;
 use Prooph\EventStore\AllEventsSlice;
 use Prooph\EventStore\CatchUpSubscriptionDropped;
 use Prooph\EventStore\CatchUpSubscriptionSettings;
@@ -216,28 +217,58 @@ class FakeEventStoreConnection implements EventStoreConnection
         throw new \RuntimeException('Not implemented');
     }
 
-    public function subscribeToStream(string $stream, bool $resolveLinkTos, EventAppearedOnSubscription $eventAppeared, ?SubscriptionDropped $subscriptionDropped = null, ?UserCredentials $userCredentials = null): EventStoreSubscription
+    public function subscribeToStream(
+        string $stream,
+        bool $resolveLinkTos,
+        Closure $eventAppeared,
+        ?Closure $subscriptionDropped = null,
+        ?UserCredentials $userCredentials = null
+    ): EventStoreSubscription
     {
         throw new \RuntimeException('Not implemented');
     }
 
-    public function subscribeToStreamFrom(string $stream, ?int $lastCheckpoint, ?CatchUpSubscriptionSettings $settings, EventAppearedOnCatchupSubscription $eventAppeared, ?LiveProcessingStartedOnCatchUpSubscription $liveProcessingStarted = null, ?CatchUpSubscriptionDropped $subscriptionDropped = null, ?UserCredentials $userCredentials = null): EventStoreStreamCatchUpSubscription
-    {
+    public function subscribeToStreamFrom(
+        string $stream,
+        ?int $lastCheckpoint,
+        ?CatchUpSubscriptionSettings $settings,
+        Closure $eventAppeared,
+        ?Closure $liveProcessingStarted = null,
+        ?Closure $subscriptionDropped = null,
+        ?UserCredentials $userCredentials = null
+    ): EventStoreStreamCatchUpSubscription {
         throw new \RuntimeException('Not implemented');
     }
 
-    public function subscribeToAll(bool $resolveLinkTos, EventAppearedOnSubscription $eventAppeared, ?SubscriptionDropped $subscriptionDropped = null, ?UserCredentials $userCredentials = null): EventStoreSubscription
-    {
+    public function subscribeToAll(
+        bool $resolveLinkTos,
+        Closure $eventAppeared,
+        ?Closure $subscriptionDropped = null,
+        ?UserCredentials $userCredentials = null
+    ): EventStoreSubscription {
         throw new \RuntimeException('Not implemented');
     }
 
-    public function subscribeToAllFrom(?Position $lastCheckpoint, ?CatchUpSubscriptionSettings $settings, EventAppearedOnCatchupSubscription $eventAppeared, ?LiveProcessingStartedOnCatchUpSubscription $liveProcessingStarted = null, ?CatchUpSubscriptionDropped $subscriptionDropped = null, ?UserCredentials $userCredentials = null): EventStoreAllCatchUpSubscription
-    {
+    public function subscribeToAllFrom(
+        ?Position $lastCheckpoint,
+        ?CatchUpSubscriptionSettings $settings,
+        Closure $eventAppeared,
+        ?Closure $liveProcessingStarted = null,
+        ?Closure $subscriptionDropped = null,
+        ?UserCredentials $userCredentials = null
+    ): EventStoreAllCatchUpSubscription {
         throw new \RuntimeException('Not implemented');
     }
 
-    public function connectToPersistentSubscription(string $stream, string $groupName, EventAppearedOnPersistentSubscription $eventAppeared, ?PersistentSubscriptionDropped $subscriptionDropped = null, int $bufferSize = 10, bool $autoAck = true, ?UserCredentials $userCredentials = null): EventStorePersistentSubscription
-    {
+    public function connectToPersistentSubscription(
+        string $stream,
+        string $groupName,
+        Closure $eventAppeared,
+        ?Closure $subscriptionDropped = null,
+        int $bufferSize = 10,
+        bool $autoAck = true,
+        ?UserCredentials $userCredentials = null
+    ): EventStorePersistentSubscription {
         throw new \RuntimeException('Not implemented');
     }
 
