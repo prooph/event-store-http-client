@@ -2,8 +2,8 @@
 
 /**
  * This file is part of `prooph/event-store-http-client`.
- * (c) 2018-2019 Alexander Miertsch <kontakt@codeliner.ws>
- * (c) 2018-2019 Sascha-Oliver Prolic <saschaprolic@googlemail.com>
+ * (c) 2018-2020 Alexander Miertsch <kontakt@codeliner.ws>
+ * (c) 2018-2020 Sascha-Oliver Prolic <saschaprolic@googlemail.com>
  *
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
@@ -31,7 +31,7 @@ class append_to_stream extends TestCase
     /** @test */
     public function cannot_append_to_stream_without_name(): void
     {
-        $connection = TestConnection::create();
+        $connection = TestConnection::create(DefaultData::adminCredentials());
         $this->expectException(InvalidArgumentException::class);
         $connection->appendToStream('', ExpectedVersion::ANY, []);
     }
@@ -42,7 +42,7 @@ class append_to_stream extends TestCase
         $stream1 = 'should_allow_appending_zero_events_to_stream_with_no_problems1';
         $stream2 = 'should_allow_appending_zero_events_to_stream_with_no_problems2';
 
-        $connection = TestConnection::create();
+        $connection = TestConnection::create(DefaultData::adminCredentials());
 
         $result = $connection->appendToStream($stream1, ExpectedVersion::ANY, []);
         \assert($result instanceof WriteResult);
@@ -72,7 +72,7 @@ class append_to_stream extends TestCase
     {
         $stream = 'should_create_stream_with_no_stream_exp_ver_on_first_write_if_does_not_exist';
 
-        $connection = TestConnection::create();
+        $connection = TestConnection::create(DefaultData::adminCredentials());
 
         $result = $connection->appendToStream($stream, ExpectedVersion::NO_STREAM, [TestEvent::newTestEvent()]);
         \assert($result instanceof WriteResult);
@@ -88,7 +88,7 @@ class append_to_stream extends TestCase
     {
         $stream = 'should_create_stream_with_any_exp_ver_on_first_write_if_does_not_exist';
 
-        $connection = TestConnection::create();
+        $connection = TestConnection::create(DefaultData::adminCredentials());
 
         $result = $connection->appendToStream($stream, ExpectedVersion::ANY, [TestEvent::newTestEvent()]);
         \assert($result instanceof WriteResult);
@@ -106,7 +106,7 @@ class append_to_stream extends TestCase
     {
         $stream = 'multiple_idempotent_writes';
 
-        $connection = TestConnection::create();
+        $connection = TestConnection::create(DefaultData::adminCredentials());
 
         $events = [TestEvent::newTestEvent(), TestEvent::newTestEvent(), TestEvent::newTestEvent(), TestEvent::newTestEvent()];
 
@@ -124,7 +124,7 @@ class append_to_stream extends TestCase
     {
         $stream = 'multiple_idempotent_writes_with_same_id_bug_case';
 
-        $connection = TestConnection::create();
+        $connection = TestConnection::create(DefaultData::adminCredentials());
 
         $x = TestEvent::newTestEvent();
         $events = [$x, $x, $x, $x, $x, $x];
@@ -141,7 +141,7 @@ class append_to_stream extends TestCase
     {
         $stream = 'in_wtf_multiple_case_of_multiple_writes_expected_version_any_per_all_same_id';
 
-        $connection = TestConnection::create();
+        $connection = TestConnection::create(DefaultData::adminCredentials());
 
         $x = TestEvent::newTestEvent();
         $events = [$x, $x, $x, $x, $x, $x];
@@ -161,15 +161,15 @@ class append_to_stream extends TestCase
     {
         $stream = 'in_slightly_reasonable_multiple_case_of_multiple_writes_with_expected_version_per_all_same_id';
 
-        $connection = TestConnection::create();
+        $connection = TestConnection::create(DefaultData::adminCredentials());
 
         $x = TestEvent::newTestEvent();
         $events = [$x, $x, $x, $x, $x, $x];
 
-        $result = $connection->appendToStream($stream, ExpectedVersion::EMPTY_STREAM, $events);
+        $result = $connection->appendToStream($stream, ExpectedVersion::NO_STREAM, $events);
         \assert($result instanceof WriteResult);
 
-        $f = $connection->appendToStream($stream, ExpectedVersion::EMPTY_STREAM, $events);
+        $f = $connection->appendToStream($stream, ExpectedVersion::NO_STREAM, $events);
         \assert($f instanceof WriteResult);
     }
 
@@ -178,9 +178,9 @@ class append_to_stream extends TestCase
     {
         $stream = 'should_fail_writing_with_correct_exp_ver_to_deleted_stream';
 
-        $connection = TestConnection::create();
+        $connection = TestConnection::create(DefaultData::adminCredentials());
 
-        $connection->deleteStream($stream, ExpectedVersion::EMPTY_STREAM, true);
+        $connection->deleteStream($stream, ExpectedVersion::NO_STREAM, true);
 
         $this->expectException(StreamDeleted::class);
         $connection->appendToStream($stream, ExpectedVersion::NO_STREAM, [TestEvent::newTestEvent()]);
@@ -191,9 +191,9 @@ class append_to_stream extends TestCase
     {
         $stream = 'should_return_log_position_when_writing';
 
-        $connection = TestConnection::create();
+        $connection = TestConnection::create(DefaultData::adminCredentials());
 
-        $result = $connection->appendToStream($stream, ExpectedVersion::EMPTY_STREAM, [TestEvent::newTestEvent()]);
+        $result = $connection->appendToStream($stream, ExpectedVersion::NO_STREAM, [TestEvent::newTestEvent()]);
         \assert($result instanceof WriteResult);
         $this->assertSame(-1, $result->logPosition()->preparePosition());
         $this->assertSame(-1, $result->logPosition()->commitPosition());
@@ -204,10 +204,10 @@ class append_to_stream extends TestCase
     {
         $stream = 'should_fail_writing_with_any_exp_ver_to_deleted_stream';
 
-        $connection = TestConnection::create();
+        $connection = TestConnection::create(DefaultData::adminCredentials());
 
         try {
-            $connection->deleteStream($stream, ExpectedVersion::EMPTY_STREAM, true);
+            $connection->deleteStream($stream, ExpectedVersion::NO_STREAM, true);
         } catch (Throwable $e) {
             $this->fail($e->getMessage());
         }
@@ -221,9 +221,9 @@ class append_to_stream extends TestCase
     {
         $stream = 'should_fail_writing_with_invalid_exp_ver_to_deleted_stream';
 
-        $connection = TestConnection::create();
+        $connection = TestConnection::create(DefaultData::adminCredentials());
 
-        $connection->deleteStream($stream, ExpectedVersion::EMPTY_STREAM, true);
+        $connection->deleteStream($stream, ExpectedVersion::NO_STREAM, true);
 
         $this->expectException(StreamDeleted::class);
         $connection->appendToStream($stream, 5, [TestEvent::newTestEvent()]);
@@ -237,9 +237,9 @@ class append_to_stream extends TestCase
     {
         $stream = 'should_append_with_correct_exp_ver_to_existing_stream';
 
-        $connection = TestConnection::create();
+        $connection = TestConnection::create(DefaultData::adminCredentials());
 
-        $connection->appendToStream($stream, ExpectedVersion::EMPTY_STREAM, [TestEvent::newTestEvent()]);
+        $connection->appendToStream($stream, ExpectedVersion::NO_STREAM, [TestEvent::newTestEvent()]);
     }
 
     /**
@@ -250,9 +250,9 @@ class append_to_stream extends TestCase
     {
         $stream = 'should_append_with_any_exp_ver_to_existing_stream';
 
-        $connection = TestConnection::create();
+        $connection = TestConnection::create(DefaultData::adminCredentials());
 
-        $result = $connection->appendToStream($stream, ExpectedVersion::EMPTY_STREAM, [TestEvent::newTestEvent()]);
+        $result = $connection->appendToStream($stream, ExpectedVersion::NO_STREAM, [TestEvent::newTestEvent()]);
         \assert($result instanceof WriteResult);
 
         $connection->appendToStream($stream, ExpectedVersion::ANY, [TestEvent::newTestEvent()]);
@@ -263,7 +263,7 @@ class append_to_stream extends TestCase
     {
         $stream = 'should_fail_appending_with_wrong_exp_ver_to_existing_stream';
 
-        $connection = TestConnection::create();
+        $connection = TestConnection::create(DefaultData::adminCredentials());
 
         $this->expectException(WrongExpectedVersion::class);
         $connection->appendToStream($stream, 1, [TestEvent::newTestEvent()]);
@@ -277,9 +277,9 @@ class append_to_stream extends TestCase
     {
         $stream = 'should_append_with_stream_exists_exp_ver_to_existing_stream';
 
-        $connection = TestConnection::create();
+        $connection = TestConnection::create(DefaultData::adminCredentials());
 
-        $connection->appendToStream($stream, ExpectedVersion::EMPTY_STREAM, [TestEvent::newTestEvent()]);
+        $connection->appendToStream($stream, ExpectedVersion::NO_STREAM, [TestEvent::newTestEvent()]);
         $connection->appendToStream($stream, ExpectedVersion::STREAM_EXISTS, [TestEvent::newTestEvent()]);
     }
 
@@ -291,7 +291,7 @@ class append_to_stream extends TestCase
     {
         $stream = 'should_append_with_stream_exists_exp_ver_to_stream_with_multiple_events';
 
-        $connection = TestConnection::create();
+        $connection = TestConnection::create(DefaultData::adminCredentials());
 
         for ($i = 0; $i < 5; $i++) {
             $connection->appendToStream($stream, ExpectedVersion::ANY, [TestEvent::newTestEvent()]);
@@ -308,7 +308,7 @@ class append_to_stream extends TestCase
     {
         $stream = 'should_append_with_stream_exists_exp_ver_if_metadata_stream_exists';
 
-        $connection = TestConnection::create();
+        $connection = TestConnection::create(DefaultData::adminCredentials());
 
         $connection->setStreamMetadata(
             $stream,
@@ -326,7 +326,7 @@ class append_to_stream extends TestCase
     {
         $stream = 'should_fail_appending_with_stream_exists_exp_ver_and_stream_does_not_exist';
 
-        $connection = TestConnection::create();
+        $connection = TestConnection::create(DefaultData::adminCredentials());
 
         $this->expectException(WrongExpectedVersion::class);
         $connection->appendToStream($stream, ExpectedVersion::STREAM_EXISTS, [TestEvent::newTestEvent()]);
@@ -337,9 +337,9 @@ class append_to_stream extends TestCase
     {
         $stream = 'should_fail_appending_with_stream_exists_exp_ver_and_stream_does_not_exist';
 
-        $connection = TestConnection::create();
+        $connection = TestConnection::create(DefaultData::adminCredentials());
 
-        $connection->deleteStream($stream, ExpectedVersion::EMPTY_STREAM, true);
+        $connection->deleteStream($stream, ExpectedVersion::NO_STREAM, true);
 
         $this->expectException(StreamDeleted::class);
         $connection->appendToStream($stream, ExpectedVersion::STREAM_EXISTS, [TestEvent::newTestEvent()]);
@@ -350,9 +350,9 @@ class append_to_stream extends TestCase
     {
         $stream = 'should_fail_appending_with_stream_exists_exp_ver_to_soft_deleted_stream';
 
-        $connection = TestConnection::create();
+        $connection = TestConnection::create(DefaultData::adminCredentials());
 
-        $connection->deleteStream($stream, ExpectedVersion::EMPTY_STREAM, false);
+        $connection->deleteStream($stream, ExpectedVersion::NO_STREAM, false);
 
         $this->expectException(StreamDeleted::class);
         $connection->appendToStream($stream, ExpectedVersion::STREAM_EXISTS, [TestEvent::newTestEvent()]);
@@ -366,11 +366,11 @@ class append_to_stream extends TestCase
     {
         $stream = 'can_append_multiple_events_at_once';
 
-        $connection = TestConnection::create();
+        $connection = TestConnection::create(DefaultData::adminCredentials());
 
         $events = TestEvent::newAmount(100);
 
-        $result = $connection->appendToStream($stream, ExpectedVersion::EMPTY_STREAM, $events);
+        $result = $connection->appendToStream($stream, ExpectedVersion::NO_STREAM, $events);
         \assert($result instanceof WriteResult);
     }
 
@@ -379,7 +379,7 @@ class append_to_stream extends TestCase
     {
         $stream = 'writes_predefined_event_id';
 
-        $connection = TestConnection::create();
+        $connection = TestConnection::create(DefaultData::adminCredentials());
 
         $event = TestEvent::newTestEvent();
 

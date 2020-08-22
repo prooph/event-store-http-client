@@ -2,8 +2,8 @@
 
 /**
  * This file is part of `prooph/event-store-http-client`.
- * (c) 2018-2019 Alexander Miertsch <kontakt@codeliner.ws>
- * (c) 2018-2019 Sascha-Oliver Prolic <saschaprolic@googlemail.com>
+ * (c) 2018-2020 Alexander Miertsch <kontakt@codeliner.ws>
+ * (c) 2018-2020 Sascha-Oliver Prolic <saschaprolic@googlemail.com>
  *
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
@@ -13,8 +13,8 @@ declare(strict_types=1);
 
 namespace ProophTest\EventStoreHttpClient\PersistentSubscriptionManagement;
 
+use Http\Adapter\Guzzle6\Client;
 use PHPUnit\Framework\TestCase;
-use Prooph\EventStore\EventAppearedOnPersistentSubscription;
 use Prooph\EventStore\EventData;
 use Prooph\EventStore\EventStorePersistentSubscription;
 use Prooph\EventStore\Exception\InvalidArgumentException;
@@ -46,7 +46,10 @@ class persistent_subscription_manager extends TestCase
     protected function setUp(): void
     {
         $this->manager = PersistentSubscriptionsManagerFactory::create(
-            TestConnection::settings()
+            TestConnection::settings(DefaultData::adminCredentials()),
+            Client::createWithConfig([
+                'verify' => false,
+            ])
         );
         $this->stream = Guid::generateAsHex();
         $this->settings = PersistentSubscriptionSettings::create()
@@ -67,19 +70,17 @@ class persistent_subscription_manager extends TestCase
         $this->sub = $this->conn->connectToPersistentSubscription(
             $this->stream,
             'existing',
-            new class() implements EventAppearedOnPersistentSubscription {
-                public function __invoke(
-                    EventStorePersistentSubscription $subscription,
-                    ResolvedEvent $resolvedEvent,
-                    ?int $retryCount = null
-                ): void {
-                    static $i = 0;
-                    $i++;
+            function (
+                EventStorePersistentSubscription $subscription,
+                ResolvedEvent $resolvedEvent,
+                ?int $retryCount = null
+            ): void {
+                static $i = 0;
+                $i++;
 
-                    if ($i === 2) {
-                        $i = 0;
-                        $subscription->stop();
-                    }
+                if ($i === 2) {
+                    $i = 0;
+                    $subscription->stop();
                 }
             },
             null,
@@ -212,24 +213,22 @@ class persistent_subscription_manager extends TestCase
             $this->sub = $this->conn->connectToPersistentSubscription(
                 $this->stream,
                 'existing',
-                new class() implements EventAppearedOnPersistentSubscription {
-                    public function __invoke(
-                        EventStorePersistentSubscription $subscription,
-                        ResolvedEvent $resolvedEvent,
-                        ?int $retryCount = null
-                    ): void {
-                        $subscription->fail(
-                            $resolvedEvent,
-                            PersistentSubscriptionNakEventAction::park(),
-                            'testing'
-                        );
+                function (
+                    EventStorePersistentSubscription $subscription,
+                    ResolvedEvent $resolvedEvent,
+                    ?int $retryCount = null
+                ): void {
+                    $subscription->fail(
+                        $resolvedEvent,
+                        PersistentSubscriptionNakEventAction::park(),
+                        'testing'
+                    );
 
-                        static $i = 0;
-                        $i++;
+                    static $i = 0;
+                    $i++;
 
-                        if ($i === 2) {
-                            $subscription->stop();
-                        }
+                    if ($i === 2) {
+                        $subscription->stop();
                     }
                 },
                 null,
@@ -255,24 +254,22 @@ class persistent_subscription_manager extends TestCase
             $sub = $this->conn->connectToPersistentSubscription(
                 $this->stream,
                 'existing',
-                new class() implements EventAppearedOnPersistentSubscription {
-                    public function __invoke(
-                        EventStorePersistentSubscription $subscription,
-                        ResolvedEvent $resolvedEvent,
-                        ?int $retryCount = null
-                    ): void {
-                        $subscription->fail(
-                            $resolvedEvent,
-                            PersistentSubscriptionNakEventAction::park(),
-                            'testing'
-                        );
+                function (
+                    EventStorePersistentSubscription $subscription,
+                    ResolvedEvent $resolvedEvent,
+                    ?int $retryCount = null
+                ): void {
+                    $subscription->fail(
+                        $resolvedEvent,
+                        PersistentSubscriptionNakEventAction::park(),
+                        'testing'
+                    );
 
-                        static $i = 0;
-                        $i++;
+                    static $i = 0;
+                    $i++;
 
-                        if ($i === 2) {
-                            $subscription->stop();
-                        }
+                    if ($i === 2) {
+                        $subscription->stop();
                     }
                 },
                 null,

@@ -2,8 +2,8 @@
 
 /**
  * This file is part of `prooph/event-store-http-client`.
- * (c) 2018-2019 Alexander Miertsch <kontakt@codeliner.ws>
- * (c) 2018-2019 Sascha-Oliver Prolic <saschaprolic@googlemail.com>
+ * (c) 2018-2020 Alexander Miertsch <kontakt@codeliner.ws>
+ * (c) 2018-2020 Sascha-Oliver Prolic <saschaprolic@googlemail.com>
  *
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
@@ -14,15 +14,12 @@ declare(strict_types=1);
 namespace Prooph\EventStoreHttpClient\Internal;
 
 use Closure;
-use Prooph\EventStore\CatchUpSubscriptionDropped;
 use Prooph\EventStore\CatchUpSubscriptionSettings;
-use Prooph\EventStore\EventAppearedOnCatchupSubscription;
 use Prooph\EventStore\EventAppearedOnSubscription;
 use Prooph\EventStore\EventStoreCatchUpSubscription as SyncEventStoreCatchUpSubscription;
 use Prooph\EventStore\EventStoreConnection;
 use Prooph\EventStore\EventStoreSubscription;
 use Prooph\EventStore\Internal\DropData;
-use Prooph\EventStore\LiveProcessingStartedOnCatchUpSubscription;
 use Prooph\EventStore\ResolvedEvent;
 use Prooph\EventStore\SubscriptionDropped;
 use Prooph\EventStore\SubscriptionDropReason;
@@ -32,64 +29,54 @@ use Throwable;
 
 abstract class EventStoreCatchUpSubscription implements SyncEventStoreCatchUpSubscription
 {
-    /** @var ResolvedEvent */
-    private static $dropSubscriptionEvent;
+    private ?ResolvedEvent $dropSubscriptionEvent = null;
 
-    /** @var bool */
-    private $isSubscribedToAll;
-    /** @var string */
-    private $streamId;
-    /** @var string */
-    private $subscriptionName;
+    private bool $isSubscribedToAll;
+    private string $streamId;
+    private string $subscriptionName;
 
-    /** @var EventStoreConnection */
-    private $connection;
-    /** @var bool */
-    private $resolveLinkTos;
-    /** @var UserCredentials|null */
-    private $userCredentials;
+    private EventStoreConnection $connection;
+    private bool $resolveLinkTos;
+    private ?UserCredentials $userCredentials;
 
-    /** @var int */
-    protected $readBatchSize;
-    /** @var int */
-    protected $maxPushQueueSize;
+    protected int $readBatchSize;
+    protected int $maxPushQueueSize;
 
-    /** @var EventAppearedOnCatchupSubscription */
-    protected $eventAppeared;
-    /** @var LiveProcessingStartedOnCatchUpSubscription|null */
-    private $liveProcessingStarted;
-    /** @var CatchUpSubscriptionDropped|null */
-    private $subscriptionDropped;
+    /** @var Closure(EventStoreCatchUpSubscription, ResolvedEvent): void */
+    protected Closure $eventAppeared;
+    /** @var null|Closure(EventStoreCatchUpSubscription): void */
+    private ?Closure $liveProcessingStarted;
+    /** @var Closure|null */
+    private ?Closure $subscriptionDropped;
 
     /** @var SplQueue<ResolvedEvent> */
-    private $liveQueue;
-    /** @var EventStoreSubscription|null */
-    private $subscription;
-    /** @var DropData|null */
-    private $dropData;
-    /** @var bool */
-    private $allowProcessing;
-    /** @var bool */
-    private $isProcessing;
-    /** @var bool */
-    protected $shouldStop;
-    /** @var bool */
-    private $isDropped;
-    /** @var bool */
-    private $stopped;
+    private SplQueue $liveQueue;
+    private ?EventStoreSubscription $subscription;
+    private ?DropData $dropData;
+    private bool $allowProcessing;
+    private bool $isProcessing;
+    protected bool $shouldStop;
+    private bool $isDropped;
+    private bool $stopped;
 
-    /** @internal */
+    /**
+     * @internal
+     *
+     * @param Closure(EventStoreCatchUpSubscription, ResolvedEvent): void $eventAppeared
+     * @param null|Closure(EventStoreCatchUpSubscription): void $liveProcessingStarted
+     * @param null|Closure(EventStoreCatchUpSubscription, SubscriptionDropReason, null|Throwable): void $subscriptionDropped
+     */
     public function __construct(
         EventStoreConnection $connection,
         string $streamId,
         ?UserCredentials $userCredentials,
-        EventAppearedOnCatchupSubscription $eventAppeared,
-        ?LiveProcessingStartedOnCatchUpSubscription $liveProcessingStarted,
-        ?CatchUpSubscriptionDropped $subscriptionDropped,
+        Closure $eventAppeared,
+        ?Closure $liveProcessingStarted,
+        ?Closure $subscriptionDropped,
         CatchUpSubscriptionSettings $settings
     ) {
-        if (null === self::$dropSubscriptionEvent) {
-            self::$dropSubscriptionEvent = new ResolvedEvent(null, null, null);
+        if (null === $this->dropSubscriptionEvent) {
+            $this->dropSubscriptionEvent = new ResolvedEvent(null, null, null);
         }
 
         $this->connection = $connection;
@@ -298,7 +285,7 @@ abstract class EventStoreCatchUpSubscription implements SyncEventStoreCatchUpSub
         if (null === $this->dropData) {
             $this->dropData = $dropData;
 
-            $this->liveQueue->enqueue(self::$dropSubscriptionEvent);
+            $this->liveQueue->enqueue($this->dropSubscriptionEvent);
 
             if ($this->allowProcessing) {
                 $this->ensureProcessingPushQueue();
@@ -322,7 +309,7 @@ abstract class EventStoreCatchUpSubscription implements SyncEventStoreCatchUpSub
                 $e = $this->liveQueue->dequeue();
                 \assert($e instanceof ResolvedEvent);
 
-                if ($e === self::$dropSubscriptionEvent) {
+                if ($e === $this->dropSubscriptionEvent) {
                     $this->dropData = $this->dropData ?? new DropData(SubscriptionDropReason::unknown(), new \Exception('Drop reason not specified'));
                     $this->dropSubscription($this->dropData->reason(), $this->dropData->error());
 

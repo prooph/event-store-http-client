@@ -2,8 +2,8 @@
 
 /**
  * This file is part of `prooph/event-store-http-client`.
- * (c) 2018-2019 Alexander Miertsch <kontakt@codeliner.ws>
- * (c) 2018-2019 Sascha-Oliver Prolic <saschaprolic@googlemail.com>
+ * (c) 2018-2020 Alexander Miertsch <kontakt@codeliner.ws>
+ * (c) 2018-2020 Sascha-Oliver Prolic <saschaprolic@googlemail.com>
  *
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
@@ -32,7 +32,7 @@ class read_event_stream_backward_should extends TestCase
     {
         $stream = 'read_event_stream_backward_should_throw_if_count_le_zero';
 
-        $store = TestConnection::create();
+        $store = TestConnection::create(DefaultData::adminCredentials());
 
         $this->expectException(InvalidArgumentException::class);
 
@@ -49,7 +49,7 @@ class read_event_stream_backward_should extends TestCase
     {
         $stream = 'read_event_stream_backward_should_notify_using_status_code_if_stream_not_found';
 
-        $store = TestConnection::create();
+        $store = TestConnection::create(DefaultData::adminCredentials());
 
         $read = $store->readStreamEventsBackward(
             $stream,
@@ -67,9 +67,9 @@ class read_event_stream_backward_should extends TestCase
     {
         $stream = 'read_event_stream_backward_should_notify_using_status_code_if_stream_was_deleted';
 
-        $store = TestConnection::create();
+        $store = TestConnection::create(DefaultData::adminCredentials());
 
-        $store->deleteStream($stream, ExpectedVersion::EMPTY_STREAM, true);
+        $store->deleteStream($stream, ExpectedVersion::NO_STREAM, true);
 
         $read = $store->readStreamEventsBackward(
             $stream,
@@ -87,7 +87,7 @@ class read_event_stream_backward_should extends TestCase
     {
         $stream = 'read_event_stream_backward_should_return_single_event_when_called_on_empty_stream';
 
-        $store = TestConnection::create();
+        $store = TestConnection::create(DefaultData::adminCredentials());
 
         $read = $store->readStreamEventsBackward(
             $stream,
@@ -105,12 +105,12 @@ class read_event_stream_backward_should extends TestCase
     {
         $stream = 'read_event_stream_backward_should_return_partial_slice_if_no_enough_events_in_stream';
 
-        $store = TestConnection::create();
+        $store = TestConnection::create(DefaultData::adminCredentials());
 
         $testEvents = TestEvent::newAmount(10);
         $store->appendToStream(
             $stream,
-            ExpectedVersion::EMPTY_STREAM,
+            ExpectedVersion::NO_STREAM,
             $testEvents
         );
 
@@ -130,12 +130,12 @@ class read_event_stream_backward_should extends TestCase
     {
         $stream = 'read_event_stream_backward_should_return_events_reversed_compared_to_written';
 
-        $store = TestConnection::create();
+        $store = TestConnection::create(DefaultData::adminCredentials());
 
         $testEvents = TestEvent::newAmount(10);
         $store->appendToStream(
             $stream,
-            ExpectedVersion::EMPTY_STREAM,
+            ExpectedVersion::NO_STREAM,
             $testEvents
         );
 
@@ -162,12 +162,12 @@ class read_event_stream_backward_should extends TestCase
     {
         $stream = 'read_event_stream_backward_should_be_able_to_read_single_event_from_arbitrary_position';
 
-        $store = TestConnection::create();
+        $store = TestConnection::create(DefaultData::adminCredentials());
 
         $testEvents = TestEvent::newAmount(10);
         $store->appendToStream(
             $stream,
-            ExpectedVersion::EMPTY_STREAM,
+            ExpectedVersion::NO_STREAM,
             $testEvents
         );
 
@@ -187,12 +187,12 @@ class read_event_stream_backward_should extends TestCase
     {
         $stream = 'read_event_stream_backward_should_be_able_to_read_first_event';
 
-        $store = TestConnection::create();
+        $store = TestConnection::create(DefaultData::adminCredentials());
 
         $testEvents = TestEvent::newAmount(10);
         $store->appendToStream(
             $stream,
-            ExpectedVersion::EMPTY_STREAM,
+            ExpectedVersion::NO_STREAM,
             $testEvents
         );
 
@@ -212,12 +212,12 @@ class read_event_stream_backward_should extends TestCase
     {
         $stream = 'read_event_stream_backward_should_be_able_to_read_last_event';
 
-        $store = TestConnection::create();
+        $store = TestConnection::create(DefaultData::adminCredentials());
 
         $testEvents = TestEvent::newAmount(10);
         $store->appendToStream(
             $stream,
-            ExpectedVersion::EMPTY_STREAM,
+            ExpectedVersion::NO_STREAM,
             $testEvents
         );
 
@@ -237,12 +237,12 @@ class read_event_stream_backward_should extends TestCase
     {
         $stream = 'read_event_stream_backward_should_be_able_to_read_slice_from_arbitrary_position';
 
-        $store = TestConnection::create();
+        $store = TestConnection::create(DefaultData::adminCredentials());
 
         $testEvents = TestEvent::newAmount(10);
         $store->appendToStream(
             $stream,
-            ExpectedVersion::EMPTY_STREAM,
+            ExpectedVersion::NO_STREAM,
             $testEvents
         );
 
@@ -270,7 +270,7 @@ class read_event_stream_backward_should extends TestCase
     /** @test */
     public function throw_when_got_int_max_value_as_maxcount(): void
     {
-        $store = TestConnection::create();
+        $store = TestConnection::create(DefaultData::adminCredentials());
 
         $this->expectException(InvalidArgumentException::class);
 

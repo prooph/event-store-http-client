@@ -2,8 +2,8 @@
 
 /**
  * This file is part of `prooph/event-store-http-client`.
- * (c) 2018-2019 Alexander Miertsch <kontakt@codeliner.ws>
- * (c) 2018-2019 Sascha-Oliver Prolic <saschaprolic@googlemail.com>
+ * (c) 2018-2020 Alexander Miertsch <kontakt@codeliner.ws>
+ * (c) 2018-2020 Sascha-Oliver Prolic <saschaprolic@googlemail.com>
  *
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
@@ -28,7 +28,7 @@ class create_persistent_subscription_on_non_existing_stream extends TestCase
      */
     public function the_completion_succeeds(): void
     {
-        $conn = TestConnection::create();
+        $conn = TestConnection::create(DefaultData::adminCredentials());
 
         $stream = Guid::generateAsHex();
         $settings = PersistentSubscriptionSettings::create()

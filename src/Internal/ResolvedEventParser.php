@@ -2,8 +2,8 @@
 
 /**
  * This file is part of `prooph/event-store-http-client`.
- * (c) 2018-2019 Alexander Miertsch <kontakt@codeliner.ws>
- * (c) 2018-2019 Sascha-Oliver Prolic <saschaprolic@googlemail.com>
+ * (c) 2018-2020 Alexander Miertsch <kontakt@codeliner.ws>
+ * (c) 2018-2020 Sascha-Oliver Prolic <saschaprolic@googlemail.com>
  *
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
@@ -13,8 +13,8 @@ declare(strict_types=1);
 
 namespace Prooph\EventStoreHttpClient\Internal;
 
-use DateTimeImmutable;
 use Prooph\EventStore\EventId;
+use Prooph\EventStore\Internal\DateTimeStringBugWorkaround;
 use Prooph\EventStore\RecordedEvent;
 use Prooph\EventStore\ResolvedEvent;
 use Prooph\EventStore\Util\DateTime;

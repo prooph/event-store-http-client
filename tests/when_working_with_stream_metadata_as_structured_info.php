@@ -2,8 +2,8 @@
 
 /**
  * This file is part of `prooph/event-store-http-client`.
- * (c) 2018-2019 Alexander Miertsch <kontakt@codeliner.ws>
- * (c) 2018-2019 Sascha-Oliver Prolic <saschaprolic@googlemail.com>
+ * (c) 2018-2020 Alexander Miertsch <kontakt@codeliner.ws>
+ * (c) 2018-2020 Sascha-Oliver Prolic <saschaprolic@googlemail.com>
  *
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
@@ -176,7 +176,7 @@ class when_working_with_stream_metadata_as_structured_info extends TestCase
     {
         $this->conn->appendToStream(
             $this->stream,
-            ExpectedVersion::EMPTY_STREAM,
+            ExpectedVersion::NO_STREAM,
             TestEvent::newAmount(2)
         );
 
@@ -220,13 +220,13 @@ class when_working_with_stream_metadata_as_structured_info extends TestCase
 
         $this->conn->setStreamMetadata(
             $this->stream,
-            ExpectedVersion::EMPTY_STREAM,
+            ExpectedVersion::NO_STREAM,
             $metadata
         );
 
         $this->conn->deleteStream(
             $this->stream,
-            ExpectedVersion::EMPTY_STREAM,
+            ExpectedVersion::NO_STREAM,
             true
         );
 
@@ -271,7 +271,7 @@ END;
 
         $this->conn->setRawStreamMetadata(
             $this->stream,
-            ExpectedVersion::EMPTY_STREAM,
+            ExpectedVersion::NO_STREAM,
             $metadata
         );
 
@@ -327,7 +327,7 @@ END;
 
         $this->conn->setStreamMetadata(
             $this->stream,
-            ExpectedVersion::EMPTY_STREAM,
+            ExpectedVersion::NO_STREAM,
             $metadata
         );
 
@@ -371,7 +371,7 @@ END;
 
         $this->conn->setStreamMetadata(
             $this->stream,
-            ExpectedVersion::EMPTY_STREAM,
+            ExpectedVersion::NO_STREAM,
             $metadata
         );
 
@@ -404,7 +404,7 @@ END;
 
         $this->conn->setRawStreamMetadata(
             $this->stream,
-            ExpectedVersion::EMPTY_STREAM,
+            ExpectedVersion::NO_STREAM,
             $metadata
         );
 

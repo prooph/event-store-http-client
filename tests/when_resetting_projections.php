@@ -2,8 +2,8 @@
 
 /**
  * This file is part of `prooph/event-store-http-client`.
- * (c) 2018-2019 Alexander Miertsch <kontakt@codeliner.ws>
- * (c) 2018-2019 Sascha-Oliver Prolic <saschaprolic@googlemail.com>
+ * (c) 2018-2020 Alexander Miertsch <kontakt@codeliner.ws>
+ * (c) 2018-2020 Sascha-Oliver Prolic <saschaprolic@googlemail.com>
  *
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
@@ -59,27 +59,21 @@ class when_resetting_projections extends TestCase
     public function should_reset_the_projection(): void
     {
         $this->execute(function () {
-            $projectionStatus = \json_decode(
-                $this->projectionsManager->getStatus(
-                    $this->projectionName,
-                    $this->credentials
-                ),
-                true
+            $projectionStatus = $this->projectionsManager->getStatus(
+                $this->projectionName,
+                $this->credentials
             );
-            $status = $projectionStatus['status'];
+            $status = $projectionStatus->status();
 
             $this->assertTrue(\in_array($status, ['Running', 'Preparing', 'Preparing/Stopping'], true));
 
             \usleep(500000);
 
-            $projectionStatus = \json_decode(
-                $this->projectionsManager->getStatus(
-                    $this->projectionName,
-                    $this->credentials
-                ),
-                true
+            $projectionStatus = $this->projectionsManager->getStatus(
+                $this->projectionName,
+                $this->credentials
             );
-            $status = $projectionStatus['status'];
+            $status = $projectionStatus->status();
 
             $this->assertTrue(\in_array($status, ['Running', 'Preparing'], true));
         });

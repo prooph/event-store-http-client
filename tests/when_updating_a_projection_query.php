@@ -2,8 +2,8 @@
 
 /**
  * This file is part of `prooph/event-store-http-client`.
- * (c) 2018-2019 Alexander Miertsch <kontakt@codeliner.ws>
- * (c) 2018-2019 Sascha-Oliver Prolic <saschaprolic@googlemail.com>
+ * (c) 2018-2020 Alexander Miertsch <kontakt@codeliner.ws>
+ * (c) 2018-2020 Sascha-Oliver Prolic <saschaprolic@googlemail.com>
  *
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
@@ -14,6 +14,7 @@ declare(strict_types=1);
 namespace ProophTest\EventStoreHttpClient;
 
 use PHPUnit\Framework\TestCase;
+use Prooph\EventStore\Projections\Query;
 use Prooph\EventStore\Util\Guid;
 
 class when_updating_a_projection_query extends TestCase
@@ -66,7 +67,7 @@ class when_updating_a_projection_query extends TestCase
                 $this->credentials
             );
 
-            $this->assertEquals($this->newQuery, $query);
+            $this->assertEquals(new Query($this->newQuery), $query);
         });
     }
 }

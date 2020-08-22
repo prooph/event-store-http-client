@@ -2,8 +2,8 @@
 
 /**
  * This file is part of `prooph/event-store-http-client`.
- * (c) 2018-2019 Alexander Miertsch <kontakt@codeliner.ws>
- * (c) 2018-2019 Sascha-Oliver Prolic <saschaprolic@googlemail.com>
+ * (c) 2018-2020 Alexander Miertsch <kontakt@codeliner.ws>
+ * (c) 2018-2020 Sascha-Oliver Prolic <saschaprolic@googlemail.com>
  *
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
@@ -13,17 +13,14 @@ declare(strict_types=1);
 
 namespace Prooph\EventStoreHttpClient\Internal;
 
+use Closure;
 use Http\Message\RequestFactory;
 use Prooph\EventStore\AllEventsSlice;
-use Prooph\EventStore\CatchUpSubscriptionDropped;
 use Prooph\EventStore\CatchUpSubscriptionSettings;
 use Prooph\EventStore\Common\SystemEventTypes;
 use Prooph\EventStore\Common\SystemStreams;
 use Prooph\EventStore\ConditionalWriteResult;
 use Prooph\EventStore\DeleteResult;
-use Prooph\EventStore\EventAppearedOnCatchupSubscription;
-use Prooph\EventStore\EventAppearedOnPersistentSubscription;
-use Prooph\EventStore\EventAppearedOnSubscription;
 use Prooph\EventStore\EventData;
 use Prooph\EventStore\EventId;
 use Prooph\EventStore\EventReadResult;
@@ -44,15 +41,13 @@ use Prooph\EventStore\Exception\UnexpectedValueException;
 use Prooph\EventStore\Exception\WrongExpectedVersion;
 use Prooph\EventStore\ExpectedVersion;
 use Prooph\EventStore\Internal\Consts;
-use Prooph\EventStore\Internal\PersistentSubscriptionCreateResult;
-use Prooph\EventStore\Internal\PersistentSubscriptionCreateStatus;
-use Prooph\EventStore\Internal\PersistentSubscriptionDeleteResult;
-use Prooph\EventStore\Internal\PersistentSubscriptionDeleteStatus;
-use Prooph\EventStore\Internal\PersistentSubscriptionUpdateResult;
-use Prooph\EventStore\Internal\PersistentSubscriptionUpdateStatus;
-use Prooph\EventStore\LiveProcessingStartedOnCatchUpSubscription;
-use Prooph\EventStore\PersistentSubscriptionDropped;
+use Prooph\EventStore\PersistentSubscriptionCreateResult;
+use Prooph\EventStore\PersistentSubscriptionCreateStatus;
+use Prooph\EventStore\PersistentSubscriptionDeleteResult;
+use Prooph\EventStore\PersistentSubscriptionDeleteStatus;
 use Prooph\EventStore\PersistentSubscriptionSettings;
+use Prooph\EventStore\PersistentSubscriptionUpdateResult;
+use Prooph\EventStore\PersistentSubscriptionUpdateStatus;
 use Prooph\EventStore\Position;
 use Prooph\EventStore\RawStreamMetadataResult;
 use Prooph\EventStore\ReadDirection;
@@ -61,7 +56,6 @@ use Prooph\EventStore\StreamEventsSlice;
 use Prooph\EventStore\StreamMetadata;
 use Prooph\EventStore\StreamMetadataResult;
 use Prooph\EventStore\StreamPosition;
-use Prooph\EventStore\SubscriptionDropped;
 use Prooph\EventStore\SystemSettings;
 use Prooph\EventStore\UserCredentials;
 use Prooph\EventStore\Util\Json;
@@ -77,14 +71,10 @@ use Throwable;
 /** @internal */
 class EventStoreHttpConnection implements EventStoreConnection
 {
-    /** @var ConnectionSettings */
-    private $settings;
-    /** @var HttpClient */
-    private $httpClient;
-    /** @var callable */
-    private $onException;
-    /** @var string */
-    private $baseUri;
+    private ConnectionSettings $settings;
+    private HttpClient $httpClient;
+    private Closure $onException;
+    private string $baseUri;
 
     /** @internal */
     public function __construct(
@@ -226,7 +216,7 @@ class EventStoreHttpConnection implements EventStoreConnection
             '/streams/' . \urlencode($stream),
             $headers,
             $body,
-            $userCredentials,
+            $userCredentials ?? $this->settings->defaultUserCredentials(),
             $this->onException
         );
 
@@ -297,7 +287,7 @@ class EventStoreHttpConnection implements EventStoreConnection
                 -1 === $eventNumber ? 'head' : $eventNumber
             ),
             $headers,
-            $userCredentials,
+            $userCredentials ?? $this->settings->defaultUserCredentials(),
             $this->onException
         );
 
@@ -389,7 +379,7 @@ class EventStoreHttpConnection implements EventStoreConnection
         $response = $this->httpClient->get(
             '/streams/' . \urlencode($stream) . '/' . $start . '/forward/' . $count . '?embed=tryharder',
             $headers,
-            $userCredentials,
+            $userCredentials ?? $this->settings->defaultUserCredentials(),
             $this->onException
         );
 
@@ -497,7 +487,7 @@ class EventStoreHttpConnection implements EventStoreConnection
                 $count
             ),
             $headers,
-            $userCredentials,
+            $userCredentials ?? $this->settings->defaultUserCredentials(),
             $this->onException
         );
 
@@ -612,7 +602,7 @@ class EventStoreHttpConnection implements EventStoreConnection
         $response = $this->httpClient->get(
             '/streams/%24all' . '/' . $position->asString() . '/forward/' . $count . '?embed=tryharder',
             $headers,
-            $userCredentials,
+            $userCredentials ?? $this->settings->defaultUserCredentials(),
             $this->onException
         );
 
@@ -685,7 +675,7 @@ class EventStoreHttpConnection implements EventStoreConnection
                 $count
             ),
             $headers,
-            $userCredentials,
+            $userCredentials ?? $this->settings->defaultUserCredentials(),
             $this->onException
         );
 
@@ -788,7 +778,7 @@ class EventStoreHttpConnection implements EventStoreConnection
             '/streams/' . \urlencode($stream) . '/metadata',
             $headers,
             $metadata,
-            $userCredentials,
+            $userCredentials ?? $this->settings->defaultUserCredentials(),
             $this->onException
         );
 
@@ -929,6 +919,10 @@ class EventStoreHttpConnection implements EventStoreConnection
             throw new InvalidArgumentException('Group name cannot be empty');
         }
 
+        if ('$all' === $stream) {
+            throw AccessDenied::toStream($stream);
+        }
+
         $body = Json::encode($settings);
 
         $headers = [
@@ -944,7 +938,7 @@ class EventStoreHttpConnection implements EventStoreConnection
             '/subscriptions/' . \urlencode($stream) . '/' . \urlencode($groupName),
             $headers,
             $body,
-            $userCredentials,
+            $userCredentials ?? $this->settings->defaultUserCredentials(),
             $this->onException
         );
 
@@ -963,6 +957,7 @@ class EventStoreHttpConnection implements EventStoreConnection
                     $response->getReasonPhrase()
                 ));
             default:
+                \var_dump($response);
                 throw new EventStoreConnectionException(\sprintf(
                     'Unexpected status code %d returned',
                     $response->getStatusCode()
@@ -999,7 +994,7 @@ class EventStoreHttpConnection implements EventStoreConnection
             '/subscriptions/' . \urlencode($stream) . '/' . \urlencode($groupName),
             $headers,
             $body,
-            $userCredentials,
+            $userCredentials ?? $this->settings->defaultUserCredentials(),
             $this->onException
         );
 
@@ -1046,7 +1041,7 @@ class EventStoreHttpConnection implements EventStoreConnection
         $response = $this->httpClient->delete(
             '/subscriptions/' . \urlencode($stream) . '/' . \urlencode($groupName),
             $headers,
-            $userCredentials,
+            $userCredentials ?? $this->settings->defaultUserCredentials(),
             $this->onException
         );
 
@@ -1090,8 +1085,8 @@ class EventStoreHttpConnection implements EventStoreConnection
     public function subscribeToStream(
         string $stream,
         bool $resolveLinkTos,
-        EventAppearedOnSubscription $eventAppeared,
-        ?SubscriptionDropped $subscriptionDropped = null,
+        Closure $eventAppeared,
+        ?Closure $subscriptionDropped = null,
         ?UserCredentials $userCredentials = null
     ): EventStoreSubscription {
         $streamEventsSlice = $this->readStreamEventsBackward(
@@ -1126,9 +1121,9 @@ class EventStoreHttpConnection implements EventStoreConnection
         string $stream,
         ?int $lastCheckpoint,
         ?CatchUpSubscriptionSettings $settings,
-        EventAppearedOnCatchupSubscription $eventAppeared,
-        ?LiveProcessingStartedOnCatchUpSubscription $liveProcessingStarted = null,
-        ?CatchUpSubscriptionDropped $subscriptionDropped = null,
+        Closure $eventAppeared,
+        ?Closure $liveProcessingStarted = null,
+        ?Closure $subscriptionDropped = null,
         ?UserCredentials $userCredentials = null
     ): EventStoreStreamCatchUpSubscription {
         if (empty($stream)) {
@@ -1153,8 +1148,8 @@ class EventStoreHttpConnection implements EventStoreConnection
 
     public function subscribeToAll(
         bool $resolveLinkTos,
-        EventAppearedOnSubscription $eventAppeared,
-        ?SubscriptionDropped $subscriptionDropped = null,
+        Closure $eventAppeared,
+        ?Closure $subscriptionDropped = null,
         ?UserCredentials $userCredentials = null
     ): EventStoreSubscription {
         $allEventsSlice = $this->readAllEventsBackward(
@@ -1178,9 +1173,9 @@ class EventStoreHttpConnection implements EventStoreConnection
     public function subscribeToAllFrom(
         ?Position $lastCheckpoint,
         ?CatchUpSubscriptionSettings $settings,
-        EventAppearedOnCatchupSubscription $eventAppeared,
-        ?LiveProcessingStartedOnCatchUpSubscription $liveProcessingStarted = null,
-        ?CatchUpSubscriptionDropped $subscriptionDropped = null,
+        Closure $eventAppeared,
+        ?Closure $liveProcessingStarted = null,
+        ?Closure $subscriptionDropped = null,
         ?UserCredentials $userCredentials = null
     ): EventStoreAllCatchUpSubscription {
         if (null === $settings) {
@@ -1201,8 +1196,8 @@ class EventStoreHttpConnection implements EventStoreConnection
     public function connectToPersistentSubscription(
         string $stream,
         string $groupName,
-        EventAppearedOnPersistentSubscription $eventAppeared,
-        ?PersistentSubscriptionDropped $subscriptionDropped = null,
+        Closure $eventAppeared,
+        ?Closure $subscriptionDropped = null,
         int $bufferSize = 10,
         bool $autoAck = true,
         ?UserCredentials $userCredentials = null

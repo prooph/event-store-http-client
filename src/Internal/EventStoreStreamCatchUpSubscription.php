@@ -2,8 +2,8 @@
 
 /**
  * This file is part of `prooph/event-store-http-client`.
- * (c) 2018-2019 Alexander Miertsch <kontakt@codeliner.ws>
- * (c) 2018-2019 Sascha-Oliver Prolic <saschaprolic@googlemail.com>
+ * (c) 2018-2020 Alexander Miertsch <kontakt@codeliner.ws>
+ * (c) 2018-2020 Sascha-Oliver Prolic <saschaprolic@googlemail.com>
  *
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
@@ -13,15 +13,13 @@ declare(strict_types=1);
 
 namespace Prooph\EventStoreHttpClient\Internal;
 
-use Prooph\EventStore\CatchUpSubscriptionDropped;
+use Closure;
 use Prooph\EventStore\CatchUpSubscriptionSettings;
-use Prooph\EventStore\EventAppearedOnCatchupSubscription;
 use Prooph\EventStore\EventStoreConnection;
 use Prooph\EventStore\EventStoreStreamCatchUpSubscription as EventStoreStreamCatchUpSubscriptionInterface;
 use Prooph\EventStore\Exception\OutOfRangeException;
 use Prooph\EventStore\Exception\RuntimeException;
 use Prooph\EventStore\Exception\StreamDeleted;
-use Prooph\EventStore\LiveProcessingStartedOnCatchUpSubscription;
 use Prooph\EventStore\ResolvedEvent;
 use Prooph\EventStore\SliceReadStatus;
 use Prooph\EventStore\StreamEventsSlice;
@@ -29,26 +27,26 @@ use Prooph\EventStore\SubscriptionDropReason;
 use Prooph\EventStore\UserCredentials;
 use Throwable;
 
-class EventStoreStreamCatchUpSubscription
-    extends EventStoreCatchUpSubscription
-    implements EventStoreStreamCatchUpSubscriptionInterface
+class EventStoreStreamCatchUpSubscription extends EventStoreCatchUpSubscription implements EventStoreStreamCatchUpSubscriptionInterface
 {
-    /** @var int */
-    private $nextReadEventNumber;
-    /** @var int */
-    private $lastProcessedEventNumber;
+    private int $nextReadEventNumber;
+    private int $lastProcessedEventNumber;
 
     /**
      * @internal
+     *
+     * @param Closure(EventStoreCatchUpSubscription, ResolvedEvent): void $eventAppeared
+     * @param null|Closure(EventStoreCatchUpSubscription): void $liveProcessingStarted
+     * @param null|Closure(EventStoreCatchUpSubscription, SubscriptionDropReason, null|Throwable): void $subscriptionDropped
      */
     public function __construct(
         EventStoreConnection $connection,
         string $streamId,
         ?int $fromEventNumberExclusive, // if null from the very beginning
         ?UserCredentials $userCredentials,
-        EventAppearedOnCatchupSubscription $eventAppeared,
-        ?LiveProcessingStartedOnCatchUpSubscription $liveProcessingStarted,
-        ?CatchUpSubscriptionDropped $subscriptionDropped,
+        Closure $eventAppeared,
+        ?Closure $liveProcessingStarted,
+        ?Closure $subscriptionDropped,
         CatchUpSubscriptionSettings $settings
     ) {
         parent::__construct(

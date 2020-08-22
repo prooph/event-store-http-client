@@ -11,11 +11,12 @@
 
 declare(strict_types=1);
 
-namespace ProophTest\EventStoreHttpClient;
+namespace Prooph\EventStoreHttpClient;
 
-class SystemUsers
-{
-    public const ADMIN = 'admin';
-    public const OPERATIONS = 'ops';
-    public const DEFAULT_ADMIN_PASSWORD = 'changeit';
-}
+require __DIR__ . '/../vendor/autoload.php';
+
+$connection = EventStoreConnectionFactory::create();
+
+$sl = $connection->readStreamEventsForward('food', 0, 100);
+
+\var_dump($sl->events()[0]);

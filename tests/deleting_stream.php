@@ -2,8 +2,8 @@
 
 /**
  * This file is part of `prooph/event-store-http-client`.
- * (c) 2018-2019 Alexander Miertsch <kontakt@codeliner.ws>
- * (c) 2018-2019 Sascha-Oliver Prolic <saschaprolic@googlemail.com>
+ * (c) 2018-2020 Alexander Miertsch <kontakt@codeliner.ws>
+ * (c) 2018-2020 Sascha-Oliver Prolic <saschaprolic@googlemail.com>
  *
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
@@ -30,9 +30,9 @@ class deleting_stream extends TestCase
     {
         $stream = 'which_already_exists_should_success_when_passed_empty_stream_expected_version';
 
-        $connection = TestConnection::create();
+        $connection = TestConnection::create(DefaultData::adminCredentials());
 
-        $connection->deleteStream($stream, ExpectedVersion::EMPTY_STREAM, true);
+        $connection->deleteStream($stream, ExpectedVersion::NO_STREAM, true);
     }
 
     /**
@@ -43,7 +43,7 @@ class deleting_stream extends TestCase
     {
         $stream = 'which_already_exists_should_success_when_passed_any_for_expected_version';
 
-        $connection = TestConnection::create();
+        $connection = TestConnection::create(DefaultData::adminCredentials());
 
         $connection->deleteStream($stream, ExpectedVersion::ANY, true);
     }
@@ -53,7 +53,7 @@ class deleting_stream extends TestCase
     {
         $stream = 'with_invalid_expected_version_should_fail';
 
-        $connection = TestConnection::create();
+        $connection = TestConnection::create(DefaultData::adminCredentials());
 
         $this->expectException(WrongExpectedVersion::class);
         $connection->deleteStream($stream, 1, true);
@@ -66,9 +66,9 @@ class deleting_stream extends TestCase
 
         $stream = 'delete_should_return_log_position_when_writing';
 
-        $connection = TestConnection::create();
+        $connection = TestConnection::create(DefaultData::adminCredentials());
 
-        $connection->appendToStream($stream, ExpectedVersion::EMPTY_STREAM, [TestEvent::newTestEvent()]);
+        $connection->appendToStream($stream, ExpectedVersion::NO_STREAM, [TestEvent::newTestEvent()]);
 
         $delete = $connection->deleteStream($stream, 0, true);
         \assert($delete instanceof DeleteResult);
@@ -86,9 +86,9 @@ class deleting_stream extends TestCase
         // note: this is different from tcp api, there it will fail!
         $stream = 'which_was_allready_deleted_should_fail';
 
-        $connection = TestConnection::create();
+        $connection = TestConnection::create(DefaultData::adminCredentials());
 
-        $connection->deleteStream($stream, ExpectedVersion::EMPTY_STREAM, true);
-        $connection->deleteStream($stream, ExpectedVersion::EMPTY_STREAM, true);
+        $connection->deleteStream($stream, ExpectedVersion::NO_STREAM, true);
+        $connection->deleteStream($stream, ExpectedVersion::NO_STREAM, true);
     }
 }
