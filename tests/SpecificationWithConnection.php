@@ -2,8 +2,8 @@
 
 /**
  * This file is part of `prooph/event-store-http-client`.
- * (c) 2018-2019 Alexander Miertsch <kontakt@codeliner.ws>
- * (c) 2018-2019 Sascha-Oliver Prolic <saschaprolic@googlemail.com>
+ * (c) 2018-2020 Alexander Miertsch <kontakt@codeliner.ws>
+ * (c) 2018-2020 Sascha-Oliver Prolic <saschaprolic@googlemail.com>
  *
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
@@ -31,7 +31,7 @@ trait SpecificationWithConnection
 
     protected function execute(callable $test): void
     {
-        $this->conn = TestConnection::create();
+        $this->conn = TestConnection::create(DefaultData::adminCredentials());
 
         $this->given();
 

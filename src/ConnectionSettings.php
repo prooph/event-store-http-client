@@ -2,8 +2,8 @@
 
 /**
  * This file is part of `prooph/event-store-http-client`.
- * (c) 2018-2019 Alexander Miertsch <kontakt@codeliner.ws>
- * (c) 2018-2019 Sascha-Oliver Prolic <saschaprolic@googlemail.com>
+ * (c) 2018-2020 Alexander Miertsch <kontakt@codeliner.ws>
+ * (c) 2018-2020 Sascha-Oliver Prolic <saschaprolic@googlemail.com>
  *
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
@@ -19,14 +19,10 @@ use Prooph\EventStore\UserCredentials;
 
 class ConnectionSettings
 {
-    /** @var EndPoint */
-    private $endPoint;
-    /** @var string */
-    private $schema;
-    /** @var UserCredentials|null */
-    private $defaultUserCredentials;
-    /** @var bool */
-    private $requireMaster;
+    private EndPoint $endPoint;
+    private string $schema;
+    private ?UserCredentials $defaultUserCredentials;
+    private bool $requireMaster;
 
     public static function default(): ConnectionSettings
     {

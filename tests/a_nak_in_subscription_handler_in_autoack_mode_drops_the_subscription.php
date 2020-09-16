@@ -2,8 +2,8 @@
 
 /**
  * This file is part of `prooph/event-store-http-client`.
- * (c) 2018-2019 Alexander Miertsch <kontakt@codeliner.ws>
- * (c) 2018-2019 Sascha-Oliver Prolic <saschaprolic@googlemail.com>
+ * (c) 2018-2020 Alexander Miertsch <kontakt@codeliner.ws>
+ * (c) 2018-2020 Sascha-Oliver Prolic <saschaprolic@googlemail.com>
  *
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
@@ -13,15 +13,12 @@ declare(strict_types=1);
 
 namespace ProophTest\EventStoreHttpClient;
 
-use Closure;
 use Exception;
 use PHPUnit\Framework\TestCase;
-use Prooph\EventStore\EventAppearedOnPersistentSubscription;
 use Prooph\EventStore\EventData;
 use Prooph\EventStore\EventId;
 use Prooph\EventStore\EventStorePersistentSubscription;
 use Prooph\EventStore\ExpectedVersion;
-use Prooph\EventStore\PersistentSubscriptionDropped;
 use Prooph\EventStore\PersistentSubscriptionSettings;
 use Prooph\EventStore\ResolvedEvent;
 use Prooph\EventStore\SubscriptionDropReason;
@@ -68,6 +65,7 @@ class a_nak_in_subscription_handler_in_autoack_mode_drops_the_subscription exten
         );
 
         $dropBehaviour = function (
+            EventStorePersistentSubscription $subscription,
             SubscriptionDropReason $reason,
             ?Throwable $exception = null
         ): void {
@@ -79,31 +77,14 @@ class a_nak_in_subscription_handler_in_autoack_mode_drops_the_subscription exten
         $this->subscription = $this->conn->connectToPersistentSubscription(
             $this->stream,
             $this->group,
-            new class() implements EventAppearedOnPersistentSubscription {
-                public function __invoke(
-                    EventStorePersistentSubscription $subscription,
-                    ResolvedEvent $resolvedEvent,
-                    ?int $retryCount = null
-                ): void {
-                    throw new \Exception('test');
-                }
+            function (
+                EventStorePersistentSubscription $subscription,
+                ResolvedEvent $resolvedEvent,
+                ?int $retryCount = null
+            ): void {
+                throw new \Exception('test');
             },
-            new class(Closure::fromCallable($dropBehaviour)) implements PersistentSubscriptionDropped {
-                private $callback;
-
-                public function __construct(callable $callback)
-                {
-                    $this->callback = $callback;
-                }
-
-                public function __invoke(
-                    EventStorePersistentSubscription $subscription,
-                    SubscriptionDropReason $reason,
-                    ?Throwable $exception = null
-                ): void {
-                    ($this->callback)($reason, $exception);
-                }
-            },
+            $dropBehaviour,
             10,
             true,
             DefaultData::adminCredentials()

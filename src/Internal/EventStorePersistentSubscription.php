@@ -2,8 +2,8 @@
 
 /**
  * This file is part of `prooph/event-store-http-client`.
- * (c) 2018-2019 Alexander Miertsch <kontakt@codeliner.ws>
- * (c) 2018-2019 Sascha-Oliver Prolic <saschaprolic@googlemail.com>
+ * (c) 2018-2020 Alexander Miertsch <kontakt@codeliner.ws>
+ * (c) 2018-2020 Sascha-Oliver Prolic <saschaprolic@googlemail.com>
  *
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
@@ -13,14 +13,13 @@ declare(strict_types=1);
 
 namespace Prooph\EventStoreHttpClient\Internal;
 
-use Prooph\EventStore\EventAppearedOnPersistentSubscription;
+use Closure;
 use Prooph\EventStore\EventId;
 use Prooph\EventStore\EventStorePersistentSubscription as EventStorePersistentSubscriptionInterface;
 use Prooph\EventStore\Exception\RuntimeException;
 use Prooph\EventStore\Internal\DropData;
 use Prooph\EventStore\Internal\PersistentEventStoreSubscription;
 use Prooph\EventStore\Internal\ResolvedEvent as InternalResolvedEvent;
-use Prooph\EventStore\PersistentSubscriptionDropped;
 use Prooph\EventStore\PersistentSubscriptionNakEventAction;
 use Prooph\EventStore\PersistentSubscriptionResolvedEvent;
 use Prooph\EventStore\ResolvedEvent;
@@ -33,54 +32,44 @@ use Throwable;
 
 class EventStorePersistentSubscription implements EventStorePersistentSubscriptionInterface
 {
-    /** @var HttpClient */
-    private $httpClient;
+    private HttpClient $httpClient;
 
-    /** @var ResolvedEvent */
-    private static $dropSubscriptionEvent;
+    private ?ResolvedEvent $dropSubscriptionEvent = null;
 
-    /** @var string */
-    private $subscriptionId;
-    /** @var string */
-    private $streamId;
-    /** @var callable */
-    private $eventAppeared;
-    /** @var callable|null */
-    private $subscriptionDropped;
-    /** @var UserCredentials|null */
-    private $userCredentials;
-    /** @var bool */
-    private $autoAck;
+    private string $subscriptionId;
+    private string $streamId;
+    private Closure $eventAppeared;
+    private ?Closure $subscriptionDropped;
+    private ?UserCredentials $userCredentials;
+    private bool $autoAck;
 
-    /** @var PersistentEventStoreSubscription */
-    private $subscription;
-    /** @var SplQueue */
-    private $queue;
-    /** @var bool */
-    private $isProcessing = false;
-    /** @var DropData */
-    private $dropData;
+    private PersistentEventStoreSubscription $subscription;
+    private SplQueue $queue;
+    private bool $isProcessing = false;
+    private ?DropData $dropData = null;
 
-    /** @var bool */
-    private $isDropped = false;
-    /** @var int */
-    private $bufferSize;
-    /** @var bool */
-    private $stopped = true;
+    private bool $isDropped = false;
+    private int $bufferSize;
+    private bool $stopped = true;
 
-    /** @internal  */
+    /**
+     * @internal
+     *
+     * @param Closure(EventStorePersistentSubscription, ResolvedEvent, null|int): void $eventAppeared
+     * @param null|Closure(EventStorePersistentSubscription, SubscriptionDropReason, null|Throwable): void $subscriptionDropped
+     */
     public function __construct(
         HttpClient $httpClient,
         string $subscriptionId,
         string $streamId,
-        EventAppearedOnPersistentSubscription $eventAppeared,
-        ?PersistentSubscriptionDropped $subscriptionDropped,
+        Closure $eventAppeared,
+        ?Closure $subscriptionDropped,
         ?UserCredentials $userCredentials,
         int $bufferSize = 10,
         bool $autoAck = true
     ) {
-        if (null === self::$dropSubscriptionEvent) {
-            self::$dropSubscriptionEvent = new ResolvedEvent(null, null, null);
+        if (null === $this->dropSubscriptionEvent) {
+            $this->dropSubscriptionEvent = new ResolvedEvent(null, null, null);
         }
 
         $this->httpClient = $httpClient;
@@ -280,7 +269,7 @@ class EventStorePersistentSubscription implements EventStorePersistentSubscripti
             $this->dropData = new DropData($reason, $error);
 
             $this->enqueue(
-                new PersistentSubscriptionResolvedEvent(self::$dropSubscriptionEvent, null)
+                new PersistentSubscriptionResolvedEvent($this->dropSubscriptionEvent, null)
             );
         }
     }
@@ -316,7 +305,7 @@ class EventStorePersistentSubscription implements EventStorePersistentSubscripti
                 $e = $this->queue->dequeue();
                 \assert($e instanceof PersistentSubscriptionResolvedEvent);
 
-                if ($e->event() === self::$dropSubscriptionEvent) {
+                if ($e->event() === $this->dropSubscriptionEvent) {
                     // drop subscription artificial ResolvedEvent
 
                     if (null === $this->dropData) {

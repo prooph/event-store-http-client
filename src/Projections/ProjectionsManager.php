@@ -2,8 +2,8 @@
 
 /**
  * This file is part of `prooph/event-store-http-client`.
- * (c) 2018-2019 Alexander Miertsch <kontakt@codeliner.ws>
- * (c) 2018-2019 Sascha-Oliver Prolic <saschaprolic@googlemail.com>
+ * (c) 2018-2020 Alexander Miertsch <kontakt@codeliner.ws>
+ * (c) 2018-2020 Sascha-Oliver Prolic <saschaprolic@googlemail.com>
  *
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
@@ -18,6 +18,9 @@ use Prooph\EventStore\Exception\EventStoreConnectionException;
 use Prooph\EventStore\Exception\InvalidArgumentException;
 use Prooph\EventStore\Projections\ProjectionDetails;
 use Prooph\EventStore\Projections\ProjectionsManager as SyncProjectionsManager;
+use Prooph\EventStore\Projections\ProjectionStatistics;
+use Prooph\EventStore\Projections\Query;
+use Prooph\EventStore\Projections\State;
 use Prooph\EventStore\Transport\Http\HttpStatusCode;
 use Prooph\EventStore\UserCredentials;
 use Prooph\EventStore\Util\Json;
@@ -31,10 +34,8 @@ use Throwable;
 
 class ProjectionsManager implements SyncProjectionsManager
 {
-    /** @var ConnectionSettings */
-    private $settings;
-    /** @var HttpClient */
-    private $httpClient;
+    private ConnectionSettings $settings;
+    private HttpClient $httpClient;
 
     /** @internal */
     public function __construct(
@@ -287,39 +288,45 @@ class ProjectionsManager implements SyncProjectionsManager
     /**
      * Returns String of JSON containing projection status
      */
-    public function getStatus(string $name, ?UserCredentials $userCredentials = null): string
+    public function getStatus(string $name, ?UserCredentials $userCredentials = null): ProjectionDetails
     {
         if ('' === $name) {
             throw new InvalidArgumentException('Name is required');
         }
 
-        return $this->sendGet(
-            \sprintf(
-                '/projection/%s',
-                \urlencode($name)
-            ),
-            $userCredentials,
-            HttpStatusCode::OK
-        )->getBody()->getContents();
+        return $this->buildProjectionDetails(
+            Json::decode(
+                $this->sendGet(
+                    \sprintf(
+                        '/projection/%s',
+                        \urlencode($name)
+                    ),
+                    $userCredentials,
+                    HttpStatusCode::OK
+                )->getBody()->getContents()
+            )
+        );
     }
 
     /**
      * Returns String of JSON containing projection state
      */
-    public function getState(string $name, ?UserCredentials $userCredentials = null): string
+    public function getState(string $name, ?UserCredentials $userCredentials = null): State
     {
         if ('' === $name) {
             throw new InvalidArgumentException('Name is required');
         }
 
-        return $this->sendGet(
-            \sprintf(
-                '/projection/%s/state',
-                \urlencode($name)
-            ),
-            $userCredentials,
-            HttpStatusCode::OK
-        )->getBody()->getContents();
+        return new State(
+            $this->sendGet(
+                \sprintf(
+                    '/projection/%s/state',
+                    \urlencode($name)
+                ),
+                $userCredentials,
+                HttpStatusCode::OK
+            )->getBody()->getContents()
+        );
     }
 
     /**
@@ -329,7 +336,7 @@ class ProjectionsManager implements SyncProjectionsManager
         string $name,
         string $partition,
         ?UserCredentials $userCredentials = null
-    ): string {
+    ): State {
         if ('' === $name) {
             throw new InvalidArgumentException('Name is required');
         }
@@ -338,44 +345,42 @@ class ProjectionsManager implements SyncProjectionsManager
             throw new InvalidArgumentException('Partition is required');
         }
 
-        return $this->sendGet(
-            \sprintf(
-                '/projection/%s/state?partition=%s',
-                \urlencode($name),
-                \urlencode($partition)
-            ),
-            $userCredentials,
-            HttpStatusCode::OK
-        )->getBody()->getContents();
+        return new State(
+            $this->sendGet(
+                \sprintf(
+                    '/projection/%s/state?partition=%s',
+                    \urlencode($name),
+                    \urlencode($partition)
+                ),
+                $userCredentials,
+                HttpStatusCode::OK
+            )->getBody()->getContents()
+        );
     }
 
-    /**
-     * Returns String of JSON containing projection result
-     */
-    public function getResult(string $name, ?UserCredentials $userCredentials = null): string
+    public function getResult(string $name, ?UserCredentials $userCredentials = null): State
     {
         if ('' === $name) {
             throw new InvalidArgumentException('Name is required');
         }
 
-        return $this->sendGet(
-            \sprintf(
-                '/projection/%s/result',
-                \urlencode($name)
-            ),
-            $userCredentials,
-            HttpStatusCode::OK
-        )->getBody()->getContents();
+        return new State(
+            $this->sendGet(
+                \sprintf(
+                    '/projection/%s/result',
+                    \urlencode($name)
+                ),
+                $userCredentials,
+                HttpStatusCode::OK
+            )->getBody()->getContents()
+        );
     }
 
-    /**
-     * Returns String of JSON containing projection result
-     */
     public function getPartitionResult(
         string $name,
         string $partition,
         ?UserCredentials $userCredentials = null
-    ): string {
+    ): State {
         if ('' === $name) {
             throw new InvalidArgumentException('Name is required');
         }
@@ -384,56 +389,61 @@ class ProjectionsManager implements SyncProjectionsManager
             throw new InvalidArgumentException('Partition is required');
         }
 
-        return $this->sendGet(
-            \sprintf(
-                '/projection/%s/result?partition=%s',
-                \urlencode($name),
-                \urlencode($partition)
-            ),
-            $userCredentials,
-            HttpStatusCode::OK
-        )->getBody()->getContents();
+        return new State(
+            $this->sendGet(
+                \sprintf(
+                    '/projection/%s/result?partition=%s',
+                    \urlencode($name),
+                    \urlencode($partition)
+                ),
+                $userCredentials,
+                HttpStatusCode::OK
+            )->getBody()->getContents()
+        );
     }
 
-    /**
-     * Returns String of JSON containing projection statistics
-     */
-    public function getStatistics(string $name, ?UserCredentials $userCredentials = null): string
+    public function getStatistics(string $name, ?UserCredentials $userCredentials = null): ProjectionStatistics
     {
         if ('' === $name) {
             throw new InvalidArgumentException('Name is required');
         }
 
-        return $this->sendGet(
-            \sprintf(
-                '/projection/%s/statistics',
-                \urlencode($name)
-            ),
-            $userCredentials,
-            HttpStatusCode::OK
-        )->getBody()->getContents();
+        return new ProjectionStatistics(
+            \json_decode(
+                $this->sendGet(
+                    \sprintf(
+                        '/projection/%s/statistics',
+                        \urlencode($name)
+                    ),
+                    $userCredentials,
+                    HttpStatusCode::OK
+                )->getBody()->getContents()
+            )
+        );
     }
 
-    public function getQuery(string $name, ?UserCredentials $userCredentials = null): string
+    public function getQuery(string $name, ?UserCredentials $userCredentials = null): Query
     {
         if ('' === $name) {
             throw new InvalidArgumentException('Name is required');
         }
 
-        return $this->sendGet(
-            \sprintf(
-                '/projection/%s/query',
-                \urlencode($name)
-            ),
-            $userCredentials,
-            HttpStatusCode::OK
-        )->getBody()->getContents();
+        return new Query(
+            $this->sendGet(
+                \sprintf(
+                    '/projection/%s/query',
+                    \urlencode($name)
+                ),
+                $userCredentials,
+                HttpStatusCode::OK
+            )->getBody()->getContents()
+        );
     }
 
     public function updateQuery(
         string $name,
         string $query,
-        bool $emitEnabled = false,
+        ?bool $emitEnabled = false,
         ?UserCredentials $userCredentials = null
     ): void {
         if ('' === $name) {
@@ -444,9 +454,15 @@ class ProjectionsManager implements SyncProjectionsManager
             throw new InvalidArgumentException('Query is required');
         }
 
+        $emit = '';
+
+        if (null !== $emitEnabled) {
+            $emit = '?emit=' . (string) (int) $emitEnabled;
+        }
+
         $this->sendPut(
             \sprintf(
-                '/projection/%s/query?emit=' . (int) $emitEnabled,
+                '/projection/%s/query' . $emit,
                 \urlencode($name)
             ),
             $query,

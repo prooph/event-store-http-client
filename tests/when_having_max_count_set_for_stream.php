@@ -2,8 +2,8 @@
 
 /**
  * This file is part of `prooph/event-store-http-client`.
- * (c) 2018-2019 Alexander Miertsch <kontakt@codeliner.ws>
- * (c) 2018-2019 Sascha-Oliver Prolic <saschaprolic@googlemail.com>
+ * (c) 2018-2020 Alexander Miertsch <kontakt@codeliner.ws>
+ * (c) 2018-2020 Sascha-Oliver Prolic <saschaprolic@googlemail.com>
  *
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
@@ -13,7 +13,6 @@ declare(strict_types=1);
 
 namespace ProophTest\EventStoreHttpClient;
 
-use Amp\Success;
 use PHPUnit\Framework\TestCase;
 use Prooph\EventStore\EventData;
 use Prooph\EventStore\EventStoreConnection;
@@ -34,7 +33,7 @@ class when_having_max_count_set_for_stream extends TestCase
 
     private function execute(callable $function): void
     {
-        $this->conn = TestConnection::create();
+        $this->conn = TestConnection::create(DefaultData::adminCredentials());
 
         $this->conn->setStreamMetadata(
             $this->stream,

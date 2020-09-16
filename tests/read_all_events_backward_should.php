@@ -2,8 +2,8 @@
 
 /**
  * This file is part of `prooph/event-store-http-client`.
- * (c) 2018-2019 Alexander Miertsch <kontakt@codeliner.ws>
- * (c) 2018-2019 Sascha-Oliver Prolic <saschaprolic@googlemail.com>
+ * (c) 2018-2020 Alexander Miertsch <kontakt@codeliner.ws>
+ * (c) 2018-2020 Sascha-Oliver Prolic <saschaprolic@googlemail.com>
  *
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
@@ -66,7 +66,7 @@ class read_all_events_backward_should extends TestCase
 
         $this->testEvents = TestEvent::newAmount(20);
 
-        $this->conn->appendToStream('stream-' . Guid::generateAsHex(), ExpectedVersion::EMPTY_STREAM, $this->testEvents);
+        $this->conn->appendToStream('stream-' . Guid::generateAsHex(), ExpectedVersion::NO_STREAM, $this->testEvents);
 
         $result = $this->conn->appendToStream('stream-' . Guid::generateAsHex(), ExpectedVersion::NO_STREAM, $this->testEvents);
         \assert($result instanceof WriteResult);

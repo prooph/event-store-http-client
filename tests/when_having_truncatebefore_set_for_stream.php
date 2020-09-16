@@ -2,8 +2,8 @@
 
 /**
  * This file is part of `prooph/event-store-http-client`.
- * (c) 2018-2019 Alexander Miertsch <kontakt@codeliner.ws>
- * (c) 2018-2019 Sascha-Oliver Prolic <saschaprolic@googlemail.com>
+ * (c) 2018-2020 Alexander Miertsch <kontakt@codeliner.ws>
+ * (c) 2018-2020 Sascha-Oliver Prolic <saschaprolic@googlemail.com>
  *
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
@@ -42,7 +42,7 @@ class when_having_truncatebefore_set_for_stream extends TestCase
     {
         $this->conn->appendToStream(
             $stream,
-            ExpectedVersion::EMPTY_STREAM,
+            ExpectedVersion::NO_STREAM,
             $this->testEvents,
             DefaultData::adminCredentials()
         );
@@ -82,7 +82,7 @@ class when_having_truncatebefore_set_for_stream extends TestCase
             $this->appendEvents($stream);
             $this->setStreamMetadata(
                 $stream,
-                ExpectedVersion::EMPTY_STREAM,
+                ExpectedVersion::NO_STREAM,
                 StreamMetadata::create()->setTruncateBefore(2)
             );
 
@@ -106,7 +106,7 @@ class when_having_truncatebefore_set_for_stream extends TestCase
             $this->appendEvents($stream);
             $this->setStreamMetadata(
                 $stream,
-                ExpectedVersion::EMPTY_STREAM,
+                ExpectedVersion::NO_STREAM,
                 StreamMetadata::create()->setTruncateBefore(2)
             );
 
@@ -128,7 +128,7 @@ class when_having_truncatebefore_set_for_stream extends TestCase
             $this->appendEvents($stream);
             $this->setStreamMetadata(
                 $stream,
-                ExpectedVersion::EMPTY_STREAM,
+                ExpectedVersion::NO_STREAM,
                 StreamMetadata::create()->setTruncateBefore(2)
             );
 
@@ -150,7 +150,7 @@ class when_having_truncatebefore_set_for_stream extends TestCase
             $this->appendEvents($stream);
             $this->setStreamMetadata(
                 $stream,
-                ExpectedVersion::EMPTY_STREAM,
+                ExpectedVersion::NO_STREAM,
                 StreamMetadata::create()->setTruncateBefore(2)
             );
 
@@ -189,7 +189,7 @@ class when_having_truncatebefore_set_for_stream extends TestCase
             $this->appendEvents($stream);
             $this->setStreamMetadata(
                 $stream,
-                ExpectedVersion::EMPTY_STREAM,
+                ExpectedVersion::NO_STREAM,
                 StreamMetadata::create()->setTruncateBefore(2)
             );
 
@@ -228,7 +228,7 @@ class when_having_truncatebefore_set_for_stream extends TestCase
             $this->appendEvents($stream);
             $this->setStreamMetadata(
                 $stream,
-                ExpectedVersion::EMPTY_STREAM,
+                ExpectedVersion::NO_STREAM,
                 StreamMetadata::create()->setTruncateBefore(2)
             );
 
@@ -267,7 +267,7 @@ class when_having_truncatebefore_set_for_stream extends TestCase
             $this->appendEvents($stream);
             $this->setStreamMetadata(
                 $stream,
-                ExpectedVersion::EMPTY_STREAM,
+                ExpectedVersion::NO_STREAM,
                 StreamMetadata::create()->setTruncateBefore(2)
             );
 
@@ -306,7 +306,7 @@ class when_having_truncatebefore_set_for_stream extends TestCase
             $this->appendEvents($stream);
             $this->setStreamMetadata(
                 $stream,
-                ExpectedVersion::EMPTY_STREAM,
+                ExpectedVersion::NO_STREAM,
                 StreamMetadata::create()->setTruncateBefore(2)
             );
 
@@ -341,7 +341,7 @@ class when_having_truncatebefore_set_for_stream extends TestCase
             $this->appendEvents($stream);
             $this->setStreamMetadata(
                 $stream,
-                ExpectedVersion::EMPTY_STREAM,
+                ExpectedVersion::NO_STREAM,
                 StreamMetadata::create()->setTruncateBefore(2)
             );
 
@@ -376,7 +376,7 @@ class when_having_truncatebefore_set_for_stream extends TestCase
             $this->appendEvents($stream);
             $this->setStreamMetadata(
                 $stream,
-                ExpectedVersion::EMPTY_STREAM,
+                ExpectedVersion::NO_STREAM,
                 StreamMetadata::create()->setTruncateBefore(2)
             );
 
@@ -411,7 +411,7 @@ class when_having_truncatebefore_set_for_stream extends TestCase
             $this->appendEvents($stream);
             $this->setStreamMetadata(
                 $stream,
-                ExpectedVersion::EMPTY_STREAM,
+                ExpectedVersion::NO_STREAM,
                 StreamMetadata::create()->setTruncateBefore(2)
             );
 
@@ -446,7 +446,7 @@ class when_having_truncatebefore_set_for_stream extends TestCase
             $this->appendEvents($stream);
             $this->setStreamMetadata(
                 $stream,
-                ExpectedVersion::EMPTY_STREAM,
+                ExpectedVersion::NO_STREAM,
                 StreamMetadata::create()->setTruncateBefore(2)
             );
 
@@ -481,7 +481,7 @@ class when_having_truncatebefore_set_for_stream extends TestCase
             $this->appendEvents($stream);
             $this->setStreamMetadata(
                 $stream,
-                ExpectedVersion::EMPTY_STREAM,
+                ExpectedVersion::NO_STREAM,
                 StreamMetadata::create()->setTruncateBefore(2)
             );
 
@@ -516,7 +516,7 @@ class when_having_truncatebefore_set_for_stream extends TestCase
             $this->appendEvents($stream);
             $this->setStreamMetadata(
                 $stream,
-                ExpectedVersion::EMPTY_STREAM,
+                ExpectedVersion::NO_STREAM,
                 StreamMetadata::create()->setTruncateBefore(2)
             );
 
@@ -551,7 +551,7 @@ class when_having_truncatebefore_set_for_stream extends TestCase
             $this->appendEvents($stream);
             $this->setStreamMetadata(
                 $stream,
-                ExpectedVersion::EMPTY_STREAM,
+                ExpectedVersion::NO_STREAM,
                 StreamMetadata::create()->setTruncateBefore(2)
             );
 

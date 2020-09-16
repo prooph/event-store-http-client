@@ -2,8 +2,8 @@
 
 /**
  * This file is part of `prooph/event-store-http-client`.
- * (c) 2018-2019 Alexander Miertsch <kontakt@codeliner.ws>
- * (c) 2018-2019 Sascha-Oliver Prolic <saschaprolic@googlemail.com>
+ * (c) 2018-2020 Alexander Miertsch <kontakt@codeliner.ws>
+ * (c) 2018-2020 Sascha-Oliver Prolic <saschaprolic@googlemail.com>
  *
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
@@ -13,6 +13,7 @@ declare(strict_types=1);
 
 namespace Prooph\EventStoreHttpClient\Internal;
 
+use Closure;
 use Prooph\EventStore\EventId;
 use Prooph\EventStore\EventStoreSubscription;
 use Prooph\EventStore\Exception\AccessDenied;
@@ -32,32 +33,18 @@ use Throwable;
 /** @internal */
 class ConnectToPersistentSubscriptionOperation implements ConnectToPersistentSubscriptions
 {
-    /** @var HttpClient */
-    private $httpClient;
-    /** @var string */
-    private $groupName;
-    /** @var int */
-    private $bufferSize;
-    /** @var string */
-    private $subscriptionId;
-    /** @var string */
-    protected $streamId;
-    /** @var bool */
-    protected $resolveLinkTos;
-    /** @var UserCredentials|null */
-    protected $userCredentials;
-    /** @var callable */
-    protected $eventAppeared;
-    /** @var callable|null */
-    private $subscriptionDropped;
-    /** @var SplQueue */
-    private $actionQueue;
-    /** @var EventStoreSubscription */
-    private $subscription;
-    /** @var bool */
-    private $unsubscribed = false;
-    /** @var string */
-    protected $correlationId;
+    private HttpClient $httpClient;
+    private string $groupName;
+    private int $bufferSize;
+    private string $subscriptionId;
+    protected string $streamId;
+    protected bool $resolveLinkTos;
+    protected ?UserCredentials $userCredentials;
+    protected Closure $eventAppeared;
+    private ?Closure $subscriptionDropped = null;
+    private SplQueue $actionQueue;
+    private ?EventStoreSubscription $subscription = null;
+    private bool $unsubscribed = false;
 
     public function __construct(
         HttpClient $httpClient,

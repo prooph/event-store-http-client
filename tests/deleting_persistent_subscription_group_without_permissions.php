@@ -2,8 +2,8 @@
 
 /**
  * This file is part of `prooph/event-store-http-client`.
- * (c) 2018-2019 Alexander Miertsch <kontakt@codeliner.ws>
- * (c) 2018-2019 Sascha-Oliver Prolic <saschaprolic@googlemail.com>
+ * (c) 2018-2020 Alexander Miertsch <kontakt@codeliner.ws>
+ * (c) 2018-2020 Sascha-Oliver Prolic <saschaprolic@googlemail.com>
  *
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
@@ -15,6 +15,7 @@ namespace ProophTest\EventStoreHttpClient;
 
 use PHPUnit\Framework\TestCase;
 use Prooph\EventStore\Exception\AccessDenied;
+use Prooph\EventStore\UserCredentials;
 use Prooph\EventStore\Util\Guid;
 use ProophTest\EventStoreHttpClient\Helper\TestConnection;
 
@@ -23,13 +24,14 @@ class deleting_persistent_subscription_group_without_permissions extends TestCas
     /** @test */
     public function the_delete_fails_with_access_denied(): void
     {
-        $conn = TestConnection::create();
+        $conn = TestConnection::create(DefaultData::adminCredentials());
 
         $this->expectException(AccessDenied::class);
 
         $conn->deletePersistentSubscription(
             Guid::generateAsHex(),
-            Guid::generateAsHex()
+            Guid::generateAsHex(),
+            new UserCredentials('unknown', 'user')
         );
     }
 }

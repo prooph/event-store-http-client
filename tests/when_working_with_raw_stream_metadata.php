@@ -2,8 +2,8 @@
 
 /**
  * This file is part of `prooph/event-store-http-client`.
- * (c) 2018-2019 Alexander Miertsch <kontakt@codeliner.ws>
- * (c) 2018-2019 Sascha-Oliver Prolic <saschaprolic@googlemail.com>
+ * (c) 2018-2020 Alexander Miertsch <kontakt@codeliner.ws>
+ * (c) 2018-2020 Sascha-Oliver Prolic <saschaprolic@googlemail.com>
  *
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
@@ -32,7 +32,7 @@ class when_working_with_raw_stream_metadata extends TestCase
     protected function setUp(): void
     {
         $this->stream = Guid::generateAsHex();
-        $this->conn = TestConnection::create();
+        $this->conn = TestConnection::create(DefaultData::adminCredentials());
     }
 
     /** @test */
@@ -40,7 +40,7 @@ class when_working_with_raw_stream_metadata extends TestCase
     {
         $this->conn->setStreamMetadata(
             $this->stream,
-            ExpectedVersion::EMPTY_STREAM
+            ExpectedVersion::NO_STREAM
         );
 
         $meta = $this->conn->getRawStreamMetadata($this->stream);
@@ -56,7 +56,7 @@ class when_working_with_raw_stream_metadata extends TestCase
     {
         $this->conn->setStreamMetadata(
             $this->stream,
-            ExpectedVersion::EMPTY_STREAM
+            ExpectedVersion::NO_STREAM
         );
 
         $meta = $this->conn->getRawStreamMetadata($this->stream);
@@ -123,7 +123,7 @@ class when_working_with_raw_stream_metadata extends TestCase
     {
         $this->conn->setStreamMetadata(
             $this->stream,
-            ExpectedVersion::EMPTY_STREAM
+            ExpectedVersion::NO_STREAM
         );
 
         $meta = $this->conn->getRawStreamMetadata($this->stream);
@@ -145,7 +145,7 @@ class when_working_with_raw_stream_metadata extends TestCase
 
         $this->conn->setStreamMetadata(
             $this->stream,
-            ExpectedVersion::EMPTY_STREAM
+            ExpectedVersion::NO_STREAM
         );
 
         $meta = $this->conn->getRawStreamMetadata($this->stream);
@@ -169,7 +169,7 @@ class when_working_with_raw_stream_metadata extends TestCase
 
         $this->conn->setStreamMetadata(
             $this->stream,
-            ExpectedVersion::EMPTY_STREAM
+            ExpectedVersion::NO_STREAM
         );
     }
 
@@ -187,7 +187,7 @@ class when_working_with_raw_stream_metadata extends TestCase
     /** @test */
     public function getting_metadata_for_deleted_stream_returns_empty_string_and_signals_stream_deletion(): void
     {
-        $this->conn->setStreamMetadata($this->stream, ExpectedVersion::EMPTY_STREAM);
+        $this->conn->setStreamMetadata($this->stream, ExpectedVersion::NO_STREAM);
 
         $this->conn->deleteStream($this->stream, ExpectedVersion::NO_STREAM, true);
 

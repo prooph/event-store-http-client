@@ -2,8 +2,8 @@
 
 /**
  * This file is part of `prooph/event-store-http-client`.
- * (c) 2018-2019 Alexander Miertsch <kontakt@codeliner.ws>
- * (c) 2018-2019 Sascha-Oliver Prolic <saschaprolic@googlemail.com>
+ * (c) 2018-2020 Alexander Miertsch <kontakt@codeliner.ws>
+ * (c) 2018-2020 Sascha-Oliver Prolic <saschaprolic@googlemail.com>
  *
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
@@ -13,41 +13,39 @@ declare(strict_types=1);
 
 namespace Prooph\EventStoreHttpClient\Internal;
 
-use Prooph\EventStore\EventAppearedOnSubscription;
+use Closure;
 use Prooph\EventStore\EventStoreSubscription;
 use Prooph\EventStore\Exception\AccessDenied;
 use Prooph\EventStore\Exception\ObjectDisposed;
 use Prooph\EventStore\Internal\Consts;
 use Prooph\EventStore\Position;
-use Prooph\EventStore\SubscriptionDropped;
 use Prooph\EventStore\SubscriptionDropReason;
 use Prooph\EventStore\UserCredentials;
 use Throwable;
 
 class VolatileEventStoreAllSubscription extends EventStoreSubscription
 {
-    /** @var EventStoreHttpConnection */
-    private $connection;
-    /** @var EventAppearedOnSubscription */
-    private $eventAppeared;
-    /** @var SubscriptionDropped|null */
-    private $subscriptionDropped;
-    /** @var UserCredentials|null */
-    private $userCredentials;
-    /** @var bool */
-    private $resolveLinkTos;
-    /** @var Position */
-    private $nextPosition;
-    /** @var bool */
-    private $running = false;
-    /** @var bool */
-    private $disposed = false;
+    private EventStoreHttpConnection $connection;
+    /** @var Closure(EventStoreSubscription, ResolvedEvent): void */
+    private Closure $eventAppeared;
+    /** @var Closure(EventStoreSubscription, SubscriptionDropReason, null|Throwable): void */
+    private Closure $subscriptionDropped;
+    private ?UserCredentials $userCredentials = null;
+    private bool $resolveLinkTos;
+    private Position $nextPosition;
+    private bool $running = false;
+    private bool $disposed = false;
 
-    /** @internal */
+    /**
+     * @internal
+     *
+     * @param Closure(EventStoreSubscription, ResolvedEvent): void $eventAppeared
+     * @param null|Closure(EventStoreSubscription, SubscriptionDropReason, null|Throwable): void $subscriptionDropped
+     */
     public function __construct(
         EventStoreHttpConnection $connection,
-        EventAppearedOnSubscription $eventAppeared,
-        ?SubscriptionDropped $subscriptionDropped,
+        Closure $eventAppeared,
+        ?Closure $subscriptionDropped,
         string $streamId,
         Position $nextPosition,
         bool $resolveLinkTos,

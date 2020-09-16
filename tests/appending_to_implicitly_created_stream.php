@@ -2,8 +2,8 @@
 
 /**
  * This file is part of `prooph/event-store-http-client`.
- * (c) 2018-2019 Alexander Miertsch <kontakt@codeliner.ws>
- * (c) 2018-2019 Sascha-Oliver Prolic <saschaprolic@googlemail.com>
+ * (c) 2018-2020 Alexander Miertsch <kontakt@codeliner.ws>
+ * (c) 2018-2020 Sascha-Oliver Prolic <saschaprolic@googlemail.com>
  *
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
@@ -29,7 +29,7 @@ class appending_to_implicitly_created_stream extends TestCase
     {
         $stream = 'appending_to_implicitly_created_stream_sequence_0em1_1e0_2e1_3e2_4e3_5e4_0em1_idempotent';
 
-        $connection = TestConnection::create();
+        $connection = TestConnection::create(DefaultData::adminCredentials());
 
         $events = TestEvent::newAmount(6);
 
@@ -49,7 +49,7 @@ class appending_to_implicitly_created_stream extends TestCase
     {
         $stream = 'appending_to_implicitly_created_stream_sequence_0em1_1e0_2e1_3e2_4e3_4e4_0any_idempotent';
 
-        $connection = TestConnection::create();
+        $connection = TestConnection::create(DefaultData::adminCredentials());
 
         $events = TestEvent::newAmount(6);
 
@@ -69,7 +69,7 @@ class appending_to_implicitly_created_stream extends TestCase
     {
         $stream = 'appending_to_implicitly_created_stream_sequence_0em1_1e0_2e1_3e2_4e3_5e4_0e5_non_idempotent';
 
-        $connection = TestConnection::create();
+        $connection = TestConnection::create(DefaultData::adminCredentials());
 
         $events = TestEvent::newAmount(6);
 
@@ -87,7 +87,7 @@ class appending_to_implicitly_created_stream extends TestCase
     {
         $stream = 'appending_to_implicitly_created_stream_sequence_0em1_1e0_2e1_3e2_4e3_5e4_0e4_wev';
 
-        $connection = TestConnection::create();
+        $connection = TestConnection::create(DefaultData::adminCredentials());
 
         $events = TestEvent::newAmount(6);
 
@@ -105,7 +105,7 @@ class appending_to_implicitly_created_stream extends TestCase
     {
         $stream = 'appending_to_implicitly_created_stream_sequence_0em1_0e0_non_idempotent';
 
-        $connection = TestConnection::create();
+        $connection = TestConnection::create(DefaultData::adminCredentials());
 
         $events = [TestEvent::newTestEvent()];
 
@@ -126,7 +126,7 @@ class appending_to_implicitly_created_stream extends TestCase
     {
         $stream = 'appending_to_implicitly_created_stream_sequence_0em1_0any_idempotent';
 
-        $connection = TestConnection::create();
+        $connection = TestConnection::create(DefaultData::adminCredentials());
 
         $events = [TestEvent::newTestEvent()];
 
@@ -147,7 +147,7 @@ class appending_to_implicitly_created_stream extends TestCase
     {
         $stream = 'appending_to_implicitly_created_stream_sequence_0em1_0em1_idempotent';
 
-        $connection = TestConnection::create();
+        $connection = TestConnection::create(DefaultData::adminCredentials());
 
         $events = [TestEvent::newTestEvent()];
 
@@ -168,7 +168,7 @@ class appending_to_implicitly_created_stream extends TestCase
     {
         $stream = 'appending_to_implicitly_created_stream_sequence_0em1_1e0_2e1_1any_1any_idempotent';
 
-        $connection = TestConnection::create();
+        $connection = TestConnection::create(DefaultData::adminCredentials());
 
         $events = TestEvent::newAmount(3);
 
@@ -191,7 +191,7 @@ class appending_to_implicitly_created_stream extends TestCase
     {
         $stream = 'appending_to_implicitly_created_stream_sequence_S_0em1_1em1_E_S_0em1_E_idempotent';
 
-        $connection = TestConnection::create();
+        $connection = TestConnection::create(DefaultData::adminCredentials());
 
         $events = TestEvent::newAmount(2);
 
@@ -208,7 +208,7 @@ class appending_to_implicitly_created_stream extends TestCase
     {
         $stream = 'appending_to_implicitly_created_stream_sequence_S_0em1_1em1_E_S_0any_E_idempotent';
 
-        $connection = TestConnection::create();
+        $connection = TestConnection::create(DefaultData::adminCredentials());
 
         $events = TestEvent::newAmount(2);
 
@@ -225,7 +225,7 @@ class appending_to_implicitly_created_stream extends TestCase
     {
         $stream = 'appending_to_implicitly_created_stream_sequence_S_0em1_1em1_E_S_1e0_E_idempotent';
 
-        $connection = TestConnection::create();
+        $connection = TestConnection::create(DefaultData::adminCredentials());
 
         $events = TestEvent::newAmount(2);
 
@@ -242,7 +242,7 @@ class appending_to_implicitly_created_stream extends TestCase
     {
         $stream = 'appending_to_implicitly_created_stream_sequence_S_0em1_1em1_E_S_1any_E_idempotent';
 
-        $connection = TestConnection::create();
+        $connection = TestConnection::create(DefaultData::adminCredentials());
 
         $events = TestEvent::newAmount(2);
 
@@ -259,7 +259,7 @@ class appending_to_implicitly_created_stream extends TestCase
     {
         $stream = 'appending_to_implicitly_created_stream_sequence_S_0em1_1em1_E_S_0em1_1em1_2em1_E_idempotancy_fail';
 
-        $connection = TestConnection::create();
+        $connection = TestConnection::create(DefaultData::adminCredentials());
 
         $events = TestEvent::newAmount(2);
 

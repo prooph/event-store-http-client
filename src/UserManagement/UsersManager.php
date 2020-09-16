@@ -2,8 +2,8 @@
 
 /**
  * This file is part of `prooph/event-store-http-client`.
- * (c) 2018-2019 Alexander Miertsch <kontakt@codeliner.ws>
- * (c) 2018-2019 Sascha-Oliver Prolic <saschaprolic@googlemail.com>
+ * (c) 2018-2020 Alexander Miertsch <kontakt@codeliner.ws>
+ * (c) 2018-2020 Sascha-Oliver Prolic <saschaprolic@googlemail.com>
  *
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
@@ -16,6 +16,7 @@ namespace Prooph\EventStoreHttpClient\UserManagement;
 use Http\Message\RequestFactory;
 use Prooph\EventStore\Exception\EventStoreConnectionException;
 use Prooph\EventStore\Exception\InvalidArgumentException;
+use Prooph\EventStore\Internal\DateTimeStringBugWorkaround;
 use Prooph\EventStore\Transport\Http\HttpStatusCode;
 use Prooph\EventStore\UserCredentials;
 use Prooph\EventStore\UserManagement\ChangePasswordDetails;
@@ -29,17 +30,14 @@ use Prooph\EventStoreHttpClient\ConnectionSettings;
 use Prooph\EventStoreHttpClient\Exception\UserCommandConflictException;
 use Prooph\EventStoreHttpClient\Exception\UserCommandFailed;
 use Prooph\EventStoreHttpClient\Http\HttpClient;
-use Prooph\EventStoreHttpClient\Internal\DateTimeStringBugWorkaround;
 use Psr\Http\Client\ClientInterface;
 use Psr\Http\Message\ResponseInterface;
 use Throwable;
 
 class UsersManager implements SyncUsersManager
 {
-    /** @var ConnectionSettings */
-    private $settings;
-    /** @var HttpClient */
-    private $httpClient;
+    private ConnectionSettings $settings;
+    private HttpClient $httpClient;
 
     /** @internal */
     public function __construct(
@@ -113,7 +111,7 @@ class UsersManager implements SyncUsersManager
         );
     }
 
-    /** @return UserDetails[] */
+    /** @return list<UserDetails> */
     public function listAll(?UserCredentials $userCredentials = null): array
     {
         $response = $this->sendGet(
@@ -185,12 +183,7 @@ class UsersManager implements SyncUsersManager
     }
 
     /**
-     * @param string $login
-     * @param string $fullName
-     * @param string[] $groups
-     * @param string $password
-     * @param UserCredentials|null $userCredentials
-     * @return void
+     * @param list<string> $groups
      */
     public function createUser(
         string $login,
@@ -211,12 +204,6 @@ class UsersManager implements SyncUsersManager
             throw new InvalidArgumentException('Password cannot be empty');
         }
 
-        foreach ($groups as $group) {
-            if (! \is_string($group) || empty($group)) {
-                throw new InvalidArgumentException('Expected an array of non empty strings for group');
-            }
-        }
-
         $this->sendPost(
             '/users/',
             Json::encode(new UserCreationInformation(
@@ -231,11 +218,7 @@ class UsersManager implements SyncUsersManager
     }
 
     /**
-     * @param string $login
-     * @param string $fullName
-     * @param string[] $groups
-     * @param UserCredentials|null $userCredentials
-     * @return void
+     * @param list<string> $groups
      */
     public function updateUser(
         string $login,
@@ -249,12 +232,6 @@ class UsersManager implements SyncUsersManager
 
         if (empty($fullName)) {
             throw new InvalidArgumentException('FullName cannot be empty');
-        }
-
-        foreach ($groups as $group) {
-            if (! \is_string($group) || empty($group)) {
-                throw new InvalidArgumentException('Expected an array of non empty strings for group');
-            }
         }
 
         $this->sendPut(
