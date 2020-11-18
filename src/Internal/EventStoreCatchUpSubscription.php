@@ -165,18 +165,18 @@ abstract class EventStoreCatchUpSubscription implements SyncEventStoreCatchUpSub
     {
         if (! $this->shouldStop) {
             $eventAppeared = function(
-                    EventStoreSubscription $subscription,
-                    ResolvedEvent $resolvedEvent
-                ): void {
-                    ($this->callback)($subscription, $resolvedEvent);
-                };
+                EventStoreSubscription $subscription,
+                ResolvedEvent $resolvedEvent
+            ): void {
+                ($this->callback)($subscription, $resolvedEvent);
+            };
 
             $subscriptionDropped = function(
-                    EventStoreSubscription $subscription,
-                    SubscriptionDropReason $reason,
-                    ?Throwable $exception = null
-                ): void {
-                    ($this->callback)($reason, $exception);
+                EventStoreSubscription $subscription,
+                SubscriptionDropReason $reason,
+                ?Throwable $exception = null
+            ): void {
+                ($this->callback)($reason, $exception);
             };
 
             $subscription = empty($this->streamId)
