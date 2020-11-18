@@ -15,13 +15,11 @@ namespace Prooph\EventStoreHttpClient\Internal;
 
 use Closure;
 use Prooph\EventStore\CatchUpSubscriptionSettings;
-use Prooph\EventStore\EventAppearedOnSubscription;
 use Prooph\EventStore\EventStoreCatchUpSubscription as SyncEventStoreCatchUpSubscription;
 use Prooph\EventStore\EventStoreConnection;
 use Prooph\EventStore\EventStoreSubscription;
 use Prooph\EventStore\Internal\DropData;
 use Prooph\EventStore\ResolvedEvent;
-use Prooph\EventStore\SubscriptionDropped;
 use Prooph\EventStore\SubscriptionDropReason;
 use Prooph\EventStore\UserCredentials;
 use SplQueue;
