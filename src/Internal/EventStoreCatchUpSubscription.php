@@ -55,9 +55,9 @@ abstract class EventStoreCatchUpSubscription implements SyncEventStoreCatchUpSub
     private ?DropData $dropData;
     private bool $allowProcessing;
     private bool $isProcessing;
-    protected bool $shouldStop;
-    private bool $isDropped;
-    private bool $stopped;
+    protected bool $shouldStop = false;
+    private bool $isDropped = false;
+    private bool $stopped = false;
 
     /**
      * @internal
@@ -93,6 +93,7 @@ abstract class EventStoreCatchUpSubscription implements SyncEventStoreCatchUpSub
         $this->liveQueue = new SplQueue();
         $this->subscriptionName = $settings->subscriptionName() ?? '';
         $this->stopped = true;
+        $this->subscription = null;
     }
 
     public function isSubscribedToAll(): bool
@@ -163,37 +164,19 @@ abstract class EventStoreCatchUpSubscription implements SyncEventStoreCatchUpSub
     private function subscribeToStream(): void
     {
         if (! $this->shouldStop) {
-            $eventAppeared = new class(Closure::fromCallable([$this, 'enqueuePushedEvent'])) implements EventAppearedOnSubscription {
-                private $callback;
-
-                public function __construct(callable $callback)
-                {
-                    $this->callback = $callback;
-                }
-
-                public function __invoke(
+            $eventAppeared = function(
                     EventStoreSubscription $subscription,
                     ResolvedEvent $resolvedEvent
                 ): void {
                     ($this->callback)($subscription, $resolvedEvent);
-                }
-            };
+                };
 
-            $subscriptionDropped = new class(Closure::fromCallable([$this, 'serverSubscriptionDropped'])) implements SubscriptionDropped {
-                private $callback;
-
-                public function __construct(callable $callback)
-                {
-                    $this->callback = $callback;
-                }
-
-                public function __invoke(
+            $subscriptionDropped = function(
                     EventStoreSubscription $subscription,
                     SubscriptionDropReason $reason,
                     ?Throwable $exception = null
                 ): void {
                     ($this->callback)($reason, $exception);
-                }
             };
 
             $subscription = empty($this->streamId)
