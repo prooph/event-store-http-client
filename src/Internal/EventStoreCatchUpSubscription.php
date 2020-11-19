@@ -57,7 +57,7 @@ abstract class EventStoreCatchUpSubscription implements SyncEventStoreCatchUpSub
     private bool $isProcessing;
     protected bool $shouldStop = false;
     private bool $isDropped = false;
-    private bool $stopped = false;
+    private bool $stopped = true;
 
     /**
      * @internal
