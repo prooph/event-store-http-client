@@ -23,6 +23,7 @@ use Prooph\EventStore\Position;
 use Prooph\EventStore\ResolvedEvent;
 use Prooph\EventStore\SubscriptionDropReason;
 use Prooph\EventStore\UserCredentials;
+use Psr\Log\LoggerInterface;
 use Throwable;
 
 class EventStoreAllCatchUpSubscription extends EventStoreCatchUpSubscription implements EventStoreAllCatchUpSubscriptionInterface
@@ -39,6 +40,7 @@ class EventStoreAllCatchUpSubscription extends EventStoreCatchUpSubscription imp
      */
     public function __construct(
         EventStoreConnection $connection,
+        LoggerInterface $logger,
         ?Position $fromPositionExclusive, // if null from the very beginning
         ?UserCredentials $userCredentials,
         Closure $eventAppeared,
@@ -48,6 +50,7 @@ class EventStoreAllCatchUpSubscription extends EventStoreCatchUpSubscription imp
     ) {
         parent::__construct(
             $connection,
+            $logger,
             '',
             $userCredentials,
             $eventAppeared,
@@ -95,7 +98,18 @@ class EventStoreAllCatchUpSubscription extends EventStoreCatchUpSubscription imp
 
     private function readEventsCallback(AllEventsSlice $slice, ?int $lastCommitPosition): bool
     {
-        return $this->shouldStop || $this->processEvents($lastCommitPosition, $slice);
+        $shouldStopOrDone = $this->shouldStop || $this->processEvents($lastCommitPosition, $slice);
+
+        if ($shouldStopOrDone && $this->verbose) {
+            $this->log->debug(\sprintf(
+                'Catch-up Subscription %s to %s: finished reading events, nextReadPosition = %s',
+                $this->subscriptionName(),
+                $this->isSubscribedToAll() ? '<all>' : $this->streamId(),
+                (string) $this->nextReadPosition
+            ));
+        }
+
+        return $shouldStopOrDone;
     }
 
     private function processEvents(?int $lastCommitPosition, AllEventsSlice $slice): bool
@@ -127,6 +141,8 @@ class EventStoreAllCatchUpSubscription extends EventStoreCatchUpSubscription imp
 
     protected function tryProcess(ResolvedEvent $e): void
     {
+        $processed = false;
+
         if ($e->originalPosition()->greater($this->lastProcessedPosition)) {
             try {
                 ($this->eventAppeared)($this, $e);
@@ -135,6 +151,21 @@ class EventStoreAllCatchUpSubscription extends EventStoreCatchUpSubscription imp
             }
 
             $this->lastProcessedPosition = $e->originalPosition();
+            $processed = true;
+        }
+
+        if ($this->verbose) {
+            /** @psalm-suppress PossiblyNullReference */
+            $this->log->debug(\sprintf(
+                'Catch-up Subscription %s to %s: %s event (%s, %d, %s @ %s)',
+                $this->subscriptionName(),
+                $this->isSubscribedToAll() ? '<all>' : $this->streamId(),
+                $processed ? 'processed' : 'skipping',
+                $e->originalEvent()->eventStreamId(),
+                $e->originalEvent()->eventNumber(),
+                $e->originalEvent()->eventType(),
+                $e->originalPosition() ? $e->originalPosition()->__toString() : '<null>'
+            ));
         }
     }
 }

@@ -13,11 +13,9 @@ declare(strict_types=1);
 
 namespace Prooph\EventStoreHttpClient;
 
-use Prooph\EventStore\EventAppearedOnPersistentSubscription;
 use Prooph\EventStore\EventStorePersistentSubscription;
 use Prooph\EventStore\Exception\InvalidOperationException;
-use Prooph\EventStore\Internal\PersistentSubscriptionCreateResult;
-use Prooph\EventStore\PersistentSubscriptionDropped;
+use Prooph\EventStore\PersistentSubscriptionCreateResult;
 use Prooph\EventStore\PersistentSubscriptionSettings;
 use Prooph\EventStore\ResolvedEvent;
 use Prooph\EventStore\SubscriptionDropReason;
@@ -52,27 +50,23 @@ $result = $connection->createPersistentSubscription(
 $connection->connectToPersistentSubscription(
     'foo-bar',
     'test-persistent-subscription',
-    new class() implements EventAppearedOnPersistentSubscription {
-        public function __invoke(
-            EventStorePersistentSubscription $subscription,
-            ResolvedEvent $resolvedEvent,
-            ?int $retryCount = null
-        ): void {
-            echo 'incoming event: ' . $resolvedEvent->originalEventNumber() . '@' . $resolvedEvent->originalStreamName() . PHP_EOL;
-            echo 'data: ' . $resolvedEvent->originalEvent()->data() . PHP_EOL;
-        }
+    function(
+        EventStorePersistentSubscription $subscription,
+        ResolvedEvent $resolvedEvent,
+        ?int $retryCount = null
+    ): void {
+        echo 'incoming event: ' . $resolvedEvent->originalEventNumber() . '@' . $resolvedEvent->originalStreamName() . PHP_EOL;
+        echo 'data: ' . $resolvedEvent->originalEvent()->data() . PHP_EOL;
     },
-    new class() implements PersistentSubscriptionDropped {
-        public function __invoke(
-            EventStorePersistentSubscription $subscription,
-            SubscriptionDropReason $reason,
-            ?Throwable $exception = null
-        ): void {
-            echo 'dropped with reason: ' . $reason->name() . PHP_EOL;
+    function(
+        EventStorePersistentSubscription $subscription,
+        SubscriptionDropReason $reason,
+        ?Throwable $exception = null
+    ): void {
+        echo 'dropped with reason: ' . $reason->name() . PHP_EOL;
 
-            if ($exception) {
-                echo 'ex: ' . $exception->getMessage() . PHP_EOL;
-            }
+        if ($exception) {
+            echo 'ex: ' . $exception->getMessage() . PHP_EOL;
         }
     },
     10,
