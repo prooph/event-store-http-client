@@ -27,18 +27,17 @@ $subscription = $connection->subscribeToStreamFrom(
     'foo-bar',
     null,
     CatchUpSubscriptionSettings::default(),
-    function(
+    function (
         EventStoreCatchUpSubscription $subscription,
         ResolvedEvent $resolvedEvent
     ): void {
         echo 'incoming event: ' . $resolvedEvent->originalEventNumber() . '@' . $resolvedEvent->originalStreamName() . PHP_EOL;
         echo 'data: ' . $resolvedEvent->originalEvent()->data() . PHP_EOL;
     },
-    function(EventStoreCatchUpSubscription $subscription): void
-    {
+    function (EventStoreCatchUpSubscription $subscription): void {
         echo 'liveProcessingStarted on ' . $subscription->streamId() . PHP_EOL;
     },
-    function(
+    function (
         EventStoreCatchUpSubscription $subscription,
         SubscriptionDropReason $reason,
         ?Throwable $exception = null

@@ -27,14 +27,14 @@ $connection = EventStoreConnectionFactory::create();
 $subscription = $connection->subscribeToStream(
     'foo-bar',
     true,
-    function(
+    function (
         EventStoreSubscription $subscription,
         ResolvedEvent $resolvedEvent
     ): void {
         echo 'incoming event: ' . $resolvedEvent->originalEventNumber() . '@' . $resolvedEvent->originalStreamName() . PHP_EOL;
         echo 'data: ' . $resolvedEvent->originalEvent()->data() . PHP_EOL;
     },
-    function(
+    function (
         EventStoreSubscription $subscription,
         SubscriptionDropReason $reason,
         ?Throwable $exception = null

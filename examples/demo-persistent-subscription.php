@@ -50,7 +50,7 @@ $result = $connection->createPersistentSubscription(
 $connection->connectToPersistentSubscription(
     'foo-bar',
     'test-persistent-subscription',
-    function(
+    function (
         EventStorePersistentSubscription $subscription,
         ResolvedEvent $resolvedEvent,
         ?int $retryCount = null
@@ -58,7 +58,7 @@ $connection->connectToPersistentSubscription(
         echo 'incoming event: ' . $resolvedEvent->originalEventNumber() . '@' . $resolvedEvent->originalStreamName() . PHP_EOL;
         echo 'data: ' . $resolvedEvent->originalEvent()->data() . PHP_EOL;
     },
-    function(
+    function (
         EventStorePersistentSubscription $subscription,
         SubscriptionDropReason $reason,
         ?Throwable $exception = null

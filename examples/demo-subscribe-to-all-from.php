@@ -27,7 +27,7 @@ $connection = EventStoreConnectionFactory::create();
 $subscription = $connection->subscribeToAllFrom(
     null,
     CatchUpSubscriptionSettings::default(),
-    function(
+    function (
         EventStoreCatchUpSubscription $subscription,
         ResolvedEvent $resolvedEvent
     ): void {
