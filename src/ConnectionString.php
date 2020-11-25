@@ -16,6 +16,7 @@ namespace Prooph\EventStoreHttpClient;
 use Prooph\EventStore\EndPoint;
 use Prooph\EventStore\Exception\InvalidArgumentException;
 use Prooph\EventStore\UserCredentials;
+use Psr\Log\NullLogger;
 
 class ConnectionString
 {
@@ -24,6 +25,7 @@ class ConnectionString
         'schema' => 'string',
         'defaultusercredentials' => UserCredentials::class,
         'requiremaster' => 'bool',
+        'verboselogging' => 'bool',
     ];
 
     public static function getConnectionSettings(
@@ -31,6 +33,7 @@ class ConnectionString
         ?ConnectionSettings $settings = null
     ): ConnectionSettings {
         $settings = [
+            'verboselogging' => false,
             'endpoint' => new EndPoint('localhost', 2113),
             'schema' => 'http',
             'defaultusercredentials' => null,
@@ -100,6 +103,8 @@ class ConnectionString
         }
 
         return new ConnectionSettings(
+            new NullLogger(),
+            $settings['verboselogging'],
             $settings['endpoint'],
             $settings['schema'],
             $settings['defaultusercredentials'],

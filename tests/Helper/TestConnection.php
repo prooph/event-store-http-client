@@ -19,6 +19,7 @@ use Prooph\EventStore\Exception\RuntimeException;
 use Prooph\EventStore\UserCredentials;
 use Prooph\EventStoreHttpClient\ConnectionSettings;
 use Prooph\EventStoreHttpClient\EventStoreConnectionFactory;
+use Psr\Log\NullLogger;
 
 /** @internal */
 class TestConnection
@@ -49,6 +50,8 @@ class TestConnection
     public static function settings(?UserCredentials $userCredentials = null): ConnectionSettings
     {
         return new ConnectionSettings(
+            new NullLogger(),
+            false,
             self::httpEndPoint(),
             'http',
             $userCredentials

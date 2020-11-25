@@ -13,10 +13,8 @@ declare(strict_types=1);
 
 namespace Prooph\EventStoreHttpClient;
 
-use Prooph\EventStore\EventAppearedOnSubscription;
 use Prooph\EventStore\EventStoreSubscription;
 use Prooph\EventStore\ResolvedEvent;
-use Prooph\EventStore\SubscriptionDropped;
 use Prooph\EventStore\SubscriptionDropReason;
 use Prooph\EventStore\UserCredentials;
 use Prooph\EventStoreHttpClient\Internal\VolatileEventStoreStreamSubscription;
@@ -29,26 +27,22 @@ $connection = EventStoreConnectionFactory::create();
 $subscription = $connection->subscribeToStream(
     'foo-bar',
     true,
-    new class() implements EventAppearedOnSubscription {
-        public function __invoke(
-            EventStoreSubscription $subscription,
-            ResolvedEvent $resolvedEvent
-        ): void {
-            echo 'incoming event: ' . $resolvedEvent->originalEventNumber() . '@' . $resolvedEvent->originalStreamName() . PHP_EOL;
-            echo 'data: ' . $resolvedEvent->originalEvent()->data() . PHP_EOL;
-        }
+    function (
+        EventStoreSubscription $subscription,
+        ResolvedEvent $resolvedEvent
+    ): void {
+        echo 'incoming event: ' . $resolvedEvent->originalEventNumber() . '@' . $resolvedEvent->originalStreamName() . PHP_EOL;
+        echo 'data: ' . $resolvedEvent->originalEvent()->data() . PHP_EOL;
     },
-    new class() implements SubscriptionDropped {
-        public function __invoke(
-            EventStoreSubscription $subscription,
-            SubscriptionDropReason $reason,
-            ?Throwable $exception = null
-        ): void {
-            echo 'dropped with reason: ' . $reason->name() . PHP_EOL;
+    function (
+        EventStoreSubscription $subscription,
+        SubscriptionDropReason $reason,
+        ?Throwable $exception = null
+    ): void {
+        echo 'dropped with reason: ' . $reason->name() . PHP_EOL;
 
-            if ($exception) {
-                echo 'ex: ' . $exception->getMessage() . PHP_EOL;
-            }
+        if ($exception) {
+            echo 'ex: ' . $exception->getMessage() . PHP_EOL;
         }
     },
     new UserCredentials('admin', 'changeit')

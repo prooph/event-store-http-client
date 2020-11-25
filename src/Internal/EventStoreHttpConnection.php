@@ -1136,6 +1136,7 @@ class EventStoreHttpConnection implements EventStoreConnection
 
         return new EventStoreStreamCatchUpSubscriptionImpl(
             $this,
+            $this->settings->log(),
             $stream,
             $lastCheckpoint,
             $userCredentials,
@@ -1184,6 +1185,7 @@ class EventStoreHttpConnection implements EventStoreConnection
 
         return new EventStoreAllCatchUpSubscriptionImpl(
             $this,
+            $this->settings->log(),
             $lastCheckpoint,
             $userCredentials,
             $eventAppeared,
